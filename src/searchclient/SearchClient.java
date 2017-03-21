@@ -3,59 +3,33 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
-import Analyseoflevels.AnalLevel;
 import searchclient.Memory;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
 
 public class SearchClient {
 	public Node initialState;
-	public static boolean[][] walls;
-	public static char[][] goals;
-
-	public static ArrayList<Integer> goalRow;
-	public static ArrayList<Integer> goalCol;
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
-
+		// Read lines specifying colors
 		String line = serverMessages.readLine();
-		ArrayList<String> lines = new ArrayList<String>();
-
-		int maxCol = 0;
-		while (!line.equals("")) {
-			// Read lines specifying colors
-			if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
-				System.err.println("Error, client does not support colors.");
-				System.exit(1);
-			}
-
-			if (line.length() > maxCol) {
-				maxCol = line.length();
-			}
-
-			lines.add(line);
-
-			line = serverMessages.readLine();
+		if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
+			System.err.println("Error, client does not support colors.");
+			System.exit(1);
 		}
 
 		int row = 0;
 		boolean agentFound = false;
-		this.initialState = new Node(null, lines.size(), maxCol);
-		walls = new boolean[lines.size()][maxCol];
-		goals = new char[lines.size()][maxCol];
-		goalRow = new ArrayList<Integer>();
-		goalCol = new ArrayList<Integer>();
+		this.initialState = new Node(null);
 
-		for (String l : lines) {
-			for (int col = 0; col < l.length(); col++) {
-				char chr = l.charAt(col);
+		while (!line.equals("")) {
+			for (int col = 0; col < line.length(); col++) {
+				char chr = line.charAt(col);
 
 				if (chr == '+') { // Wall.
-					// this.initialState.walls[row][col] = true;
-					walls[row][col] = true;
+					this.initialState.walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					if (agentFound) {
 						System.err.println("Error, not a single agent level");
@@ -67,10 +41,7 @@ public class SearchClient {
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					this.initialState.boxes[row][col] = chr;
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
-					// this.initialState.goals[row][col] = chr;
-					goals[row][col] = chr;
-					goalRow.add(row);
-					goalCol.add(col);
+					this.initialState.goals[row][col] = chr;
 				} else if (chr == ' ') {
 					// Free space.
 				} else {
@@ -78,16 +49,9 @@ public class SearchClient {
 					System.exit(1);
 				}
 			}
+			line = serverMessages.readLine();
 			row++;
 		}
-//		AnalLevel anal = new AnalLevel();
-//		for (int i = 0; i < goalRow.size(); i++) {
-//				
-//			
-//			anal.analGoals(goalRow.get(i), goalCol.get(i));
-//		}
-		
-		
 	}
 
 	public LinkedList<Node> Search(Strategy strategy) throws IOException {
@@ -96,7 +60,7 @@ public class SearchClient {
 
 		int iterations = 0;
 		while (true) {
-			if (iterations == 1000) {
+            if (iterations == 1000) {
 				System.err.println(strategy.searchStatus());
 				iterations = 0;
 			}
@@ -112,10 +76,7 @@ public class SearchClient {
 			}
 
 			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
-															// nodes is shuffled
-															// randomly; see
-															// Node.java.
+			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded nodes is shuffled randomly; see Node.java.
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
 					strategy.addToFrontier(n);
 				}
@@ -133,36 +94,33 @@ public class SearchClient {
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
 
-		Strategy strategy;
-		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-			case "-astar":
-				strategy = new StrategyBestFirst(new AStar(client.initialState));
-				break;
-			case "-wastar":
-				// You're welcome to test WA* out with different values, but for
-				// the report you must at least indicate benchmarks for W = 5.
-				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
-				break;
-			case "-greedy":
-				strategy = new StrategyBestFirst(new Greedy(client.initialState));
-				break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
-		} else {
-			strategy = new StrategyBFS();
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-		}
+        Strategy strategy;
+        if (args.length > 0) {
+            switch (args[0].toLowerCase()) {
+                case "-bfs":
+                    strategy = new StrategyBFS();
+                    break;
+                case "-dfs":
+                    strategy = new StrategyDFS();
+                    break;
+                case "-astar":
+                    strategy = new StrategyBestFirst(new AStar(client.initialState));
+                    break;
+                case "-wastar":
+                    // You're welcome to test WA* out with different values, but for the report you must at least indicate benchmarks for W = 5.
+                    strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
+                    break;
+                case "-greedy":
+                    strategy = new StrategyBestFirst(new Greedy(client.initialState));
+                    break;
+                default:
+                    strategy = new StrategyBFS();
+                    System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+            }
+        } else {
+            strategy = new StrategyBFS();
+            System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+        }
 
 		LinkedList<Node> solution;
 		try {
