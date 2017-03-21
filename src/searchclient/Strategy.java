@@ -2,6 +2,9 @@ package searchclient;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.Stack;
+import java.util.PriorityQueue;
+import java.util.Comparator;
 
 import searchclient.Memory;
 import searchclient.NotImplementedException;
@@ -93,75 +96,96 @@ public abstract class Strategy {
 	}
 
 	public static class StrategyDFS extends Strategy {
+		//private ArrayDeque<Node> frontier;
+		private HashSet<Node> frontierSet;
+		private Stack<Node> frontier;
+
 		public StrategyDFS() {
 			super();
-			throw new NotImplementedException();
+			frontier = new Stack<Node>();
+			frontierSet = new HashSet<Node>();
 		}
 
 		@Override
 		public Node getAndRemoveLeaf() {
-			throw new NotImplementedException();
+			//Node n = frontier.pollFirst();
+			Node n = frontier.pop();
+			frontierSet.remove(n);
+			return n;
 		}
 
 		@Override
 		public void addToFrontier(Node n) {
-			throw new NotImplementedException();
+			//frontier.addLast(n);
+			frontier.push(n);
+			frontierSet.add(n);
 		}
 
 		@Override
 		public int countFrontier() {
-			throw new NotImplementedException();
+			return frontier.size();
 		}
 
 		@Override
 		public boolean frontierIsEmpty() {
-			throw new NotImplementedException();
+			return frontier.isEmpty();
 		}
 
 		@Override
 		public boolean inFrontier(Node n) {
-			throw new NotImplementedException();
+			return frontierSet.contains(n);
 		}
 
 		@Override
 		public String toString() {
 			return "Depth-first Search";
 		}
+
+		
 	}
 
 	// Ex 3: Best-first Search uses a priority queue (Java contains no implementation of a Heap data structure)
 	public static class StrategyBestFirst extends Strategy {
 		private Heuristic heuristic;
+		private PriorityQueue<Node> frontier;
+		private HashSet<Node> frontierSet;
 
 		public StrategyBestFirst(Heuristic h) {
 			super();
 			this.heuristic = h;
-			throw new NotImplementedException();
+
+			frontier = new PriorityQueue<Node>(h);
+			frontierSet = new HashSet<Node>();
 		}
 
 		@Override
 		public Node getAndRemoveLeaf() {
-			throw new NotImplementedException();
+			Node n = frontier.poll();
+			frontierSet.remove(n);
+			return n;
+
 		}
 
 		@Override
 		public void addToFrontier(Node n) {
-			throw new NotImplementedException();
+			frontier.add(n);
+			// System.err.println(frontier);
+			frontierSet.add(n);
 		}
 
 		@Override
 		public int countFrontier() {
-			throw new NotImplementedException();
+			return frontier.size();
 		}
 
 		@Override
 		public boolean frontierIsEmpty() {
-			throw new NotImplementedException();
+			return frontier.isEmpty();
 		}
 
 		@Override
 		public boolean inFrontier(Node n) {
-			throw new NotImplementedException();
+			return frontierSet.contains(n);
 		}
 
 		@Override
