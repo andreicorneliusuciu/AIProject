@@ -4,7 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import searchclient.Memory;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
@@ -12,7 +17,12 @@ import searchclient.Heuristic.*;
 public class SearchClient {
 	public Node initialState;
 	public static boolean[][] walls;
-	public static char[][] goals;
+	public static char[][] goals; 
+	public static List<String> agents; // clear the null characters. 
+
+	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
+
+	public Map<Integer, String> boxIDToColor = new HashMap<>();
 
 	public static ArrayList<Integer> goalRow;
 	public static ArrayList<Integer> goalCol;
@@ -21,13 +31,49 @@ public class SearchClient {
 
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
-
+		agents = new ArrayList<String>();
+		
+		for(int i=0;i<10;i++){
+			
+			agents.add("NULL");
+			
+		}
+		
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
 			if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
-				System.err.println("Error, client does not support colors.");
-				System.exit(1);
+				String[] s = line.split(":");
+
+				String color = s[0];
+
+				String[] s1 = s[1].split(",");
+				s1[0].trim();
+
+				for (int i = 0; i < s1.length; i++) {
+					char chr = s1[i].charAt(0);
+					if ('0' <= chr && chr <= '9') {
+
+						agents.add(Integer.parseInt(""+chr),color);
+						
+					} else if ('A' <= chr && chr <= 'Z') { //Box 
+							if(!colorToBoxes.containsKey(color)){
+								List boxes = new LinkedList<String>();
+								boxes.add(""+chr);
+								 colorToBoxes.put(color, boxes);
+							
+							}else{
+								List boxes = colorToBoxes.get(color);
+								boxes.add(""+chr);
+								colorToBoxes.put(color, boxes);
+							}
+					} else {
+						System.exit(1);
+						// WRONG ERROR
+					}
+
+				}
+
 			}
 
 			if (line.length() > maxCol) {
@@ -55,11 +101,9 @@ public class SearchClient {
 					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
-					if (agentFound) {
-						System.err.println("Error, not a single agent level");
-						System.exit(1);
-					}
-					agentFound = true;
+
+					agents.add("");
+
 					this.initialState.agentRow = row;
 					this.initialState.agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
@@ -78,14 +122,13 @@ public class SearchClient {
 			}
 			row++;
 		}
-//		AnalLevel anal = new AnalLevel();
-//		for (int i = 0; i < goalRow.size(); i++) {
-//				
-//			
-//			anal.analGoals(goalRow.get(i), goalCol.get(i));
-//		}
-		
-		
+		// AnalLevel anal = new AnalLevel();
+		// for (int i = 0; i < goalRow.size(); i++) {
+		//
+		//
+		// anal.analGoals(goalRow.get(i), goalCol.get(i));
+		// }
+
 	}
 
 	public LinkedList<Node> Search(Strategy strategy) throws IOException {
