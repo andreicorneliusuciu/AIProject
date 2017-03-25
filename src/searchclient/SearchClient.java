@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import searchclient.Memory;
-import searchclient.Strategy.*;
-import searchclient.Heuristic.*;
+import searchclient.Heuristic.AStar;
+import searchclient.Heuristic.Greedy;
+import searchclient.Heuristic.WeightedAStar;
+import searchclient.Strategy.StrategyBFS;
+import searchclient.Strategy.StrategyBestFirst;
+import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
 	public Node initialState;
@@ -42,9 +45,10 @@ public class SearchClient {
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
+			
 			if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
 				String[] s = line.split(":");
-
+				
 				String color = s[0];
 
 				String[] s1 = s[1].split(",");
@@ -52,29 +56,35 @@ public class SearchClient {
 
 				for (int i = 0; i < s1.length; i++) {
 					char chr = s1[i].charAt(0);
+					
+					//Agent
 					if ('0' <= chr && chr <= '9') {
 
 						agents.add(Integer.parseInt(""+chr),color);
-						
-					} else if ('A' <= chr && chr <= 'Z') { //Box 
+					
+					//Box
+					} else if ('A' <= chr && chr <= 'Z') {
+							//It is not on the map
 							if(!colorToBoxes.containsKey(color)){
 								List boxes = new LinkedList<String>();
 								boxes.add(""+chr);
-								 colorToBoxes.put(color, boxes);
-							
-							}else{
+								colorToBoxes.put(color, boxes);
+							//It is already in the map. Update value
+							} else {
 								List boxes = colorToBoxes.get(color);
 								boxes.add(""+chr);
 								colorToBoxes.put(color, boxes);
 							}
 					} else {
-						System.exit(1);
+						
+						
 						// WRONG ERROR
 					}
 
 				}
 
 			}
+			
 
 			if (line.length() > maxCol) {
 				maxCol = line.length();
@@ -87,13 +97,22 @@ public class SearchClient {
 
 		int row = 0;
 		boolean agentFound = false;
+		
+		
 		this.initialState = new Node(null, lines.size(), maxCol);
+		
+		
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
 		goalRow = new ArrayList<Integer>();
 		goalCol = new ArrayList<Integer>();
-
+		
+		
+		
 		for (String l : lines) {
+			if(!l.startsWith("+")) {
+				continue;
+			}
 			for (int col = 0; col < l.length(); col++) {
 				char chr = l.charAt(col);
 
@@ -102,7 +121,7 @@ public class SearchClient {
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
-					agents.add("");
+//					agents.add("null");
 
 					this.initialState.agentRow = row;
 					this.initialState.agentCol = col;
@@ -114,14 +133,24 @@ public class SearchClient {
 					goalRow.add(row);
 					goalCol.add(col);
 				} else if (chr == ' ') {
-					// Free space.
+
 				} else {
-					System.err.println("Error, read invalid level character: " + (int) chr);
+					System.err.println("Error, read invalid level character: " +  chr);
 					System.exit(1);
 				}
 			}
 			row++;
 		}
+		
+		for (Iterator<String> iterator = agents.iterator(); iterator.hasNext();) {
+		    String string = iterator.next();
+		    if (string.equals("NULL")) {
+		        // Remove the current element from the iterator and the list.
+		        iterator.remove();
+		    }
+		}
+		
+		
 		// AnalLevel anal = new AnalLevel();
 		// for (int i = 0; i < goalRow.size(); i++) {
 		//
@@ -167,13 +196,13 @@ public class SearchClient {
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
-
+		
 		// Use stderr to print to console
 		System.err.println("SearchClient initializing. I am sending this using the error output stream.");
-
+		
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
-
+		
 		Strategy strategy;
 		if (args.length > 0) {
 			switch (args[0].toLowerCase()) {
@@ -216,15 +245,18 @@ public class SearchClient {
 		if (solution == null) {
 			System.err.println(strategy.searchStatus());
 			System.err.println("Unable to solve level.");
+			
 			System.exit(0);
 		} else {
 			System.err.println("\nSummary for " + strategy.toString());
 			System.err.println("Found solution of length " + solution.size());
 			System.err.println(strategy.searchStatus());
-
+			
 			for (Node n : solution) {
+				
 				String act = n.action.toString();
 				System.out.println(act);
+				System.err.println("===== " + act + " ====");
 				String response = serverMessages.readLine();
 				if (response.contains("false")) {
 					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
