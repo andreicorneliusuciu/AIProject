@@ -153,7 +153,8 @@ public class SearchClient {
 			}
 
 			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
+			
+			for (Node n : leafNode.getExpandedNodes(3,4)) { // hmm ja ii desuyo neeeeee!  The list of expanded
 															// nodes is shuffled
 															// randomly; see
 															// Node.java.
@@ -161,10 +162,35 @@ public class SearchClient {
 					strategy.addToFrontier(n);
 				}
 			}
+			
+			//agent creates plans from HTN functions
+			//Searchclient conflict resolves
 			iterations++;
 		}
 	}
-
+	
+	public LinkedList<Node> moveAgentToBox(int agent,Box box){
+		return null;
+	}
+	public LinkedList<Node> moveBoxToGoal(int agent,Box box,int xgoal,int ygoal){
+		return null;
+	}
+	public LinkedList<Node> moveBoxTo(int agent,Box box,int x,int y){
+		return null;
+	}
+	
+	public LinkedList<Node> freeAgent(int agent,int lockedAgent){
+		return null;
+	}
+	
+	public LinkedList<Node> storeBox(int agent,Box box){
+		return null;
+	}
+	
+	public LinkedList<Node> conflictResolution(int highAgent,int lowAgent, LinkedList<Node> highPlan, LinkedList<Node> lowPlan){
+		return null;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 

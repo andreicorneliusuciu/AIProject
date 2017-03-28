@@ -73,12 +73,12 @@ public class Node {
 		return true;
 	}
 
-	public ArrayList<Node> getExpandedNodes() {
+	public ArrayList<Node> getExpandedNodes(int x,int y) {
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
-			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
-			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+			int newAgentRow = y + Command.dirToRowChange(c.dir1);
+			int newAgentCol = x + Command.dirToColChange(c.dir1);
 
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving
@@ -108,15 +108,15 @@ public class Node {
 			} else if (c.actionType == Type.Pull) {
 				// Cell is free where agent is going
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
-					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
+					int boxRow = y + Command.dirToRowChange(c.dir2);
+					int boxCol = x + Command.dirToColChange(c.dir2);
 					// .. and there's a box in "dir2" of the agent
 					if (this.boxAt(boxRow, boxCol)) {
 						Node n = this.ChildNode();
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
+						n.boxes[y][x] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
 						expandedNodes.add(n);
 					}
