@@ -15,3 +15,10 @@ hs_err_pid*
 *.log
 .metadata/version.ini
 *.xml
+*.gen
+.metadata/.mylyn/.taskListIndex/segments_1
+*.zip
+.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.index
+*.xmi
+*.fdt
+.metadata/*
