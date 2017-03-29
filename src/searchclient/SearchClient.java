@@ -18,11 +18,15 @@ import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
-	public Node initialState;
+	//The list of initial state for every agent
+	public List<Node> initialStates;
 	public static boolean[][] walls;
 	public static char[][] goals; 
-	public static List<String> agents; // clear the null characters. 
-
+	
+	//The list of agents. Index represents the agent, the value is the color
+	public static List<String> agents;
+	
+	//Key = Color, Value = List of Box numbers
 	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
 
 	public Map<Integer, String> boxIDToColor = new HashMap<>();
@@ -36,7 +40,7 @@ public class SearchClient {
 		ArrayList<String> lines = new ArrayList<String>();
 		agents = new ArrayList<String>();
 		
-		for(int i=0;i<10;i++){
+		for(int i = 0; i < 10; i++){
 			
 			agents.add("NULL");
 			
@@ -45,8 +49,8 @@ public class SearchClient {
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
-			
-			if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
+			//^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$
+			if (!line.startsWith("+")) {
 				String[] s = line.split(":");
 				
 				String color = s[0];
@@ -56,11 +60,11 @@ public class SearchClient {
 
 				for (int i = 0; i < s1.length; i++) {
 					char chr = s1[i].charAt(0);
-					
+					System.err.println("Index = " + chr + " Color = " + color);
 					//Agent
 					if ('0' <= chr && chr <= '9') {
-
-						agents.add(Integer.parseInt(""+chr),color);
+						System.err.println("------- > Index = " + Integer.parseInt(""+chr) + " Color = " + color);
+//						agents.add(Integer.parseInt(""+chr), color);
 					
 					//Box
 					} else if ('A' <= chr && chr <= 'Z') {
@@ -84,7 +88,6 @@ public class SearchClient {
 				}
 
 			}
-			
 
 			if (line.length() > maxCol) {
 				maxCol = line.length();
@@ -98,8 +101,15 @@ public class SearchClient {
 		int row = 0;
 		boolean agentFound = false;
 		
+		System.err.println("Agents: " + agents);
+		System.err.println("Colors to box map: " + colorToBoxes);
 		
-		this.initialState = new Node(null, lines.size(), maxCol);
+		//Create the list of initial states for all the agents
+		//Ignore the other agents/boxes
+		this.initialStates = new LinkedList<>();
+		//add the node to the list. The index represents the agent.
+		initialStates.add(new Node(null, lines.size(), maxCol));
+		initialStates.add(new Node(null, lines.size(), maxCol));
 		
 		
 		walls = new boolean[lines.size()][maxCol];
@@ -122,11 +132,12 @@ public class SearchClient {
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
 //					agents.add("null");
-
-					this.initialState.agentRow = row;
-					this.initialState.agentCol = col;
+//TODO: Modify intial state to have an array of agents 
+					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
+					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialState.boxes[row][col] = chr;
+					this.initialStates.get(0).boxes[row][col] = chr;
+					this.initialStates.get(1).boxes[row][col] = chr;
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// this.initialState.goals[row][col] = chr;
 					goals[row][col] = chr;
@@ -150,7 +161,6 @@ public class SearchClient {
 		    }
 		}
 		
-		
 		// AnalLevel anal = new AnalLevel();
 		// for (int i = 0; i < goalRow.size(); i++) {
 		//
@@ -160,14 +170,14 @@ public class SearchClient {
 
 	}
 
-	public LinkedList<Node> Search(Strategy strategy) throws IOException {
+	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
-		strategy.addToFrontier(this.initialState);
+		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
 		while (true) {
 			if (iterations == 1000) {
-				System.err.println(strategy.searchStatus());
+				//System.err.println(strategy.searchStatus());
 				iterations = 0;
 			}
 
@@ -204,6 +214,7 @@ public class SearchClient {
 		SearchClient client = new SearchClient(serverMessages);
 		
 		Strategy strategy;
+
 		if (args.length > 0) {
 			switch (args[0].toLowerCase()) {
 			case "-bfs":
@@ -212,17 +223,17 @@ public class SearchClient {
 			case "-dfs":
 				strategy = new StrategyDFS();
 				break;
-			case "-astar":
-				strategy = new StrategyBestFirst(new AStar(client.initialState));
-				break;
-			case "-wastar":
-				// You're welcome to test WA* out with different values, but for
-				// the report you must at least indicate benchmarks for W = 5.
-				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
-				break;
-			case "-greedy":
-				strategy = new StrategyBestFirst(new Greedy(client.initialState));
-				break;
+//			case "-astar":
+//				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
+//				break;
+//			case "-wastar":
+//				// You're welcome to test WA* out with different values, but for
+//				// the report you must at least indicate benchmarks for W = 5.
+//				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
+//				break;
+//			case "-greedy":
+//				strategy = new StrategyBestFirst(new Greedy(client.initialState));
+//				break;
 			default:
 				strategy = new StrategyBFS();
 				System.err.println(
@@ -235,34 +246,72 @@ public class SearchClient {
 		}
 
 		LinkedList<Node> solution;
+		LinkedList<Node> sol2;
 		try {
-			solution = client.Search(strategy);
-		} catch (OutOfMemoryError ex) {
-			System.err.println("Maximum memory usage exceeded.");
+			solution = client.Search(strategy, client.initialStates.get(0));
+			System.err.println("Found solution for agent 0");
+		} catch (Exception ex) {
+			//System.err.println("Maximum memory usage exceeded.");
+			System.err.println("Problems for agent 0");
 			solution = null;
 		}
+		
+		//dup;icate
+		try {
+			sol2 = client.Search(new StrategyBFS(), client.initialStates.get(1));
+			System.err.println("Found solution for agent 1");
+		} catch (OutOfMemoryError ex) {
+			System.err.println("Maximum memory usage exceeded.");
+			sol2 = null;
+		}
+		//end of duplicate
 
 		if (solution == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
+//			System.err.println(strategy.searchStatus());
+	//		System.err.println("Unable to solve level.");
 			
 			System.exit(0);
 		} else {
-			System.err.println("\nSummary for " + strategy.toString());
-			System.err.println("Found solution of length " + solution.size());
-			System.err.println(strategy.searchStatus());
-			
-			for (Node n : solution) {
-				
-				String act = n.action.toString();
-				System.out.println(act);
-				System.err.println("===== " + act + " ====");
-				String response = serverMessages.readLine();
-				if (response.contains("false")) {
-					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
-					System.err.format("%s was attempted in \n%s\n", act, n.toString());
-					break;
-				}
+//			System.err.println("\nSummary for " + strategy.toString());
+//			System.err.println("Found solution of length " + solution.size());
+//			System.err.println(strategy.searchStatus());
+			//Multi-agent commands
+
+			System.err.println("Sol length for agent 0: " + solution.size());
+			System.err.println("Sol length for agent 1: " + sol2.size());
+
+//			System.out.println(currentAction);
+				for (int j = 0; j < 100; j++) {
+					String act = "NoOp";
+					String act1 = "NoOp";
+					try {
+						act = solution.get(j).action.toString();
+						
+					} catch(IndexOutOfBoundsException e) {
+						
+
+
+					}
+					try {
+						act1 = sol2.get(j).action.toString();
+						
+					} catch(IndexOutOfBoundsException e) {
+						System.err.format("Exception in the moves of agent 1");
+
+
+					}
+					
+					
+					String currentAction = "[" + act + ", " + act1 + "]";
+					System.out.println(currentAction);
+					System.err.println("===== " + currentAction + " ====");
+					String response = serverMessages.readLine();
+					if (response.contains("false")) {
+						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
+						System.err.format("%s was attempted in \n%s\n", act, "Dont care");
+						break;
+					}
+
 			}
 		}
 	}
