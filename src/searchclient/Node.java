@@ -111,6 +111,7 @@ public class Node {
 				}
 			} else if (c.actionType == Type.Pull) {
 				// Cell is free where agent is going
+				//ToDo if agent and box are same color
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
 					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
 					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
