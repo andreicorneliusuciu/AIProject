@@ -1,6 +1,7 @@
 
-//ToDO change pull/push in node to check if color is the same. 
-//Maybe then all agents can see all boxes without problems.
+//ToDO change pull/push in node to check if color is the same. Maybe then all agents can see all boxes without problems.
+//toDo store info on agent like: agentNumber,row,col
+//reason all agents appear once and as 0 is node.toString, fix needed
 
 
 package searchclient;
@@ -31,6 +32,8 @@ public class SearchClient {
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static Map<Integer,String> agents;
+	//agent is implied in position, row,col stored
+	public static int[][] agentLocation = new int[10][2];
 	
 	//Key = Color, Value = List of Box numbers. 
 //	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
@@ -41,7 +44,7 @@ public class SearchClient {
 	//(same name same color)
 	//We need to store the exact boxes and their positions in other means.
 	
-	public Map<Character, String> colorToBoxes = new HashMap<>();
+	public static Map<Character, String> colorToBoxes = new HashMap<>();
 
 	public static ArrayList<Integer> goalRow;
 	public static ArrayList<Integer> goalCol;
@@ -150,6 +153,10 @@ public class SearchClient {
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
+					agentLocation[Character.getNumericValue(chr)][0]= row;
+					agentLocation[Character.getNumericValue(chr)][1]= col;
+
+					
 					if(!agents.containsKey(Character.getNumericValue(chr))){
 						
 						agents.put(Character.getNumericValue(chr), "blue");
@@ -170,6 +177,7 @@ public class SearchClient {
 										
 					if(!colorToBoxes.containsKey(chr))
 					{
+						//default everything not explicitly defined to blue
 					colorToBoxes.put(chr, "blue");
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -340,7 +348,8 @@ public class SearchClient {
 
 					}
 					
-					
+					System.err.println("These are the agent positions of the level" +  Arrays.deepToString(agentLocation));
+
 					String currentAction = "[" + act + ", " + act1 + "]";
 					System.out.println(currentAction);
 					System.err.println("===== " + currentAction + " ====");
