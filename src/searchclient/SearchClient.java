@@ -303,7 +303,7 @@ public class SearchClient {
 			solution = null;
 		}
 		
-		//dup;icate
+		//duplicate
 		try {
 			sol2 = client.Search(new StrategyBFS(), client.initialStates.get(1));
 			System.err.println("Found solution for agent 1");
@@ -315,7 +315,7 @@ public class SearchClient {
 
 		if (solution == null) {
 //			System.err.println(strategy.searchStatus());
-	//		System.err.println("Unable to solve level.");
+			System.err.println("Unable to solve level.");
 			
 			System.exit(0);
 		} else {
