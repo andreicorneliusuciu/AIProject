@@ -23,6 +23,7 @@ import searchclient.Heuristic.WeightedAStar;
 import searchclient.Strategy.StrategyBFS;
 import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
+import sun.management.resources.agent;
 
 public class SearchClient {
 	//The list of initial state for every agent
@@ -33,7 +34,12 @@ public class SearchClient {
 	
 	
 	//The list of agents. Index represents the agent, the value is the color
-	public static Map<Integer,String> agents;
+	//public static Map<Integer,String> agents;
+	
+	public static ArrayList<Agent> agents = new ArrayList<>();
+	
+	
+	
 	//agent is implied in position, row,col stored
 	public static int[][] agentLocation = new int[10][2];
 	
@@ -56,7 +62,7 @@ public class SearchClient {
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
 
-		agents = new HashMap<Integer,String>();
+		//agents = new HashMap<Integer,String>();
 
 		int maxCol = 0;
 		while (!line.equals("")) {
@@ -80,8 +86,7 @@ public class SearchClient {
 						//System.err.println("------- > Index = " + Integer.parseInt(""+chr) + " Color = " + color);
 						//agents.add(Integer.parseInt(""+chr), color);
 						
-						agents.put(Integer.parseInt(""+chr), color);
-						//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+						agents.add(new Agent((int)chr,color,new Position(0,0), new Node(null, 0, 0)));			//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
 
 					
 					//Box
@@ -146,9 +151,11 @@ public class SearchClient {
 					agentLocation[Character.getNumericValue(chr)][1]= col;
 
 					
-					if(!agents.containsKey(Character.getNumericValue(chr))){
+					if(!agents.contains(Character.getNumericValue(chr))){
 						
-						agents.put(Character.getNumericValue(chr), "blue");
+						//agents.add(Character.getNumericValue(chr), "blue");
+						agents.add(new Agent((int)chr,"blue",new Position(0,0), new Node(null, 0, 0)));			//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+
 						
 					//	System.err.println("These are the agents/colors of the level" +  Arrays.asList(agents));
 
@@ -156,9 +163,12 @@ public class SearchClient {
 					}
 //					agents.add("null");
 //TODO: Modify intial state to have an array of agents 
+					for(Agent a:agents){
 					initialStates.add(new Node(null, lines.size(), maxCol));
-					initialStates.add(new Node(null, lines.size(), maxCol));
-
+					//initialStates.add(new Node(null, lines.size(), maxCol));
+					}
+					
+					
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.

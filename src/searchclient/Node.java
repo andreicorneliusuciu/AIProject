@@ -95,7 +95,7 @@ public class Node {
 				{
 					
 					agentNumber = i;
-					agentColor = SearchClient.agents.get(i);
+					agentColor = SearchClient.agents.get(i).color;
 					//System.err.println("lul "+agentColor); 
 
 				}
