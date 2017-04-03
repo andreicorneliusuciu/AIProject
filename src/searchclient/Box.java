@@ -5,7 +5,6 @@ public class Box {
 	public char name;
 	public String color;
 	public Position pos;
-	public Node initialstate;
 	
 	
 	Box(char name, String color, Position pos,Node intialstate){
@@ -13,7 +12,6 @@ public class Box {
 		this.name = name;
 		this.color = color;
 		this.pos = pos;
-		this.initialstate = initialstate;
 	}
 	
 }
