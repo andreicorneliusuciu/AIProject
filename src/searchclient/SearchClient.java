@@ -168,6 +168,8 @@ public class SearchClient {
 //					agents.add("null");
 //TODO: Modify intial state to have an array of agents 
 					initialStates.add(new Node(null, lines.size(), maxCol));
+					initialStates.add(new Node(null, lines.size(), maxCol));
+
 
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
