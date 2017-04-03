@@ -2,9 +2,9 @@ package searchclient;
 
 public class Box {
 	
-	public int ID;
-	public String name;
+	public int Id;
+	public Character name;
 	public String Color;
-	public Position pos;
+	public Position position;
 	
 }

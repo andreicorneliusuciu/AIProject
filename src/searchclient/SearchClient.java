@@ -20,8 +20,10 @@ import searchclient.Strategy.StrategyDFS;
 public class SearchClient {
 	//The list of initial state for every agent
 	public List<Node> initialStates;
+	//TODO: make this 2 matrices LinkedList<Position>
 	public static boolean[][] walls;
-	public static char[][] goals; 
+	public static char[][] goals;
+	
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static List<String> agents;
@@ -38,12 +40,10 @@ public class SearchClient {
 
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
-		agents = new ArrayList<String>();
+		this.agents = new ArrayList<String>();
 		
-		for(int i = 0; i < 10; i++){
-			
-			agents.add("NULL");
-			
+		for(int i = 0; i < 10; i++) {
+			this.agents.add("NULL");
 		}
 		
 		int maxCol = 0;
@@ -59,19 +59,17 @@ public class SearchClient {
 				s1[0].trim();
 
 				for (int i = 0; i < s1.length; i++) {
-					char chr = s1[i].charAt(0);
-					System.err.println("Index = " + chr + " Color = " + color);
+					char chr = s1[i].trim().charAt(0);
 					//Agent
 					if ('0' <= chr && chr <= '9') {
-						System.err.println("------- > Index = " + Integer.parseInt(""+chr) + " Color = " + color);
-//						agents.add(Integer.parseInt(""+chr), color);
+						this.agents.add(Integer.parseInt("" + chr), color);
 					
 					//Box
 					} else if ('A' <= chr && chr <= 'Z') {
 							//It is not on the map
 							if(!colorToBoxes.containsKey(color)){
 								List boxes = new LinkedList<String>();
-								boxes.add(""+chr);
+								boxes.add(chr);
 								colorToBoxes.put(color, boxes);
 							//It is already in the map. Update value
 							} else {
@@ -101,7 +99,6 @@ public class SearchClient {
 		int row = 0;
 		boolean agentFound = false;
 		
-		System.err.println("Agents: " + agents);
 		System.err.println("Colors to box map: " + colorToBoxes);
 		
 		//Create the list of initial states for all the agents
@@ -131,8 +128,7 @@ public class SearchClient {
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
-//					agents.add("null");
-//TODO: Modify intial state to have an array of agents 
+					//TODO: Modify intial state to have an array of agents 
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
@@ -143,6 +139,7 @@ public class SearchClient {
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
+					
 				} else if (chr == ' ') {
 
 				} else {
@@ -161,13 +158,7 @@ public class SearchClient {
 		    }
 		}
 		
-		// AnalLevel anal = new AnalLevel();
-		// for (int i = 0; i < goalRow.size(); i++) {
-		//
-		//
-		// anal.analGoals(goalRow.get(i), goalCol.get(i));
-		// }
-
+		System.err.println("Agents: " + agents);
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -287,20 +278,14 @@ public class SearchClient {
 					try {
 						act = solution.get(j).action.toString();
 						
-					} catch(IndexOutOfBoundsException e) {
-						
-
-
+					} catch(IndexOutOfBoundsException e) {						
 					}
 					try {
 						act1 = sol2.get(j).action.toString();
 						
 					} catch(IndexOutOfBoundsException e) {
 						System.err.format("Exception in the moves of agent 1");
-
-
-					}
-					
+					}					
 					
 					String currentAction = "[" + act + ", " + act1 + "]";
 					System.out.println(currentAction);
