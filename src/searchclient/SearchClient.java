@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,81 +31,57 @@ public class SearchClient {
 	public static boolean[][] walls;
 	public static char[][] goals;
 	
-	public List<Agent> agentList = new ArrayList<>();
+	//Initial boxes position (right at the beginning of the level)
+	public List<Box> initialBoxes = new ArrayList<>();
 	
+	public static List<Goal> goalsList = new ArrayList<>();
 	
 	//The list of agents. Index represents the agent, the value is the color
 	//public static Map<Integer,String> agents;
 	
-	public static ArrayList<Agent> agents = new ArrayList<>();
-	
-	
+	public static List<Agent> agents = new ArrayList<>();
 	
 	//agent is implied in position, row,col stored
 	public static int[][] agentLocation = new int[10][2];
 	
-	//Key = Color, Value = List of Box numbers. 
-//	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
-//
-//	public Map<Integer, String> boxIDToColor = new HashMap<>();
-	
-	//map containing BoxName char,BoxColor string. Used for learning quickly what color a box is. 
-	//(same name same color)
-	//We need to store the exact boxes and their positions in other means.
-	
-	public static Map<Character, String> colorToBoxes = new HashMap<>();
+	public static Map<Character, String> boxesToColors = new HashMap<>();
 
 	public static ArrayList<Integer> goalRow;
 	public static ArrayList<Integer> goalCol;
+	
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
 
-		//agents = new HashMap<Integer,String>();
-
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
-			//^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$
 			if (!line.startsWith("+")) {
 				
-				//System.err.println("Yes it does");
 				String[] s = line.split(":");
-				
 				String color = s[0];
-
 				String[] s1 = s[1].split(",");
 				s1[0] = s1[0].trim();
 
 				for (int i = 0; i < s1.length; i++) {
 					char chr = s1[i].charAt(0);
-					//System.err.println("Index = " + chr + " Color = " + color);
 					//Agent
 					if ('0' <= chr && chr <= '9') {
-						//System.err.println("------- > Index = " + Integer.parseInt(""+chr) + " Color = " + color);
-						//agents.add(Integer.parseInt(""+chr), color);
-						
-						agents.add(new Agent((int)chr,color,new Position(0,0), new Node(null, 0, 0)));			//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
-
-					
+						//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+						agents.add(new Agent((int)chr, color, null, null));	
 					//Box
 					} else if ('A' <= chr && chr <= 'Z') {
 							//It is not on the map
-							if(!colorToBoxes.containsKey(chr)){
-								//List boxes = new LinkedList<String>();
-								//boxes.add(""+chr);
-								//colorToBoxes.put(color, boxes);
-							}
+							if(!boxesToColors.containsKey(chr)) {
+								boxesToColors.put(chr, color);
+								//TODO: in the next parsing function make the boxes default.
+							} 
 					} else {
-						
-						//agents.put(0, "Blue");
-						// WRONG ERROR
+						//TODO: Catch an exeption.
 					}
-
 				}
-
 			}
 
 			if (line.length() > maxCol) {
@@ -120,7 +95,6 @@ public class SearchClient {
 
 		
 		int row = 0;
-		boolean agentFound = false;
 		
 
 		//Create the list of initial states for all the agents
@@ -130,17 +104,10 @@ public class SearchClient {
 		//initialStates.add(new Node(null, lines.size(), maxCol));
 		//initialStates.add(new Node(null, lines.size(), maxCol));
 		
-		//add the node to the list. The index represents the agent.
-		for(int i = 0; i < agents.size(); i++) {
-			initialStates.add(new Node(null, lines.size(), maxCol));
-		}
-		
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
 		goalRow = new ArrayList<Integer>();
 		goalCol = new ArrayList<Integer>();
-		
-		
 		
 		for (String l : lines) {
 			if(!l.startsWith("+")) {
@@ -150,28 +117,22 @@ public class SearchClient {
 				char chr = l.charAt(col);
 
 				if (chr == '+') { // Wall.
-					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
 					agentLocation[Character.getNumericValue(chr)][0]= row;
 					agentLocation[Character.getNumericValue(chr)][1]= col;
-
 					
-					if(!agents.contains(Character.getNumericValue(chr))){
+					
+					if(!agents.contains(Character.getNumericValue(chr))) {
 						
 						//agents.add(Character.getNumericValue(chr), "blue");
 						agents.add(new Agent((int)chr,"blue",new Position(0,0), new Node(null, 0, 0)));			//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
 
-						
-					//	System.err.println("These are the agents/colors of the level" +  Arrays.asList(agents));
-
-						
 					}
-//					agents.add("null");
-//TODO: Modify intial state to have an array of agents 
+					
 					for(Agent a:agents){
-					initialStates.add(new Node(null, lines.size(), maxCol));
+						initialStates.add(new Node(null, lines.size(), maxCol));
 					//initialStates.add(new Node(null, lines.size(), maxCol));
 					}
 					
@@ -179,16 +140,15 @@ public class SearchClient {
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialStates.get(0).boxes[row][col] = chr;
-					this.initialStates.get(1).boxes[row][col] = chr;
-										
-					if(!colorToBoxes.containsKey(chr))
-					{
-						//default everything not explicitly defined to blue
-					colorToBoxes.put(chr, "blue");
-					}
+					//Default color being used
+					if(!boxesToColors.containsKey(chr)) {
+						initialBoxes.add(new Box(chr, "blue", new Position(row, col)));
+						System.err.println("Default color being used");
+						
+					} else initialBoxes.add(new Box(chr, boxesToColors.get(chr), new Position(row, col)));
+					
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
-					// this.initialState.goals[row][col] = chr;
+					goalsList.add(new Goal(chr, new Position(row, col), boxesToColors.get(Character.toUpperCase(chr))));
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
@@ -203,11 +163,10 @@ public class SearchClient {
 			row++;
 		}
 		
-
-		System.err.println("These are the agents/colors of the level" +  Arrays.asList(agents));
-		System.err.println("These are the boxes/colors of the level" +  Arrays.asList(colorToBoxes));
+		//TODO: iterate through all the agents and update the initial state for every one of them.
 		
-		System.err.println("Agents: " + agents);
+		System.err.println("\n\n -- Boxes are: " + initialBoxes);
+		System.err.println("\n\n -- Goals are: " + goalsList);
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -338,7 +297,7 @@ public class SearchClient {
 
 					}
 					
-					System.err.println("These are the agent positions of the level" +  Arrays.deepToString(agentLocation));
+					
 
 					String currentAction = "[" + act + ", " + act1 + "]";
 					System.out.println(currentAction);

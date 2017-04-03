@@ -137,7 +137,7 @@ public class Node {
 				
 
 				
-				boxColor = SearchClient.colorToBoxes.get(boxes[newAgentRow][newAgentCol]);
+				boxColor = SearchClient.boxesToColors.get(boxes[newAgentRow][newAgentCol]);
 
 			//System.err.println("I tried to Push: Box Color "+boxColor+" Agent Color "+agentColor); 
 
@@ -153,7 +153,7 @@ public class Node {
 						
 //						if(boxColor.equals(agentColor))
 //						{
-						System.err.println("Push: Box Color "+boxColor+", Agent Color " +agentColor); 
+						
 
 						Node n = this.ChildNode();
 						n.action = c;
@@ -185,7 +185,7 @@ public class Node {
 
 					if (this.boxAt(boxRow, boxCol)) {
 						
-						boxColor = SearchClient.colorToBoxes.get(boxes[boxRow][boxCol]);
+						boxColor = SearchClient.boxesToColors.get(boxes[boxRow][boxCol]);
 						
 						//System.err.println("Pull: Box Color "+boxColor+" Agent Color "+agentColor); 
 						//if(boxColor.equals(agentColor))

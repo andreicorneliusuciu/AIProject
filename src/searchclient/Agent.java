@@ -13,4 +13,9 @@ public class Agent {
 		this.position = position;
 		this.node = node;
 	}
+	
+	@Override
+	public String toString() {
+		return "Name = " + name + " Color = " + color + " Position = " + position + "\n";
+	}
 }
