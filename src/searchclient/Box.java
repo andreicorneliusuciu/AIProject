@@ -4,14 +4,17 @@ public class Box {
 	
 	public char name;
 	public String color;
-	public Position pos;
+	public Position position;
 	
-	
-	Box(char name, String color, Position pos,Node intialstate){
+	public Box(char name, String color, Position position) {
 		
 		this.name = name;
 		this.color = color;
-		this.pos = pos;
-	}
+		this.position = position;
+  }
 	
+	@Override
+	public String toString() {
+		return "Name = " + name + " Color = " + color + " Position = " + position + "\n";
+	}
 }

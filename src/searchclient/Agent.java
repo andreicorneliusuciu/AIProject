@@ -1,9 +1,9 @@
 package searchclient;
 
 public class Agent {
-	
-	public String color;
+		
 	public int name;
+	public String color;
 	public Position position;
 	public Node node;
 	
@@ -12,5 +12,10 @@ public class Agent {
 		this.name = name;
 		this.position = position;
 		this.node = node;
+	}
+	
+	@Override
+	public String toString() {
+		return "Name = " + name + " Color = " + color + " Position = " + position + "\n";
 	}
 }

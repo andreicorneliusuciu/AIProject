@@ -9,4 +9,9 @@ public class Position {
 		this.row = x;
 		this.col = y;
 	}
+	
+	@Override
+	public String toString() {
+		return "(" + row + ", " + col + ")";
+	}
 }
