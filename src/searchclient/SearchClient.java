@@ -32,6 +32,7 @@ public class SearchClient {
 	
 	//Initial boxes position (right at the beginning of the level)
 	public List<Box> initialBoxes = new ArrayList<>();
+	private LinkedList initialStates;
 	
 	public static List<Goal> goalsList = new ArrayList<>();
 	
@@ -47,8 +48,6 @@ public class SearchClient {
 
 	// The list of agents. Index represents the agent, the value is the color
 	// public static Map<Integer,String> agents;
-
-	public static ArrayList<Agent> agents = new ArrayList<>();
 
 	// agent is implied in position, row,col stored
 	//public static int[][] agentLocation = new int[10][2];
