@@ -24,6 +24,8 @@ public class SearchClient {
 	public static boolean[][] walls;
 	public static char[][] goals;
 	
+	public List<Agent> agentList = new ArrayList<>();
+	
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static List<String> agents;
@@ -95,19 +97,27 @@ public class SearchClient {
 
 			line = serverMessages.readLine();
 		}
-
+		
+		for (Iterator<String> iterator = agents.iterator(); iterator.hasNext();) {
+		    String string = iterator.next();
+		    if (string.equals("NULL")) {
+		        // Remove the current element from the iterator and the list.
+		        iterator.remove();
+		    }
+		}
+		
 		int row = 0;
 		boolean agentFound = false;
 		
 		System.err.println("Colors to box map: " + colorToBoxes);
-		
 		//Create the list of initial states for all the agents
 		//Ignore the other agents/boxes
 		this.initialStates = new LinkedList<>();
-		//add the node to the list. The index represents the agent.
-		initialStates.add(new Node(null, lines.size(), maxCol));
-		initialStates.add(new Node(null, lines.size(), maxCol));
 		
+		//add the node to the list. The index represents the agent.
+		for(int i = 0; i < agents.size(); i++) {
+			initialStates.add(new Node(null, lines.size(), maxCol));
+		}
 		
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
@@ -127,13 +137,19 @@ public class SearchClient {
 					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
-
+					
 					//TODO: Modify intial state to have an array of agents 
-					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
-					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
+					for(int i = 0; i < agents.size(); i++) {
+						this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
+						this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
+					}
+					
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialStates.get(0).boxes[row][col] = chr;
-					this.initialStates.get(1).boxes[row][col] = chr;
+					for(int i = 0; i < agents.size(); i++) {
+						//put the boc into the agent map IF the color is the same
+						this.initialStates.get(i).boxes[row][col] = chr;
+					}
+					
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// this.initialState.goals[row][col] = chr;
 					goals[row][col] = chr;
@@ -150,13 +166,7 @@ public class SearchClient {
 			row++;
 		}
 		
-		for (Iterator<String> iterator = agents.iterator(); iterator.hasNext();) {
-		    String string = iterator.next();
-		    if (string.equals("NULL")) {
-		        // Remove the current element from the iterator and the list.
-		        iterator.remove();
-		    }
-		}
+		
 		
 		System.err.println("Agents: " + agents);
 	}

@@ -20,6 +20,9 @@ public class Node {
 	public int agentRow;
 	public int agentCol;
 	
+	public List<Agent> otherAgentsPosition;
+	public List<Box> otherBoxesPostition;
+	
 	public char[][] boxes;
 	public List<Position> boxesList;
 	

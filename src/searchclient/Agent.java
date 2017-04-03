@@ -1,9 +1,9 @@
 package searchclient;
 
 public class Agent {
-	
-	public String color;
+		
 	public int name;
+	public String color;
 	public Position position;
 	public Node node;
 	
