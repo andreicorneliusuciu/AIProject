@@ -27,8 +27,10 @@ import searchclient.Strategy.StrategyDFS;
 public class SearchClient {
 	//The list of initial state for every agent
 	public List<Node> initialStates;
+	//TODO: make this 2 matrices LinkedList<Position>
 	public static boolean[][] walls;
-	public static char[][] goals; 
+	public static char[][] goals;
+	
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static Map<Integer,String> agents;
@@ -53,14 +55,9 @@ public class SearchClient {
 
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
+
 		agents = new HashMap<Integer,String>();
-		
-//		for(int i = 0; i < 10; i++){
-//			
-//			agents.add("NULL");
-//			
-//		}
-		
+
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
@@ -85,6 +82,7 @@ public class SearchClient {
 						
 						agents.put(Integer.parseInt(""+chr), color);
 						//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+
 					
 					//Box
 					} else if ('A' <= chr && chr <= 'Z') {
@@ -93,13 +91,6 @@ public class SearchClient {
 								//List boxes = new LinkedList<String>();
 								//boxes.add(""+chr);
 								//colorToBoxes.put(color, boxes);
-								colorToBoxes.put(chr, color);
-								
-							//It is already in the map. Update value
-//							} else {
-//								List boxes = colorToBoxes.get(color);
-//								boxes.add(""+chr);
-//								colorToBoxes.put(color, boxes);
 							}
 					} else {
 						
@@ -123,8 +114,6 @@ public class SearchClient {
 		int row = 0;
 		boolean agentFound = false;
 		
-		//System.err.println("Agents: " + Arrays.asList(agents));
-		//System.err.println("Colors to box map: " + colorToBoxes);
 		
 		//Create the list of initial states for all the agents
 		//Ignore the other agents/boxes
@@ -170,7 +159,6 @@ public class SearchClient {
 					initialStates.add(new Node(null, lines.size(), maxCol));
 					initialStates.add(new Node(null, lines.size(), maxCol));
 
-
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
@@ -187,6 +175,7 @@ public class SearchClient {
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
+					
 				} else if (chr == ' ') {
 
 				} else {
@@ -210,13 +199,7 @@ public class SearchClient {
 //		    }
 //		}
 		
-		// AnalLevel anal = new AnalLevel();
-		// for (int i = 0; i < goalRow.size(); i++) {
-		//
-		//
-		// anal.analGoals(goalRow.get(i), goalCol.get(i));
-		// }
-
+		System.err.println("Agents: " + agents);
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -336,10 +319,7 @@ public class SearchClient {
 					try {
 						act = solution.get(j).action.toString();
 						
-					} catch(IndexOutOfBoundsException e) {
-						
-
-
+					} catch(IndexOutOfBoundsException e) {						
 					}
 					try {
 						act1 = sol2.get(j).action.toString();

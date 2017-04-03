@@ -11,8 +11,4 @@ public class JointAction {
 		this.jointAction = new LinkedList<>();
 		this.noOfAgents = noOfAgents;
 	}
-	
-	
-	
-	
 }
