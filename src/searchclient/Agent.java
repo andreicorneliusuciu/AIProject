@@ -7,7 +7,7 @@ public class Agent {
 	public Position position;
 	public Node node;
 	
-	public Agent(String color, int name, Position position, Node node) {
+	public Agent( int name,String color, Position position, Node node) {
 		this.color = color;
 		this.name = name;
 		this.position = position;

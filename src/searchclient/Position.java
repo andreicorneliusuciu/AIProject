@@ -2,11 +2,11 @@ package searchclient;
 
 public class Position {
 	
-	public int x;
-	public int y;
+	public int row;
+	public int col;
 	
 	public Position(int x, int y) {
-		this.x = x;
-		this.y = y;
+		this.row = x;
+		this.col = y;
 	}
 }
