@@ -1,8 +1,10 @@
 package searchclient;
+
 public class Box {
 	
-	int ID;
-	String name;
-	Position pos;
+	public int Id;
+	public Character name;
+	public String Color;
+	public Position position;
 	
 }
