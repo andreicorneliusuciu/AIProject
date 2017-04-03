@@ -3,7 +3,6 @@
 //toDo store info on agent like: agentNumber,row,col
 //reason all agents appear once and as 0 is node.toString, fix needed
 
-
 package searchclient;
 
 import java.io.BufferedReader;
@@ -25,9 +24,9 @@ import searchclient.Strategy.StrategyDFS;
 import sun.management.resources.agent;
 
 public class SearchClient {
-	//The list of initial state for every agent
-	public List<Node> initialStates;
-	//TODO: make this 2 matrices LinkedList<Position>
+	// The list of initial state for every agent
+	// public List<Node> initialStates;
+	// TODO: make this 2 matrices LinkedList<Position>
 	public static boolean[][] walls;
 	public static char[][] goals;
 	
@@ -46,6 +45,16 @@ public class SearchClient {
 	
 	public static Map<Character, String> boxesToColors = new HashMap<>();
 
+	// The list of agents. Index represents the agent, the value is the color
+	// public static Map<Integer,String> agents;
+
+	public static ArrayList<Agent> agents = new ArrayList<>();
+
+	// agent is implied in position, row,col stored
+	//public static int[][] agentLocation = new int[10][2];
+
+	public static Map<Character, String> colorToBoxes = new HashMap<>();
+
 	public static ArrayList<Integer> goalRow;
 	public static ArrayList<Integer> goalCol;
 	
@@ -61,12 +70,14 @@ public class SearchClient {
 			if (!line.startsWith("+")) {
 				
 				String[] s = line.split(":");
+
 				String color = s[0];
 				String[] s1 = s[1].split(",");
 				s1[0] = s1[0].trim();
 
 				for (int i = 0; i < s1.length; i++) {
 					char chr = s1[i].charAt(0);
+
 					//Agent
 					if ('0' <= chr && chr <= '9') {
 						//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
@@ -91,26 +102,23 @@ public class SearchClient {
 			lines.add(line);
 
 			line = serverMessages.readLine();
-		}
-
+		}		
 		
-		int row = 0;
-		
-
-		//Create the list of initial states for all the agents
-		//Ignore the other agents/boxes
 		this.initialStates = new LinkedList<>();
 		//add the node to the list. The index represents the agent.
 		//initialStates.add(new Node(null, lines.size(), maxCol));
 		//initialStates.add(new Node(null, lines.size(), maxCol));
-		
+
+		int row = 0;
+		boolean agentFound = false;
+
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
 		goalRow = new ArrayList<Integer>();
 		goalCol = new ArrayList<Integer>();
-		
+
 		for (String l : lines) {
-			if(!l.startsWith("+")) {
+			if (!l.startsWith("+")) {
 				continue;
 			}
 			for (int col = 0; col < l.length(); col++) {
@@ -120,53 +128,70 @@ public class SearchClient {
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
-					agentLocation[Character.getNumericValue(chr)][0]= row;
-					agentLocation[Character.getNumericValue(chr)][1]= col;
-					
-					
-					if(!agents.contains(Character.getNumericValue(chr))) {
-						
-						//agents.add(Character.getNumericValue(chr), "blue");
-						agents.add(new Agent((int)chr,"blue",new Position(0,0), new Node(null, 0, 0)));			//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+					// agentLocation[Character.getNumericValue(chr)][0]= row;
+					// agentLocation[Character.getNumericValue(chr)][1]= col;
+					// int counter=0;
+					boolean found = false;
+					for (Agent a : agents) {
+
+						if (a.name == (int) chr) {
+
+							// if you find an agent that you already have,
+							// update its position
+							a.position.col = col;
+							a.position.row = row;
+							found = true;
+							break;
+						}
 
 					}
-					
-					for(Agent a:agents){
-						initialStates.add(new Node(null, lines.size(), maxCol));
-					//initialStates.add(new Node(null, lines.size(), maxCol));
+					if (!found) {
+						agents.add(new Agent((int) chr, "blue", new Position(row, col), null));
 					}
-					
-					
-					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
-					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
+
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
+
 					//Default color being used
 					if(!boxesToColors.containsKey(chr)) {
 						initialBoxes.add(new Box(chr, "blue", new Position(row, col)));
 						System.err.println("Default color being used");
 						
 					} else initialBoxes.add(new Box(chr, boxesToColors.get(chr), new Position(row, col)));
-					
+
+          //Will use this in the last agents loop
+					//this.initialStates.get(0).boxes[row][col] = chr;
+
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					goalsList.add(new Goal(chr, new Position(row, col), boxesToColors.get(Character.toUpperCase(chr))));
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
-					
+
 				} else if (chr == ' ') {
 
 				} else {
-					System.err.println("Error, read invalid level character: " +  chr);
+					System.err.println("Error, read invalid level character: " + chr);
 					System.exit(1);
 				}
 			}
 			row++;
 		}
-		
-		//TODO: iterate through all the agents and update the initial state for every one of them.
-		
+
 		System.err.println("\n\n -- Boxes are: " + initialBoxes);
 		System.err.println("\n\n -- Goals are: " + goalsList);
+
+		System.err.println("These are the agents/colors of the level" + Arrays.asList(agents));
+		System.err.println("These are the boxes/colors of the level" + Arrays.asList(colorToBoxes));
+		
+		for(Agent a : agents)
+		{
+			//add initial state without other goals
+			//a.node = ;
+			
+		}
+
+		System.err.println("Agents: " + agents);
+
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -176,7 +201,7 @@ public class SearchClient {
 		int iterations = 0;
 		while (true) {
 			if (iterations == 1000) {
-				//System.err.println(strategy.searchStatus());
+				// System.err.println(strategy.searchStatus());
 				iterations = 0;
 			}
 
@@ -205,13 +230,13 @@ public class SearchClient {
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
-		
+
 		// Use stderr to print to console
 		System.err.println("SearchClient initializing. I am sending this using the error output stream.");
-		
+
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
-		
+
 		Strategy strategy;
 
 		if (args.length > 0) {
@@ -222,17 +247,20 @@ public class SearchClient {
 			case "-dfs":
 				strategy = new StrategyDFS();
 				break;
-//			case "-astar":
-//				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
-//				break;
-//			case "-wastar":
-//				// You're welcome to test WA* out with different values, but for
-//				// the report you must at least indicate benchmarks for W = 5.
-//				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
-//				break;
-//			case "-greedy":
-//				strategy = new StrategyBestFirst(new Greedy(client.initialState));
-//				break;
+			// case "-astar":
+			// strategy = new StrategyBestFirst(new
+			// AStar(client.initialStates.get(0)));
+			// break;
+			// case "-wastar":
+			// // You're welcome to test WA* out with different values, but for
+			// // the report you must at least indicate benchmarks for W = 5.
+			// strategy = new StrategyBestFirst(new
+			// WeightedAStar(client.initialState, 5));
+			// break;
+			// case "-greedy":
+			// strategy = new StrategyBestFirst(new
+			// Greedy(client.initialState));
+			// break;
 			default:
 				strategy = new StrategyBFS();
 				System.err.println(
@@ -244,71 +272,92 @@ public class SearchClient {
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
-		LinkedList<Node> solution;
-		LinkedList<Node> sol2;
-		try {
-			solution = client.Search(strategy, client.initialStates.get(0));
-			System.err.println("Found solution for agent 0");
-		} catch (Exception ex) {
-			//System.err.println("Maximum memory usage exceeded.");
-			System.err.println("Problems for agent 0");
-			solution = null;
-		}
-		
-		//duplicate
-		try {
-			sol2 = client.Search(new StrategyBFS(), client.initialStates.get(1));
-			System.err.println("Found solution for agent 1");
-		} catch (OutOfMemoryError ex) {
-			System.err.println("Maximum memory usage exceeded.");
-			sol2 = null;
-		}
-		//end of duplicate
+		ArrayList<LinkedList<Node>> solutions = new ArrayList<LinkedList<Node>>();
+		String jointActions = "";
 
-		if (solution == null) {
-//			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-			
-			System.exit(0);
-		} else {
-//			System.err.println("\nSummary for " + strategy.toString());
-//			System.err.println("Found solution of length " + solution.size());
-//			System.err.println(strategy.searchStatus());
-			//Multi-agent commands
+		for (Agent a : agents) {
+			LinkedList<Node> solution;
+			// LinkedList<Node> sol2;
+			try {
+				solution = client.Search(strategy, a.node);
+				System.err.println("Found solution for agent " + a.name);
+			} catch (Exception ex) {
+				// System.err.println("Maximum memory usage exceeded.");
+				System.err.println("Problems for agent " + a.name);
+				solution = null;
+			}
+			solutions.add(solution);
 
-			System.err.println("Sol length for agent 0: " + solution.size());
-			System.err.println("Sol length for agent 1: " + sol2.size());
+			if (solution == null) {
+				// System.err.println(strategy.searchStatus());
+				System.err.println("Unable to solve level.");
 
-//			System.out.println(currentAction);
+				System.exit(0);
+			} else {
+				// System.err.println("\nSummary for " + strategy.toString());
+				// System.err.println("Found solution of length " +
+				// solution.size());
+				// System.err.println(strategy.searchStatus());
+				// Multi-agent commands
+
+				System.err.println("Sol length for agent 0: " + solution.size());
+				// System.err.println("Sol length for agent 1: " + sol2.size());
+
+				// System.out.println(currentAction);
 				for (int j = 0; j < 100; j++) {
 					String act = "NoOp";
-					String act1 = "NoOp";
-					try {
-						act = solution.get(j).action.toString();
-						
-					} catch(IndexOutOfBoundsException e) {						
+			//		String act1 = "NoOp";
+					for (int l = 0; l < agents.size(); l++) {
+						try {
+							act = solution.get(j).action.toString();
+
+						} catch (IndexOutOfBoundsException e) {
+						}
+						// try {
+						// act1 = sol2.get(j).action.toString();
+						//
+						// } catch (IndexOutOfBoundsException e) {
+						// System.err.format("Exception in the moves of agent
+						// 1");
+						//
+						// }
+
+						System.err.println(
+								"These are the agent positions of the level" + Arrays.deepToString(agentLocation));
+
+						// String currentAction = "[" + act + ", " + act1 + "]";
+
+						// String currentAction = act;
+
+						jointActions = act + ",";
 					}
-					try {
-						act1 = sol2.get(j).action.toString();
-						
-					} catch(IndexOutOfBoundsException e) {
-						System.err.format("Exception in the moves of agent 1");
-
-
-					}
-					
-					
-
-					String currentAction = "[" + act + ", " + act1 + "]";
-					System.out.println(currentAction);
-					System.err.println("===== " + currentAction + " ====");
-					String response = serverMessages.readLine();
-					if (response.contains("false")) {
-						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
-						System.err.format("%s was attempted in \n%s\n", act, "Dont care");
-						break;
-					}
-
+				}
+				// remove xtra comma
+				if (jointActions != null && jointActions.length() > 0
+						&& jointActions.charAt(jointActions.length() - 1) == ',') {
+					jointActions = jointActions.substring(0, jointActions.length() - 1);
+				}
+				jointActions = "[" + jointActions + "]";
+				System.out.println(jointActions);
+				System.err.println("===== " + jointActions + " ====");
+				String response = serverMessages.readLine();
+				if (response.contains("false")) {
+					// System.err.format("Server responsed with %s to the
+					// inapplicable action: %s\n", response, act);
+					// System.err.format("%s was attempted in \n%s\n", act,
+					// "Dont care");
+					break;
+				}
+				// // duplicate
+				// try {
+				// sol2 = client.Search(new StrategyBFS(),
+				// client.initialStates.get(1));
+				// System.err.println("Found solution for agent 1");
+				// } catch (OutOfMemoryError ex) {
+				// System.err.println("Maximum memory usage exceeded.");
+				// sol2 = null;
+				// }
+				// // end of duplicate
 			}
 		}
 	}

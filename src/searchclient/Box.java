@@ -11,7 +11,7 @@ public class Box {
 		this.name = name;
 		this.color = color;
 		this.position = position;
-	}
+  }
 	
 	@Override
 	public String toString() {
