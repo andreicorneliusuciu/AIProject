@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
@@ -18,7 +19,8 @@ public class Node {
 
 	public int agentRow;
 	public int agentCol;
-
+	
+	public List<Position> boxesArray = new ArrayList<>();
 	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
 	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
 	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
@@ -67,9 +69,10 @@ public class Node {
 				char b = Character.toLowerCase(boxes[row][col]);
 				if (g > 0 && b != g) {
 					return false;
-				}
+				} 
 			}
 		}
+		System.err.println("++++++++ TRUE");
 		return true;
 	}
 
@@ -100,6 +103,7 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
+						
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
