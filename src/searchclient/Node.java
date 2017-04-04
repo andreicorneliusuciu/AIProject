@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
-
 import searchclient.Command.Type;
 
 public class Node {
@@ -19,18 +17,6 @@ public class Node {
 
 	public int agentRow;
 	public int agentCol;
-	
-	public List<Position> boxesArray = new ArrayList<>();
-	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
-	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
-	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
-	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
-	// ...
-	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.walls[2] is an array of booleans having size MAX_COL.
-	// this.walls[row][col] is true if there's a wall at (row, col)
-	//
-
 	
 	public char[][] boxes;
 	
@@ -72,7 +58,6 @@ public class Node {
 				} 
 			}
 		}
-		System.err.println("++++++++ TRUE");
 		return true;
 	}
 
