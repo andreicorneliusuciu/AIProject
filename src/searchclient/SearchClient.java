@@ -101,9 +101,11 @@ public class SearchClient {
 		//Ignore the other agents/boxes
 		this.initialStates = new LinkedList<>();
 		//add the node to the list. The index represents the agent.
-		initialStates.add(new Node(null, lines.size(), maxCol));
-		initialStates.add(new Node(null, lines.size(), maxCol));
-		
+//		initialStates.add(new Node(null, lines.size(), maxCol));
+//		initialStates.add(new Node(null, lines.size(), maxCol));
+		for(int i = 0; i < agents.size(); i++) {
+			initialStates.add(new Node(null, lines.size(), maxCol));
+		}
 		
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
@@ -128,6 +130,7 @@ public class SearchClient {
 					int index = agents.indexOf(new Agent(Integer.parseInt(""+chr), null));
 					if(index == -1) {
 						agents.add(new Agent(Integer.parseInt(""+chr), "blue", new Position(row, col), null));
+						initialStates.add(new Node(null, lines.size(), maxCol));
 					} else {
 						//update the position of the agents declared above the map into the input file
 						Agent a = agents.get(index);
@@ -136,14 +139,23 @@ public class SearchClient {
 					}
 					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
 					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
+					
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					if(!boxesToColor.containsKey(chr)) {
 						boxesToColor.put(chr, "blue");
 					}
-					this.initialStates.get(0).boxes[row][col] = chr;
-					this.initialStates.get(1).boxes[row][col] = chr;
+//					this.initialStates.get(0).boxes[row][col] = chr;
+//					this.initialStates.get(1).boxes[row][col] = chr;
+					for(int i = 0; i < agents.size(); i++) {
+						this.initialStates.get(i).boxes[row][col] = chr;
+					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// this.initialState.goals[row][col] = chr;
+					//if I find the goal before the corresponding box on the map (I read left to right)
+					if(!boxesToColor.containsKey(Character.toUpperCase(chr))) {
+						boxesToColor.put(Character.toUpperCase(chr), "blue");
+					}
+					
 					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
 					goals[row][col] = chr;
 					goalRow.add(row);
@@ -247,72 +259,71 @@ public class SearchClient {
 		}
 
 		LinkedList<Node> solution;
-		LinkedList<Node> sol2;
-		try {
-			solution = client.Search(strategy, client.initialStates.get(0));
-			System.err.println("Found solution for agent 0");
-		} catch (Exception ex) {
-			//System.err.println("Maximum memory usage exceeded.");
-			System.err.println("Problems for agent 0");
-			solution = null;
-		}
 		
-		//dup;icate
-		try {
-			sol2 = client.Search(new StrategyBFS(), client.initialStates.get(1));
-			System.err.println("Found solution for agent 1");
-		} catch (OutOfMemoryError ex) {
-			System.err.println("Maximum memory usage exceeded.");
-			sol2 = null;
+		//List containing all the solutions for every agent
+		List<List<Node>> solutions = new ArrayList<>();
+			
+		for(int i = 0; i < agents.size(); i++) {
+			try {
+				solution = client.Search(new StrategyBFS(), client.initialStates.get(i));
+				//add the partial solution to the list of total solutions
+				solutions.add(solution);
+					
+				System.err.println("Found solution for agent " + i + " of size " + solution.size());			
+			} catch (Exception ex) {
+				//System.err.println("Maximum memory usage exceeded.");
+				System.err.println("Problems for agent " + i + " when solving the level");
+				solutions = null;
+			}	
 		}
-		//end of duplicate
+	
 
-		if (solution == null) {
-//			System.err.println(strategy.searchStatus());
-	//		System.err.println("Unable to solve level.");
+		if (solutions == null) {
+			System.err.println(strategy.searchStatus());
+			System.err.println("Unable to solve level.");
 			
 			System.exit(0);
+			
 		} else {
 //			System.err.println("\nSummary for " + strategy.toString());
 //			System.err.println("Found solution of length " + solution.size());
 //			System.err.println(strategy.searchStatus());
 			//Multi-agent commands
-
-			System.err.println("Sol length for agent 0: " + solution.size());
-			System.err.println("Sol length for agent 1: " + sol2.size());
-
-//			System.out.println(currentAction);
-				for (int j = 0; j < 100; j++) {
-					String act = "NoOp";
-					String act1 = "NoOp";
+			
+			int maxSol = 0;
+			int m;
+			for (int i = 0; i < solutions.size(); i++) {
+				m = solutions.get(i).size();
+				if (m > maxSol) {
+					maxSol = m;
+				}
+			}
+			
+			//TODO: empty the same string builder object
+			for(int i = 0; i < maxSol; i++) {
+			
+				StringBuilder jointAction = new StringBuilder();
+				
+				jointAction.append('[');
+				for(int j = 0; j < solutions.size(); j++) {
+					Node n = null;
 					try {
-						act = solution.get(j).action.toString();
-						
+						n = solutions.get(j).get(i);
+						jointAction.append(n.action.toString() + ",");
 					} catch(IndexOutOfBoundsException e) {
-						
-
-
+						jointAction.append("NoOp,");
 					}
-					try {
-						act1 = sol2.get(j).action.toString();
-						
-					} catch(IndexOutOfBoundsException e) {
-						System.err.format("Exception in the moves of agent 1");
-
-
-					}
-					
-					
-					String currentAction = "[" + act + ", " + act1 + "]";
-					System.out.println(currentAction);
-					System.err.println("===== " + currentAction + " ====");
-					String response = serverMessages.readLine();
-					if (response.contains("false")) {
-						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
-						System.err.format("%s was attempted in \n%s\n", act, "Dont care");
-						break;
-					}
-
+				}
+				//replace the last comma with ']'
+				jointAction.setCharAt(jointAction.length() - 1, ']');
+				System.out.println(jointAction.toString());
+				System.err.println("===== " + jointAction.toString() + " ====");
+				String response = serverMessages.readLine();
+				if (response.contains("false")) {
+					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
+					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
+					break;
+				}
 			}
 		}
 	}
