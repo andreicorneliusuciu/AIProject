@@ -1,17 +1,18 @@
 package searchclient;
 
-public class Box {
-	
-	public char name;
+public class Agent {
+		
+	public int name;
 	public String color;
 	public Position position;
+	public Node node;
 	
-	public Box(char name, String color, Position position) {
-		
-		this.name = name;
+	public Agent( int name,String color, Position position, Node node) {
 		this.color = color;
+		this.name = name;
 		this.position = position;
-  }
+		this.node = node;
+	}
 	
 	@Override
 	public String toString() {

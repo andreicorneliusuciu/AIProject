@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
@@ -15,24 +16,17 @@ public class Node {
 
 	public static int MAX_ROW;
 	public static int MAX_COL;
+//agentlocation agentRow,agentCol,0->max agents
 
 	public int agentRow;
 	public int agentCol;
-
-	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
-	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
-	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
-	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
-	// ...
-	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.walls[2] is an array of booleans having size MAX_COL.
-	// this.walls[row][col] is true if there's a wall at (row, col)
-	//
-
+	
+	public List<Agent> otherAgentsPosition;
+	public List<Box> otherBoxesPostition;
 	
 	public char[][] boxes;
+	public List<Position> boxesList;
 	
-
 	public Node parent;
 	public Command action;
 
@@ -44,7 +38,10 @@ public class Node {
 		this.parent = parent;
 		MAX_ROW = maxRow;
 		MAX_COL = maxCol;
+		//TODO: get rid of the boxes matrix
 		boxes = new char[MAX_ROW][MAX_COL];
+		this.boxesList = new ArrayList<>();
+		
 		if (parent == null) {
 			this.g = 0;
 		} else {
@@ -67,19 +64,50 @@ public class Node {
 				char b = Character.toLowerCase(boxes[row][col]);
 				if (g > 0 && b != g) {
 					return false;
-				}
+				} 
 			}
 		}
 		return true;
 	}
 
-	public ArrayList<Node> getExpandedNodes(int x,int y) {
+	public ArrayList<Node> getExpandedNodes() {
+		
+		//expands all possible nodes/states from present state
+		
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
-			int newAgentRow = y + Command.dirToRowChange(c.dir1);
-			int newAgentCol = x + Command.dirToColChange(c.dir1);
+			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
+			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+			
+			int agentNumber = 404;
+			
+			
+			
+			
+			
+			String boxColor = ""; 
+			String agentColor = ""; 
+			
+			//mistake here?
+			for(int i=0; i<SearchClient.agents.size();i++)
+			{
+				//System.err.println("lul "+SearchClient.agents.size());
+				//System.err.println("lul "+SearchClient.agentLocation[i][0]+", "+SearchClient.agentLocation[i][1]+" this.AgentLoc"+this.agentRow+", "+this.agentCol); 
+				if(SearchClient.agentLocation[i][0]== this.agentRow && SearchClient.agentLocation[i][1]== this.agentCol)
+				{
+					
+					agentNumber = i;
+					agentColor = SearchClient.agents.get(i).color;
+					//System.err.println("lul "+agentColor); 
 
+				}
+				
+			}
+			
+			
+			
+			//System.err.println("before ifs "+agentColor+" agentlocation" + SearchClient.agentLocation[0][0] +","+SearchClient.agentLocation[0][1]+" agentlocation1 " + SearchClient.agentLocation[1][0]+ "," +SearchClient.agentLocation[1][1] + " this.agntloc" +this.agentRow +","+this.agentCol+"   agentColor " +agentColor); 
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
@@ -88,42 +116,114 @@ public class Node {
 					n.agentRow = newAgentRow;
 					n.agentCol = newAgentCol;
 					expandedNodes.add(n);
+					
+					
+					//update agent locations
+//					SearchClient.agentLocation[agentNumber][0] = newAgentRow;
+//					SearchClient.agentLocation[agentNumber][1] = newAgentCol;
+//					
+					//print all moves, toWork:add to all moves
+					//System.err.println(n.toString());
+
 				}
+				
 			} else if (c.actionType == Type.Push) {
+				//System.err.println("Try push "+agentColor); 
 				// Make sure that there's actually a box to move
-				if (this.boxAt(newAgentRow, newAgentCol)) {
+				// Make sure their are the same color
+				
+				//agentColor = SearchClient.agents.get(boxes[newAgentRow][newAgentCol]);
+				//boxColor = SearchClient.colorToBoxes.get(boxes[newAgentRow][newAgentCol]);
+				
+
+				
+				boxColor = SearchClient.boxesToColors.get(boxes[newAgentRow][newAgentCol]);
+
+			//System.err.println("I tried to Push: Box Color "+boxColor+" Agent Color "+agentColor); 
+
+				if (this.boxAt(newAgentRow, newAgentCol) ) {
+
 					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
 					// .. and that new cell of box is free
 					if (this.cellIsFree(newBoxRow, newBoxCol)) {
+						
+						//System.err.println("Cell was free " + boxColor+" agent: "+ agentColor); 
+
+						
+//						if(boxColor.equals(agentColor))
+//						{
+						
+
 						Node n = this.ChildNode();
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
+						
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
+						
+
+						//update agent locations
+//						SearchClient.agentLocation[agentNumber][0] = newAgentRow;
+//						SearchClient.agentLocation[agentNumber][1] = newAgentCol;
+//						
+//						}
 					}
 				}
 			} else if (c.actionType == Type.Pull) {
 				// Cell is free where agent is going
-				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					int boxRow = y + Command.dirToRowChange(c.dir2);
-					int boxCol = x + Command.dirToColChange(c.dir2);
+				//ToDo if agent and box are same color
+				
+				if (this.cellIsFree(newAgentRow, newAgentCol) ) {
+					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
+					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
 					// .. and there's a box in "dir2" of the agent
+					
+					
+
 					if (this.boxAt(boxRow, boxCol)) {
+						
+						boxColor = SearchClient.boxesToColors.get(boxes[boxRow][boxCol]);
+						
+						//System.err.println("Pull: Box Color "+boxColor+" Agent Color "+agentColor); 
+						//if(boxColor.equals(agentColor))
+						//{
+							
+							
+						//System.err.println("Pull: Box Color "+boxColor+" Agent Color "+agentColor); 
+
+						
+						
+						//System.err.println("Pull: Box Color "+boxes[boxRow][boxCol]); 
+						
 						Node n = this.ChildNode();
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[y][x] = this.boxes[boxRow][boxCol];
+						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
 						expandedNodes.add(n);
+						
+						
+						
+//						//update agent locations
+//						SearchClient.agentLocation[agentNumber][0] = newAgentRow;
+//						SearchClient.agentLocation[agentNumber][1] = newAgentCol;
+//						
+//						
+						
+						
+						//}
+						
 					}
 				}
 			}
+
 		}
 		Collections.shuffle(expandedNodes, RND);
+
 		return expandedNodes;
 	}
 
@@ -205,6 +305,7 @@ public class Node {
 				} else if (SearchClient.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
+					//this is the reason why all agents appear once and only as 0
 					s.append("0");
 				} else {
 					s.append(" ");

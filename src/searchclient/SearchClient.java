@@ -1,79 +1,97 @@
+
+//ToDO change pull/push in node to check if color is the same. Maybe then all agents can see all boxes without problems.
+//toDo store info on agent like: agentNumber,row,col
+//reason all agents appear once and as 0 is node.toString, fix needed
+
 package searchclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import searchclient.Memory;
-import searchclient.Strategy.*;
-import searchclient.Heuristic.*;
+import searchclient.Heuristic.AStar;
+import searchclient.Heuristic.Greedy;
+import searchclient.Heuristic.WeightedAStar;
+import searchclient.Strategy.StrategyBFS;
+import searchclient.Strategy.StrategyBestFirst;
+import searchclient.Strategy.StrategyDFS;
+import sun.management.resources.agent;
 
 public class SearchClient {
-	public Node initialState;
+	// The list of initial state for every agent
+	// public List<Node> initialStates;
+	// TODO: make this 2 matrices LinkedList<Position>
 	public static boolean[][] walls;
-	public static char[][] goals; 
-	public static List<String> agents; // clear the null characters. 
+	public static char[][] goals;
+	
+	//Initial boxes position (right at the beginning of the level)
+	public List<Box> initialBoxes = new ArrayList<>();
+	private LinkedList initialStates;
+	
+	public static List<Goal> goalsList = new ArrayList<>();
+	
+	//The list of agents. Index represents the agent, the value is the color
+	//public static Map<Integer,String> agents;
+	
+	public static List<Agent> agents = new ArrayList<>();
+	
+	//agent is implied in position, row,col stored
+	public static int[][] agentLocation = new int[10][2];
+	
+	public static Map<Character, String> boxesToColors = new HashMap<>();
 
-	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
+	// The list of agents. Index represents the agent, the value is the color
+	// public static Map<Integer,String> agents;
 
-	public Map<Integer, String> boxIDToColor = new HashMap<>();
+	// agent is implied in position, row,col stored
+	//public static int[][] agentLocation = new int[10][2];
+
+	public static Map<Character, String> colorToBoxes = new HashMap<>();
 
 	public static ArrayList<Integer> goalRow;
 	public static ArrayList<Integer> goalCol;
+	
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
-		agents = new ArrayList<String>();
-		
-		for(int i=0;i<10;i++){
-			
-			agents.add("NULL");
-			
-		}
-		
+
 		int maxCol = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors
-			if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
+			if (!line.startsWith("+")) {
+				
 				String[] s = line.split(":");
 
 				String color = s[0];
-
 				String[] s1 = s[1].split(",");
-				s1[0].trim();
+				s1[0] = s1[0].trim();
 
 				for (int i = 0; i < s1.length; i++) {
 					char chr = s1[i].charAt(0);
+
+					//Agent
 					if ('0' <= chr && chr <= '9') {
-
-						agents.add(Integer.parseInt(""+chr),color);
-						
-					} else if ('A' <= chr && chr <= 'Z') { //Box 
-							if(!colorToBoxes.containsKey(color)){
-								List boxes = new LinkedList<String>();
-								boxes.add(""+chr);
-								 colorToBoxes.put(color, boxes);
-							
-							}else{
-								List boxes = colorToBoxes.get(color);
-								boxes.add(""+chr);
-								colorToBoxes.put(color, boxes);
-							}
+						//we add all agents explicitly marked here. Blue agents are added when the level is parsed below.
+						agents.add(new Agent((int)chr, color, null, null));	
+					//Box
+					} else if ('A' <= chr && chr <= 'Z') {
+							//It is not on the map
+							if(!boxesToColors.containsKey(chr)) {
+								boxesToColors.put(chr, color);
+								//TODO: in the next parsing function make the boxes default.
+							} 
 					} else {
-						System.exit(1);
-						// WRONG ERROR
+						//TODO: Catch an exeption.
 					}
-
 				}
-
 			}
 
 			if (line.length() > maxCol) {
@@ -83,62 +101,106 @@ public class SearchClient {
 			lines.add(line);
 
 			line = serverMessages.readLine();
-		}
+		}		
+		
+		this.initialStates = new LinkedList<>();
+		//add the node to the list. The index represents the agent.
+		//initialStates.add(new Node(null, lines.size(), maxCol));
+		//initialStates.add(new Node(null, lines.size(), maxCol));
 
 		int row = 0;
 		boolean agentFound = false;
-		this.initialState = new Node(null, lines.size(), maxCol);
+
 		walls = new boolean[lines.size()][maxCol];
 		goals = new char[lines.size()][maxCol];
 		goalRow = new ArrayList<Integer>();
 		goalCol = new ArrayList<Integer>();
 
 		for (String l : lines) {
+			if (!l.startsWith("+")) {
+				continue;
+			}
 			for (int col = 0; col < l.length(); col++) {
 				char chr = l.charAt(col);
 
 				if (chr == '+') { // Wall.
-					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 
-					agents.add("");
+					// agentLocation[Character.getNumericValue(chr)][0]= row;
+					// agentLocation[Character.getNumericValue(chr)][1]= col;
+					// int counter=0;
+					boolean found = false;
+					for (Agent a : agents) {
 
-					this.initialState.agentRow = row;
-					this.initialState.agentCol = col;
+						if (a.name == (int) chr) {
+
+							// if you find an agent that you already have,
+							// update its position
+							a.position.col = col;
+							a.position.row = row;
+							found = true;
+							break;
+						}
+
+					}
+					if (!found) {
+						agents.add(new Agent((int) chr, "blue", new Position(row, col), null));
+					}
+
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialState.boxes[row][col] = chr;
+
+					//Default color being used
+					if(!boxesToColors.containsKey(chr)) {
+						initialBoxes.add(new Box(chr, "blue", new Position(row, col)));
+						System.err.println("Default color being used");
+						
+					} else initialBoxes.add(new Box(chr, boxesToColors.get(chr), new Position(row, col)));
+
+          //Will use this in the last agents loop
+					//this.initialStates.get(0).boxes[row][col] = chr;
+
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
-					// this.initialState.goals[row][col] = chr;
+					goalsList.add(new Goal(chr, new Position(row, col), boxesToColors.get(Character.toUpperCase(chr))));
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
+
 				} else if (chr == ' ') {
-					// Free space.
+
 				} else {
-					System.err.println("Error, read invalid level character: " + (int) chr);
+					System.err.println("Error, read invalid level character: " + chr);
 					System.exit(1);
 				}
 			}
 			row++;
 		}
-		// AnalLevel anal = new AnalLevel();
-		// for (int i = 0; i < goalRow.size(); i++) {
-		//
-		//
-		// anal.analGoals(goalRow.get(i), goalCol.get(i));
-		// }
+
+		System.err.println("\n\n -- Boxes are: " + initialBoxes);
+		System.err.println("\n\n -- Goals are: " + goalsList);
+
+		System.err.println("These are the agents/colors of the level" + Arrays.asList(agents));
+		System.err.println("These are the boxes/colors of the level" + Arrays.asList(colorToBoxes));
+		
+		for(Agent a : agents)
+		{
+			//add initial state without other goals
+			//a.node = ;
+			
+		}
+
+		System.err.println("Agents: " + agents);
 
 	}
 
-	public LinkedList<Node> Search(Strategy strategy) throws IOException {
+	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
-		strategy.addToFrontier(this.initialState);
+		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
 		while (true) {
 			if (iterations == 1000) {
-				System.err.println(strategy.searchStatus());
+				// System.err.println(strategy.searchStatus());
 				iterations = 0;
 			}
 
@@ -201,6 +263,7 @@ public class SearchClient {
 		SearchClient client = new SearchClient(serverMessages);
 
 		Strategy strategy;
+
 		if (args.length > 0) {
 			switch (args[0].toLowerCase()) {
 			case "-bfs":
@@ -209,17 +272,20 @@ public class SearchClient {
 			case "-dfs":
 				strategy = new StrategyDFS();
 				break;
-			case "-astar":
-				strategy = new StrategyBestFirst(new AStar(client.initialState));
-				break;
-			case "-wastar":
-				// You're welcome to test WA* out with different values, but for
-				// the report you must at least indicate benchmarks for W = 5.
-				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
-				break;
-			case "-greedy":
-				strategy = new StrategyBestFirst(new Greedy(client.initialState));
-				break;
+			// case "-astar":
+			// strategy = new StrategyBestFirst(new
+			// AStar(client.initialStates.get(0)));
+			// break;
+			// case "-wastar":
+			// // You're welcome to test WA* out with different values, but for
+			// // the report you must at least indicate benchmarks for W = 5.
+			// strategy = new StrategyBestFirst(new
+			// WeightedAStar(client.initialState, 5));
+			// break;
+			// case "-greedy":
+			// strategy = new StrategyBestFirst(new
+			// Greedy(client.initialState));
+			// break;
 			default:
 				strategy = new StrategyBFS();
 				System.err.println(
@@ -231,32 +297,92 @@ public class SearchClient {
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
-		LinkedList<Node> solution;
-		try {
-			solution = client.Search(strategy);
-		} catch (OutOfMemoryError ex) {
-			System.err.println("Maximum memory usage exceeded.");
-			solution = null;
-		}
+		ArrayList<LinkedList<Node>> solutions = new ArrayList<LinkedList<Node>>();
+		String jointActions = "";
 
-		if (solution == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-			System.exit(0);
-		} else {
-			System.err.println("\nSummary for " + strategy.toString());
-			System.err.println("Found solution of length " + solution.size());
-			System.err.println(strategy.searchStatus());
+		for (Agent a : agents) {
+			LinkedList<Node> solution;
+			// LinkedList<Node> sol2;
+			try {
+				solution = client.Search(strategy, a.node);
+				System.err.println("Found solution for agent " + a.name);
+			} catch (Exception ex) {
+				// System.err.println("Maximum memory usage exceeded.");
+				System.err.println("Problems for agent " + a.name);
+				solution = null;
+			}
+			solutions.add(solution);
 
-			for (Node n : solution) {
-				String act = n.action.toString();
-				System.out.println(act);
+			if (solution == null) {
+				// System.err.println(strategy.searchStatus());
+				System.err.println("Unable to solve level.");
+
+				System.exit(0);
+			} else {
+				// System.err.println("\nSummary for " + strategy.toString());
+				// System.err.println("Found solution of length " +
+				// solution.size());
+				// System.err.println(strategy.searchStatus());
+				// Multi-agent commands
+
+				System.err.println("Sol length for agent 0: " + solution.size());
+				// System.err.println("Sol length for agent 1: " + sol2.size());
+
+				// System.out.println(currentAction);
+				for (int j = 0; j < 100; j++) {
+					String act = "NoOp";
+			//		String act1 = "NoOp";
+					for (int l = 0; l < agents.size(); l++) {
+						try {
+							act = solution.get(j).action.toString();
+
+						} catch (IndexOutOfBoundsException e) {
+						}
+						// try {
+						// act1 = sol2.get(j).action.toString();
+						//
+						// } catch (IndexOutOfBoundsException e) {
+						// System.err.format("Exception in the moves of agent
+						// 1");
+						//
+						// }
+
+						System.err.println(
+								"These are the agent positions of the level" + Arrays.deepToString(agentLocation));
+
+						// String currentAction = "[" + act + ", " + act1 + "]";
+
+						// String currentAction = act;
+
+						jointActions = act + ",";
+					}
+				}
+				// remove xtra comma
+				if (jointActions != null && jointActions.length() > 0
+						&& jointActions.charAt(jointActions.length() - 1) == ',') {
+					jointActions = jointActions.substring(0, jointActions.length() - 1);
+				}
+				jointActions = "[" + jointActions + "]";
+				System.out.println(jointActions);
+				System.err.println("===== " + jointActions + " ====");
 				String response = serverMessages.readLine();
 				if (response.contains("false")) {
-					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, act);
-					System.err.format("%s was attempted in \n%s\n", act, n.toString());
+					// System.err.format("Server responsed with %s to the
+					// inapplicable action: %s\n", response, act);
+					// System.err.format("%s was attempted in \n%s\n", act,
+					// "Dont care");
 					break;
 				}
+				// // duplicate
+				// try {
+				// sol2 = client.Search(new StrategyBFS(),
+				// client.initialStates.get(1));
+				// System.err.println("Found solution for agent 1");
+				// } catch (OutOfMemoryError ex) {
+				// System.err.println("Maximum memory usage exceeded.");
+				// sol2 = null;
+				// }
+				// // end of duplicate
 			}
 		}
 	}
