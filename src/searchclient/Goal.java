@@ -14,6 +14,6 @@ public class Goal {
 
 	@Override
 	public String toString() {
-		return "Goal [name=" + name + ", color=" + color + " pos= " + ", isSatisfied=" + isSatisfied + "]";
+		return "Goal [name=" + name + ", color=" + color + " pos= " + position + ", isSatisfied=" + isSatisfied + "]";
 	}
 }

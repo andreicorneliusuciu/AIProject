@@ -26,6 +26,7 @@ public class SearchClient {
 	//The list of agents. Index represents the agent, the value is the color
 	public static List<Agent> agents;
 	
+	//List with all the goals.
 	public static List<Goal> allGoals;
 	
 	//Key = Color, Value = List of Box numbers
@@ -43,6 +44,7 @@ public class SearchClient {
 		String line = serverMessages.readLine();
 		ArrayList<String> lines = new ArrayList<String>();
 		agents = new ArrayList<Agent>();
+		allGoals = new ArrayList<>();
 		
 		int maxCol = 0;
 		while (!line.equals("")) {
@@ -142,6 +144,7 @@ public class SearchClient {
 					this.initialStates.get(1).boxes[row][col] = chr;
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// this.initialState.goals[row][col] = chr;
+					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
 					goals[row][col] = chr;
 					goalRow.add(row);
 					goalCol.add(col);
@@ -162,8 +165,9 @@ public class SearchClient {
 //		        iterator.remove();
 //		    }
 //		}
-		System.err.println(agents);
-		System.err.println(boxesToColor);
+		System.err.println(" + Agents: " + agents);
+		System.err.println(" + Boxes: " + boxesToColor);
+		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
 	}
 
