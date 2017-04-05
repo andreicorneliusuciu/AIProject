@@ -21,7 +21,7 @@ public class SearchClient {
 	//The list of initial state for every agent
 	public List<Node> initialStates;
 	public static boolean[][] walls;
-	public static char[][] goals; 
+//	public static char[][] goals; 
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static List<Agent> agents;
@@ -33,11 +33,12 @@ public class SearchClient {
 	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
 	
 	public Map<Character, String> boxesToColor = new HashMap<>();
+	
+	//color to agent map
+	public Map<String, Character> colorToAgent = new HashMap<>();
 
-	public Map<Integer, String> boxIDToColor = new HashMap<>();
-
-	public static ArrayList<Integer> goalRow;
-	public static ArrayList<Integer> goalCol;
+//	public static ArrayList<Integer> goalRow;
+//	public static ArrayList<Integer> goalCol;
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 
@@ -108,10 +109,10 @@ public class SearchClient {
 		}
 		
 		walls = new boolean[lines.size()][maxCol];
-		goals = new char[lines.size()][maxCol];
-		goalRow = new ArrayList<Integer>();
-		goalCol = new ArrayList<Integer>();
-		
+//		goals = new char[lines.size()][maxCol];
+//		goalRow = new ArrayList<Integer>();
+//		goalCol = new ArrayList<Integer>();
+//		
 		
 		
 		for (String l : lines) {
@@ -147,7 +148,11 @@ public class SearchClient {
 //					this.initialStates.get(0).boxes[row][col] = chr;
 //					this.initialStates.get(1).boxes[row][col] = chr;
 					for(int i = 0; i < agents.size(); i++) {
-						this.initialStates.get(i).boxes[row][col] = chr;
+						//if the color of the box is the same as the agent => put it into the agent's initial map
+						if(boxesToColor.get(chr).equals(agents.get(i).color)) {
+							this.initialStates.get(i).boxes[row][col] = chr;
+							this.initialStates.get(i).boxes2.add(new Position(row, col));
+						}
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// this.initialState.goals[row][col] = chr;
@@ -157,9 +162,19 @@ public class SearchClient {
 					}
 					
 					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
-					goals[row][col] = chr;
-					goalRow.add(row);
-					goalCol.add(col);
+					//goals[row][col] = chr;
+					
+					//TODO: solve the default case??? when agent is blue
+					for(int i = 0; i < agents.size(); i++) {
+						//put the goal to the agent map just if they are the same color
+						if(agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
+							this.initialStates.get(i).goals[row][col] = chr;
+							this.initialStates.get(i).goals2.add(new Position(row, col));
+						}
+					}
+					//aici fac ceva cu golul
+//					goalRow.add(row);
+//					goalCol.add(col);
 				} else if (chr == ' ') {
 
 				} else {
@@ -180,6 +195,10 @@ public class SearchClient {
 		System.err.println(" + Agents: " + agents);
 		System.err.println(" + Boxes: " + boxesToColor);
 		System.err.println(" + Goals: " + allGoals);
+		System.err.println("\n ------------------------------------ \n");
+		for (Node n : initialStates) {
+			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
+		}
 		System.err.println("\n ------------------------------------ \n");
 	}
 
@@ -265,6 +284,8 @@ public class SearchClient {
 			
 		for(int i = 0; i < agents.size(); i++) {
 			try {
+				//System.err.println("\n & Agent " + i + " init state is:\n ");
+				//System.err.println(client.initialStates.get(i));
 				solution = client.Search(new StrategyBFS(), client.initialStates.get(i));
 				//add the partial solution to the list of total solutions
 				solutions.add(solution);

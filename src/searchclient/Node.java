@@ -19,7 +19,11 @@ public class Node {
 	public int agentCol;
 	
 	public char[][] boxes;
+	public char[][] goals;
 	
+	//alphabetially sorted both lists
+	public List<Position> goals2 = new ArrayList<>();
+	public List<Position> boxes2 = new ArrayList<>();
 
 	public Node parent;
 	public Command action;
@@ -33,6 +37,7 @@ public class Node {
 		MAX_ROW = maxRow;
 		MAX_COL = maxCol;
 		boxes = new char[MAX_ROW][MAX_COL];
+		goals = new char[MAX_ROW][MAX_COL];
 		if (parent == null) {
 			this.g = 0;
 		} else {
@@ -51,7 +56,7 @@ public class Node {
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
-				char g = SearchClient.goals[row][col];
+				char g = this.goals[row][col];
 				char b = Character.toLowerCase(boxes[row][col]);
 				if (g > 0 && b != g) {
 					return false;
@@ -90,6 +95,7 @@ public class Node {
 						n.agentCol = newAgentCol;
 						
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
+						//TODO: this 0 is not ok here. needs to be the agent's number
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
 					}
@@ -126,10 +132,11 @@ public class Node {
 
 	private Node ChildNode() {
 		Node copy = new Node(this,MAX_ROW,MAX_COL);
+		//aici
 		for (int row = 0; row < MAX_ROW; row++) {
 			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-			System.arraycopy(SearchClient.goals[row], 0, SearchClient.goals[row], 0, MAX_COL);
+			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}
 		return copy;
 	}
@@ -152,7 +159,7 @@ public class Node {
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
 			result = prime * result + Arrays.deepHashCode(this.boxes);
-			result = prime * result + Arrays.deepHashCode(SearchClient.goals);
+			result = prime * result + Arrays.deepHashCode(this.goals);
 			result = prime * result + Arrays.deepHashCode(SearchClient.walls);
 			this._hash = result;
 		}
@@ -172,7 +179,7 @@ public class Node {
 			return false;
 		if (!Arrays.deepEquals(this.boxes, other.boxes))
 			return false;
-		if (!Arrays.deepEquals(SearchClient.goals, SearchClient.goals))
+		if (!Arrays.deepEquals(this.goals, this.goals))
 			return false;
 		if (!Arrays.deepEquals(SearchClient.walls, SearchClient.walls))
 			return false;
@@ -189,8 +196,8 @@ public class Node {
 			for (int col = 0; col < MAX_COL; col++) {
 				if (this.boxes[row][col] > 0) {
 					s.append(this.boxes[row][col]);
-				} else if (SearchClient.goals[row][col] > 0) {
-					s.append(SearchClient.goals[row][col]);
+				} else if (this.goals[row][col] > 0) {
+					s.append(this.goals[row][col]);
 				} else if (SearchClient.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {

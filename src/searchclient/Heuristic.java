@@ -1,103 +1,43 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Random;
+import java.util.Set;
+import java.util.List;
+import java.lang.Math;
 
 import searchclient.NotImplementedException;
+import searchclient.Node;
 
 public abstract class Heuristic implements Comparator<Node> {
-
-	
-	ArrayList<Integer> boxRow;
-	ArrayList<Integer> boxCol;
-	ArrayList<Integer> boxGoaldistList;
-	ArrayList<Integer> boxAgentdistList;
-	int aCol;
-	int aRow ;
-	
+    
+    //This is the goal state, represented as a list of the final intended positions of the boxes
+    public List<Position> goals;
+    public List<Position> boxes;
+        
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
+		//TODO: I guess I need to make a list of positions in the Node class
+        goals = initialState.goals2;
+        boxes = initialState.boxes2;
 	}
 
-	public int boxGoalDist(int lastEleCol,int lastEleRow, int g){
-		
-		int boxgoaldist = Math.abs(boxCol.get(lastEleCol) - SearchClient.goalCol.get(g))
-				+ Math.abs(boxRow.get(lastEleRow) - SearchClient.goalRow.get(g));
-		
-		int boxagent = Math.abs(boxCol.get(lastEleCol)-aCol)+Math.abs(boxRow.get(lastEleCol)-aRow);
-		
-		 return boxgoaldist*2+boxagent;
-		
-	}
-	
-	
-	
 	public int h(Node n) {
-
-		aCol = n.agentCol;
-		aRow = n.agentRow;
-
-		 boxRow = new ArrayList<Integer>();
-		 boxCol = new ArrayList<Integer>();
-		boxGoaldistList = new ArrayList<Integer>();
-		int max=0;
-		char[][] boxes = n.boxes;
-		
-		for (int row = 0; row < Node.MAX_ROW; row++) {
-
-			for (int col = 0; col < Node.MAX_COL; col++) {
-				if (boxes[row][col] > 0) {
-					boxRow.add(row);
-					boxCol.add(col);
-
-					for (int g = 0; g < SearchClient.goalCol.size(); g++) {
-
-						Integer gRow = SearchClient.goalRow.get(g);
-						Integer gCol = SearchClient.goalCol.get(g);
-
-						 
-						if (Character.toLowerCase(boxes[row][col]) == SearchClient.goals[gRow][gCol]) {
-
-							
-							
-							
-							boxGoaldistList.add(boxGoalDist(boxCol.size() - 1,boxRow.size() - 1,g));
-							
-						//	boxAgentdistList.add(boxAgentDist(boxCol.size() - 1,boxRow.size() - 1,g));
-							
-								
-							
-						//	System.err.println("HEJ MED DIG");
-						}
-
-					}
-
-				}
-			}
-		}
-		
-//		for(int i=0; i<boxGoaldistList.size();i++){
-			
-		//	System.err.println(boxGoaldistList.get(i));
-			
+       	//Manhattan distance Math.abs(x1-x0) + Math.abs(y1-y0);
+       	
+       	int result = 0;
+		//Manhattan distance between box and its specific goal a -> A, b -> B etc.
+//		for(int i = 0; i < Node.ARRAY_LENGHT; i++) {
+//			result += Math.abs(n.boxes2.get(i).row - goals.get(i).row) + Math.abs(n.boxes2.get(i).col - goals.get(i).col);
 //		}
-		
-		Integer min = Collections.min(boxGoaldistList);
-		
-		
 
-	//	System.err.println("box Col/row: " + boxes[boxRow.get(0)][boxCol.get(0)] + "       ( " + boxCol.get(0) + ","
-	//			+ boxRow.get(0) + " )" + " goal State: "
-	//			+ SearchClient.goals[SearchClient.goalRow.get(1)][SearchClient.goalCol.get(1)]);
-		return max;
+		return result;
 	}
 
 	public abstract int f(Node n);
 
 	@Override
 	public int compare(Node n1, Node n2) {
+
 		return this.f(n1) - this.f(n2);
 	}
 
