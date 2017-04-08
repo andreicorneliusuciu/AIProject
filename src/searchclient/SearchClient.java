@@ -331,9 +331,18 @@ public class SearchClient {
 					try {
 						n = solutions.get(j).get(i);
 						jointAction.append(n.action.toString() + ",");
+						
 					} catch(IndexOutOfBoundsException e) {
+						
 						jointAction.append("NoOp,");
+						
+						//have to manually break if agents share color. ToDo: make goals2 in node List<Goal> to have access to IsSatisfied.
+//						if(solutions.get(j-1).get(i).isGoalState()){
+//							break;
+//						}
 					}
+					
+					
 				}
 				//replace the last comma with ']'
 				jointAction.setCharAt(jointAction.length() - 1, ']');
