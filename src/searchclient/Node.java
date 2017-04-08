@@ -81,6 +81,8 @@ public class Node {
 					n.agentRow = newAgentRow;
 					n.agentCol = newAgentCol;
 					expandedNodes.add(n);
+					//System.err.println(n.toString());
+
 				}
 			} else if (c.actionType == Type.Push) {
 				// Make sure that there's actually a box to move
@@ -98,6 +100,8 @@ public class Node {
 						//TODO: this 0 is not ok here. needs to be the agent's number
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
+						//System.err.println(n.toString());
+
 					}
 				}
 			} else if (c.actionType == Type.Pull) {
@@ -114,6 +118,8 @@ public class Node {
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
 						expandedNodes.add(n);
+						//System.err.println(n.toString());
+
 					}
 				}
 			}
@@ -189,6 +195,10 @@ public class Node {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
+		
+	
+		
+		
 		for (int row = 0; row < MAX_ROW; row++) {
 			if (!SearchClient.walls[row][0]) {
 				break;
@@ -201,7 +211,7 @@ public class Node {
 				} else if (SearchClient.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
-					s.append("0");
+					s.append("?");
 				} else {
 					s.append(" ");
 				}
