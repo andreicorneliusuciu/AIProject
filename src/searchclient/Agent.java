@@ -6,6 +6,18 @@ public class Agent {
 	public String color;
 	public Position position;
 	public Node initialState;
+	public boolean isTrapped = false;
+	
+	
+	
+	public Agent(int name, String color, Position position, Node initialState, boolean isTrapped) {
+		this.name = name;
+		this.color = color;
+		this.position = position;
+		this.initialState = initialState;
+		this.isTrapped = isTrapped;
+	}
+	
 	
 	public Agent(int name, String color, Position position, Node initialState) {
 		this.name = name;
@@ -13,6 +25,8 @@ public class Agent {
 		this.position = position;
 		this.initialState = initialState;
 	}
+	
+	
 	
 	public Agent(int name, Node initialState) {
 		this.name = name;
