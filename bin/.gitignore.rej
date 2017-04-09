@@ -1,0 +1,6 @@
+diff a/bin/.gitignore b/bin/.gitignore	(rejected hunks)
+@@ -1,4 +1,2 @@
+-/levels/
+-/readme-server.txt
+ /sampleclients/
+ /searchclient/

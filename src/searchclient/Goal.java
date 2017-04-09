@@ -1,6 +1,7 @@
 package searchclient;
 
 public class Goal {
+
 	public Character name;
 	public String color;
 	public Position position;

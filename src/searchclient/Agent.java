@@ -46,6 +46,4 @@ public class Agent {
 			return false;
 		return true;
 	}
-	
-	
 }
