@@ -29,26 +29,42 @@ public class Planner {
 	
 	
 	
-	public Node MoveBoxToGoal(Box box,Goal goal)
-	{
-		Node newState = state;	
-		
-		if(!state.boxes2.contains(box))
-		{
-			System.err.println("404: Box not found. Shit");
-			return null;
-		}
-		else
-		{
-			for(Box b : newState.boxes2)
-			{
-				
-			}
-			
-		}
-		
-		return newState;
-	}
+    public Node MoveBoxToGoal(Box box, Goal goal) {
+        Node newState = state;
+
+        Position goalPos = null;
+
+        //find the goal position
+        if (!state.goals2.contains(goal)) {
+            System.err.println("404: Goal not found. Shit");
+            return null;
+        } else {
+            for (Goal b : newState.goals2) {
+
+                if (b == goal) {
+                    goalPos = b.position;
+                    break;
+                }
+            }
+
+        }
+        //find the box, set its position to goalPosition
+        if (!state.boxes2.contains(box)) {
+            System.err.println("404: Box not found. Shit");
+            return null;
+        } else {
+            for (Box b : newState.boxes2) {
+
+                if (b == box) {
+                    b.position = goalPos;
+                    break;
+                }
+            }
+        
+        }
+        return newState;
+    }
+
 	
 	public void FreeAgent(Agent agent)
 	{
