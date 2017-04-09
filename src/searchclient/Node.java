@@ -22,8 +22,8 @@ public class Node {
 	public char[][] goals;
 	
 	//alphabetially sorted both lists
-	public List<Position> goals2 = new ArrayList<>();
-	public List<Position> boxes2 = new ArrayList<>();
+	public List<Goal> goals2 = new ArrayList<>();
+	public List<Box> boxes2 = new ArrayList<>();
 
 	public Node parent;
 	public Command action;

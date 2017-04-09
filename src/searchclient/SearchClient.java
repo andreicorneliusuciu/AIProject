@@ -79,7 +79,10 @@ public class SearchClient {
 //							}
 						//TODO: in the second loop, put the default ones
 						boxesToColor.put(chr, color);
-					} else {
+						
+					} else 
+					{
+						
 					}
 
 				}
@@ -151,7 +154,7 @@ public class SearchClient {
 						//if the color of the box is the same as the agent => put it into the agent's initial map
 						if(boxesToColor.get(chr).equals(agents.get(i).color)) {
 							this.initialStates.get(i).boxes[row][col] = chr;
-							this.initialStates.get(i).boxes2.add(new Position(row, col));
+							this.initialStates.get(i).boxes2.add(new Box(chr,boxesToColor.get(chr),new Position(row, col)));
 						}
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -169,7 +172,7 @@ public class SearchClient {
 						//put the goal to the agent map just if they are the same color
 						if(agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
 							this.initialStates.get(i).goals[row][col] = chr;
-							this.initialStates.get(i).goals2.add(new Position(row, col));
+							this.initialStates.get(i).goals2.add(new Goal(chr,boxesToColor.get(Character.toUpperCase(chr)),new Position(row, col)));
 						}
 					}
 					//aici fac ceva cu golul
@@ -202,6 +205,9 @@ public class SearchClient {
 		System.err.println("\n ------------------------------------ \n");
 	}
 
+	
+	
+	//TODO replace this with call to Planner
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
 		strategy.addToFrontier(initialNode);

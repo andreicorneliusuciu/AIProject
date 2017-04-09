@@ -18,7 +18,8 @@ public abstract class Heuristic implements Comparator<Node> {
 	ArrayList<Integer> boxGoaldistList;
 	ArrayList<Integer> boxAgentdistList;
 	
-	
+	//fill by findStorage()
+	public List<Position> storageSpace;
 
 	int aCol;
 	int aRow ;
@@ -29,7 +30,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		findStorage(initialState);
 		
 		//these use storage
-		findBoxCluster(initialState);
+		findBoxCluster(initialState); //maybe not needed
 		findTrappedAgent(initialState);
 		///////////////////
 		
@@ -41,25 +42,25 @@ public abstract class Heuristic implements Comparator<Node> {
 	public boolean findBoxCluster(Node n)
 	{
 		
-		char[][] boxes = n.boxes;
-		Set<Character> neighbors = new HashSet<>();
-		Set<Box> clusteredBoxes;
-		
-		
-		for(int row=0; row<Node.MAX_ROW;row++)
-			for(int col=0; col<Node.MAX_COL; col++)
-			{
-				neighbors = getNeighbors(Node.MAX_ROW,Node.MAX_COL,row,col,boxes);
-				
-				//clusteredBoxes = new HashSet<Box>(neighbors);
-				
-				//System.err.println("i'm here toooooo");	
-				//how to print this shit
-				//for (Character s : neighbors) {
-									
-					//}
-				
-			}
+//		char[][] boxes = n.boxes;
+//		Set<Character> neighbors = new HashSet<>();
+//		Set<Box> clusteredBoxes;
+//		
+//		
+//		for(int row=0; row<Node.MAX_ROW;row++)
+//			for(int col=0; col<Node.MAX_COL; col++)
+//			{
+//				neighbors = getNeighbors(Node.MAX_ROW,Node.MAX_COL,row,col,boxes);
+//				
+//				//clusteredBoxes = new HashSet<Box>(neighbors);
+//				
+//				//System.err.println("i'm here toooooo");	
+//				//how to print this shit
+//				//for (Character s : neighbors) {
+//									
+//					//}
+//				
+//			}
 		//todo.. Change getneighbors to +1 on boxes[i][j]>0. See toString for example.
 		
 		//System.err.println("Hashset contains" );
@@ -112,7 +113,7 @@ public abstract class Heuristic implements Comparator<Node> {
 	
 	public boolean findStorage(Node initialState)
 	{
-		//TODO finds cells that could be used as storage. Marks them with isStorage=true. 
+		//TODO finds cells that could be used as storage. Fills up storageSpace List<>. 
 		//Returns true if one or more cells are marked as storage.
 		
 		return false;
