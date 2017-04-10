@@ -11,8 +11,8 @@ import searchclient.Node;
 public abstract class Heuristic implements Comparator<Node> {
     
     //This is the goal state, represented as a list of the final intended positions of the boxes
-    public List<Position> goals;
-    public List<Position> boxes;
+    public List<Goal> goals;
+    public List<Box> boxes;
         
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.

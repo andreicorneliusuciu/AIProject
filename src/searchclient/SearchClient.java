@@ -135,7 +135,7 @@ public class SearchClient {
 						//if the color of the box is the same as the agent => put it into the agent's initial map
 						if(boxesToColor.get(chr).equals(agents.get(i).color)) {
 							this.initialStates.get(i).boxes[row][col] = chr;
-							this.initialStates.get(i).boxes2.add(new Position(row, col));
+							this.initialStates.get(i).boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 						}
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -151,7 +151,7 @@ public class SearchClient {
 						//put the goal to the agent map just if they are the same color
 						if(agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
 							this.initialStates.get(i).goals[row][col] = chr;
-							this.initialStates.get(i).goals2.add(new Position(row, col));
+							this.initialStates.get(i).goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
 				} else if (chr == ' ') {
@@ -168,7 +168,11 @@ public class SearchClient {
 		System.err.println(" + Boxes: " + boxesToColor);
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
+		int i = 0;
 		for (Node n : initialStates) {
+			
+			agents.get(i).initialState = n;
+			i++;
 			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 		}
 		System.err.println("\n ------------------------------------ \n");
