@@ -19,13 +19,16 @@ public abstract class Heuristic implements Comparator<Node> {
 	ArrayList<Integer> boxAgentdistList;
 	
 	//fill by findStorage()
-	public List<Position> storageSpace;
+	public static List<Position> storageSpace = new ArrayList<Position>();
+	
 
 	int aCol;
 	int aRow ;
 	
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
+		
+		
 		
 		findStorage(initialState);
 		

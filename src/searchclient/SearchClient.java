@@ -203,6 +203,16 @@ public class SearchClient {
 			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 		}
 		System.err.println("\n ------------------------------------ \n");
+		
+		
+		//debugging planner
+		if(agents.get(0)!=null)
+		{
+//			System.err.println("\n Not null"+agents.get(1));
+			Planner plan = new Planner(initialStates.get(0));
+			
+		}
+	
 	}
 
 	
@@ -312,6 +322,7 @@ public class SearchClient {
 			System.exit(0);
 			
 		} else {
+			
 //			System.err.println("\nSummary for " + strategy.toString());
 //			System.err.println("Found solution of length " + solution.size());
 //			System.err.println(strategy.searchStatus());
@@ -325,6 +336,7 @@ public class SearchClient {
 					maxSol = m;
 				}
 			}
+			
 			
 			//TODO: empty the same string builder object
 			for(int i = 0; i < maxSol; i++) {
