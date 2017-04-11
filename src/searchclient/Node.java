@@ -87,7 +87,7 @@ public class Node {
 				if (this.boxAt(newAgentRow, newAgentCol)) {
 					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
-					// .. and that new cell of box is free
+					// .. and that new cell of box is free.
 					if (this.cellIsFree(newBoxRow, newBoxCol)) {
 						Node n = this.ChildNode();
 						n.action = c;
