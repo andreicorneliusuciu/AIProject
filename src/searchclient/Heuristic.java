@@ -1,5 +1,6 @@
 package searchclient;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.List;
@@ -13,12 +14,23 @@ public abstract class Heuristic implements Comparator<Node> {
     //This is the goal state, represented as a list of the final intended positions of the boxes
     public List<Goal> goals;
     public List<Box> boxes;
+
+    //list of storage positions to be updated in FindStorage() during preprocessing
+    public static List<Position> storageSpace = new ArrayList<Position>();
+
+    
         
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
 		//TODO: I guess I need to make a list of positions in the Node class
         goals = initialState.goals2;
         boxes = initialState.boxes2;
+        
+        //TODO: preprocessing methods that do:
+        //findStorage(); and add the cells in the static storageSpace variable
+        //findTrappedAgent(); and do agent.isTrapped = true and mark the trapping box with box.isBlocking = true
+        //findTrickyGoal(initialState); finds hard goals, lowers the goal.priority using the getter
+        
 	}
 
 	public int h(Node n) {
