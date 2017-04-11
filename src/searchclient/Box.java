@@ -7,7 +7,6 @@ public class Box {
 	public Position position;
 	public boolean isBlocking = false;
 	
-	
 	public Box(Character name, String color, Position position) {
 		super();
 		this.name = name;
@@ -33,10 +32,7 @@ public class Box {
 //	public Box(Position position) {
 //		this.position = position;
 //	}
-	
-	
-	
-
+  
 	@Override
 	public String toString() {
 		return "Box [name=" + name + ", color=" + color + ", position=" + position + "]";
