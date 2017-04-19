@@ -176,7 +176,18 @@ public class SearchClient {
 			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 		}
 		System.err.println("\n ------------------------------------ \n");
+	
+	
+	
+    if(agents.get(0)!=null)
+    {
+//        System.err.println("\n Not null"+agents.get(1));
+        Planner plan = new Planner(initialStates.get(0));
+        
+    }
+
 	}
+	
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());

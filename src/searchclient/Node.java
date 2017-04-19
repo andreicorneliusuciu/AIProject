@@ -53,6 +53,8 @@ public class Node {
 		return this.parent == null;
 	}
 
+	
+	//TODO change to check if goal.isSatisfied == true for all goals. +Code to turn isSatisfied to true.
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
