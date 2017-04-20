@@ -19,7 +19,7 @@ import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
 	//The list of initial state for every agent
-	public List<Node> initialStates;
+	//public List<Node> initialStates;
 	public static boolean[][] walls;
 	
 	//The list of agents. Index represents the agent, the value is the color
@@ -92,11 +92,12 @@ public class SearchClient {
 		int row = 0;
 		//Create the list of initial states for all the agents
 		//Ignore the other agents/boxes
-		this.initialStates = new LinkedList<>();
+		//this.initialStates = new LinkedList<>();
 		//add the node to the list. The index represents the agent.
 
 		for(int i = 0; i < agents.size(); i++) {
-			initialStates.add(new Node(null, lines.size(), maxCol));
+			agents.get(i).assignInitialState(new Node(null, lines.size(), maxCol));
+			//initialStates.add(new Node(null, lines.size(), maxCol));
 		}
 		
 		walls = new boolean[lines.size()][maxCol];
@@ -116,16 +117,16 @@ public class SearchClient {
 					//TODO
 					int index = agents.indexOf(new Agent(Integer.parseInt(""+chr), null));
 					if(index == -1) {
-						agents.add(new Agent(Integer.parseInt(""+chr), "blue", new Position(row, col), null));
-						initialStates.add(new Node(null, lines.size(), maxCol));
+						agents.add(new Agent(Integer.parseInt(""+chr), "blue", new Position(row, col), new Node(null, lines.size(), maxCol)));
+						//agents.add(new Node(null, lines.size(), maxCol));
 					} else {
 						//update the position of the agents declared above the map into the input file
 						Agent a = agents.get(index);
 						a.position.row = row;
 						a.position.col = col;
 					}
-					this.initialStates.get(Integer.parseInt(""+chr)).agentRow = row;
-					this.initialStates.get(Integer.parseInt(""+chr)).agentCol = col;
+					agents.get(Integer.parseInt(""+chr)).initialState.agentRow = row;
+					agents.get(Integer.parseInt(""+chr)).initialState.agentCol = col;
 					
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					if(!boxesToColor.containsKey(chr)) {
@@ -134,8 +135,8 @@ public class SearchClient {
 					for(int i = 0; i < agents.size(); i++) {
 						//if the color of the box is the same as the agent => put it into the agent's initial map
 						if(boxesToColor.get(chr).equals(agents.get(i).color)) {
-							this.initialStates.get(i).boxes[row][col] = chr;
-							this.initialStates.get(i).boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+							agents.get(i).initialState.boxes[row][col] = chr;
+							agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 						}
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -150,8 +151,8 @@ public class SearchClient {
 					for(int i = 0; i < agents.size(); i++) {
 						//put the goal to the agent map just if they are the same color
 						if(agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
-							this.initialStates.get(i).goals[row][col] = chr;
-							this.initialStates.get(i).goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
+							agents.get(i).initialState.goals[row][col] = chr;
+							agents.get(i).initialState.goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
 				} else if (chr == ' ') {
@@ -169,11 +170,11 @@ public class SearchClient {
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
 		int i = 0;
-		for (Node n : initialStates) {
+		for (Agent a : agents) {
 			
-			agents.get(i).initialState = n;
-			i++;
-			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
+			//agents.get(i).initialState = n;
+			//i++;
+			System.err.println("\n $ Goals: " + a.initialState.goals2 + " Boxes: "  +a.initialState.boxes2); 
 		}
 		System.err.println("\n ------------------------------------ \n");
 	
@@ -182,7 +183,7 @@ public class SearchClient {
     if(agents.get(0)!=null)
     {
 //        System.err.println("\n Not null"+agents.get(1));
-        Planner plan = new Planner(initialStates.get(0));
+        Planner plan = new Planner(agents.get(0).initialState);
         
     }
 
@@ -271,7 +272,7 @@ public class SearchClient {
 			
 		for(int i = 0; i < agents.size(); i++) {
 			try {
-				solution = client.Search(new StrategyBFS(), client.initialStates.get(i));
+				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
 				//add the partial solution to the list of total solutions
 				solutions.add(solution);
 					

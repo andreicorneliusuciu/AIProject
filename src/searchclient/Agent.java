@@ -20,6 +20,9 @@ public class Agent {
 		this.initialState = initialState;
 	}
 
+	public void assignInitialState(Node initialState){
+		this.initialState = initialState;
+	}
 	
 
 	@Override
