@@ -17,10 +17,38 @@ import searchclient.Strategy.StrategyBFS;
 import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
+
+
 public class SearchClient {
+	public int[][] flowFill(Agent agent, Node node){
+		int[][] matrix = new int[rowSize][colSize];
+		
+		for(int i = 0; i<rowSize; i++){
+			for(int i2 = 0; i2<colSize; i2++){
+				if(walls[i][i2]){
+					matrix[i][i2] = Integer.MAX_VALUE;//Wall!
+				}
+			}
+		}
+		
+		for(int i = 0; i<node.boxes2.size(); i++){
+			matrix[node.boxes2.get(i).position.row][node.boxes2.get(i).position.col] = node.boxes2.get(i).name;
+		}
+		
+		//flowfill algorithm
+		ArrayList<Position> flow = new ArrayList<Position>();
+		flow.add(agent.position);
+		
+		return null;
+	}
+	
 	//The list of initial state for every agent
 	//public List<Node> initialStates;
 	public static boolean[][] walls;
+	
+	//The size of the map
+	public static int colSize;
+	public static int rowSize;
 	
 	//The list of agents. Index represents the agent, the value is the color
 	public static List<Agent> agents;
@@ -101,6 +129,8 @@ public class SearchClient {
 		}
 		
 		walls = new boolean[lines.size()][maxCol];
+		this.rowSize = lines.size();//Keeps track of map size
+		this.colSize = maxCol;
 
 		for (String l : lines) {
 			if(!l.startsWith("+")) {
