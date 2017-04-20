@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import searchclient.Heuristic.AStar;
 import searchclient.Heuristic.Greedy;
@@ -22,24 +24,83 @@ import searchclient.Strategy.StrategyDFS;
 public class SearchClient {
 	public int[][] flowFill(Agent agent, Node node){
 		int[][] matrix = new int[rowSize][colSize];
+		int[][] result = new int[rowSize][colSize];
 		
 		for(int i = 0; i<rowSize; i++){
 			for(int i2 = 0; i2<colSize; i2++){
 				if(walls[i][i2]){
 					matrix[i][i2] = Integer.MAX_VALUE;//Wall!
+					result[i][i2] = 1;//Wall
 				}
 			}
 		}
 		
-		for(int i = 0; i<node.boxes2.size(); i++){
-			matrix[node.boxes2.get(i).position.row][node.boxes2.get(i).position.col] = node.boxes2.get(i).name;
+		for(int i = 0; i<node.MAX_ROW; i++){
+			for(int i2 = 0; i2<node.MAX_COL; i2++){
+				if(node.boxes[i][i2] != '\u0000'){
+					matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
+					System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
+					System.err.println(agent.color.hashCode());
+				}
+			}
 		}
+		//Find all boxes colors and put them into Matrix
 		
 		//flowfill algorithm
-		ArrayList<Position> flow = new ArrayList<Position>();
+		Set <Position> flow = new HashSet<Position>();
+		Set <Position> blockage = new HashSet<Position>();
 		flow.add(agent.position);
-		
-		return null;
+		boolean found = true;
+		while(found){
+			int curSize = flow.size();
+			Set <Position> tempFlow = new HashSet<Position>();
+			for(Position p : flow){
+				if(p.row-1>=0){
+					if(matrix[p.row-1][p.col] == 0 || matrix[p.row-1][p.col] == agent.color.hashCode()){
+						tempFlow.add(new Position(p.row-1,p.col));
+					} else if(matrix[p.row-1][p.col] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
+						blockage.add(new Position(p.row-1,p.col));
+					}
+				}
+				if(p.col-1>=0){
+					if(matrix[p.row][p.col-1] == 0 || matrix[p.row][p.col-1] == agent.color.hashCode()){
+						tempFlow.add(new Position(p.row,p.col-1));
+					} else if(matrix[p.row][p.col-1] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
+						blockage.add(new Position(p.row,p.col-1));
+					}
+				}
+				if((p.col+1)<this.colSize){
+					if(matrix[p.row][p.col+1] == 0 || matrix[p.row][p.col+1] == agent.color.hashCode()){
+						tempFlow.add(new Position(p.row,p.col+1));
+					} else if(matrix[p.row][p.col+1] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
+						blockage.add(new Position(p.row,p.col+1));
+					}
+				}
+				if((p.row+1) < this.rowSize){
+					if(matrix[p.row+1][p.col] == 0 || matrix[p.row+1][p.col] == agent.color.hashCode()){
+						tempFlow.add(new Position(p.row+1,p.col));
+					} else if(matrix[p.row+1][p.col] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
+						blockage.add(new Position(p.row+1,p.col));
+					}
+				}
+			}
+			for(Position p : tempFlow){
+				flow.add(p);
+			}
+			
+			if(flow.size() == curSize){
+				found = false;
+			}
+		}
+		for(Position p : flow){
+			result[p.row][p.col] = 2; //Free flow!
+		}
+		for(Position p : blockage){
+			result[p.row][p.col] = 3; //Blockage!
+		}
+
+		System.err.println("0");
+		return result; //0 = Unconnected, 1 = Wall, 2 = Free flow, 3 = Blockage.
 	}
 	
 	//The list of initial state for every agent
@@ -164,10 +225,10 @@ public class SearchClient {
 					}
 					for(int i = 0; i < agents.size(); i++) {
 						//if the color of the box is the same as the agent => put it into the agent's initial map
-						if(boxesToColor.get(chr).equals(agents.get(i).color)) {
+						//if(boxesToColor.get(chr).equals(agents.get(i).color)) {
 							agents.get(i).initialState.boxes[row][col] = chr;
 							agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
-						}
+						//}
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					//if I find the goal before the corresponding box on the map (I read left to right)
@@ -333,6 +394,29 @@ public class SearchClient {
 				m = solutions.get(i).size();
 				if (m > maxSol) {
 					maxSol = m;
+				}
+			}
+			//DEBUG ALGORITHMS
+			boolean debugAlgo = true;
+			if (debugAlgo){
+				for(Agent a : agents){
+					String newString = "";
+					int[][] result = client.flowFill(a,a.initialState);
+					for(int i = 0; i<client.rowSize; i++){
+						for(int i2 = 0; i2<client.colSize; i2++){
+							if(result[i][i2] == 0){
+								newString+=" ";
+							} else if(result[i][i2] == 1){
+								newString+="+";
+							} else if(result[i][i2] == 2){
+								newString+="F";
+							} else if(result[i][i2] == 3){
+								newString+="X";
+							}
+						}
+						newString += "\n";
+					}
+					System.err.println(newString);
 				}
 			}
 			
