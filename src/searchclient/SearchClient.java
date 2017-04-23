@@ -415,7 +415,8 @@ public class SearchClient {
 	    if(agents.get(0)!=null)
 	    {
 	//        System.err.println("\n Not null"+agents.get(1));
-	        Planner plan = new Planner(agents.get(0).initialState);
+	        //Planner plan = new Planner(agents.get(0));
+	    	
 	        
 	    }
 
@@ -483,7 +484,9 @@ public class SearchClient {
 			done = false;
 			positions = new ArrayList<Position>();
 		}
-		
+		for(Agent a : agents){
+    		Planner plan = new Planner(a);
+    	}
 		Strategy strategy;
 
 		if (args.length > 0) {
@@ -557,13 +560,13 @@ public class SearchClient {
 				}
 			}
 			//DEBUG ALGORITHMS
-			boolean debugAlgo = true;
+			boolean debugAlgo = false;
 			if (debugAlgo){
 				for(Agent a : agents){
 					String newString = "";
-					int[][] result = client.flowFill(a,a.initialState);
-					for(int i = 0; i<client.rowSize; i++){
-						for(int i2 = 0; i2<client.colSize; i2++){
+					int[][] result = SearchClient.flowFill(a,a.initialState);
+					for(int i = 0; i<SearchClient.rowSize; i++){
+						for(int i2 = 0; i2<SearchClient.colSize; i2++){
 							if(result[i][i2] == 0){
 								newString+=" ";
 							} else if(result[i][i2] == 1){
