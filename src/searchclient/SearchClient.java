@@ -156,8 +156,8 @@ public class SearchClient {
 			for(int i2 = 0; i2<node.MAX_COL; i2++){
 				if(node.boxes[i][i2] != '\u0000'){
 					matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
-					System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
-					System.err.println(agent.color.hashCode());
+					//System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
+					//System.err.println(agent.color.hashCode());
 				}
 			}
 		}
@@ -229,7 +229,7 @@ public class SearchClient {
 					for(int i2 = 0; i2<colSize; i2++){
 						if(matrix[i][i2] == 3){
 							if(matrix[i-1][i2] == 0 || matrix[i+1][i2] == 0 || matrix[i][i2-1] == 0 || matrix[i][i2+1] == 0){
-								for(Box b : node.boxes2){
+								for(Box b : allBoxes){
 									if(b.position.equals(new Position(i,i2))){
 										b.isBlocking = true;
 									}
@@ -255,6 +255,8 @@ public class SearchClient {
 	
 	//List with all the goals.
 	public static List<Goal> allGoals;
+	//List with all the boxes.
+	public static List<Box> allBoxes;
 	
 	//Key = Color, Value = List of Box numbers
 	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
@@ -462,10 +464,11 @@ public class SearchClient {
 		
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
+		allBoxes = agents.get(0).initialState.boxes2;
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
 		for(Agent a : agents){
-			for(Box b : a.initialState.boxes2){
+			for(Box b : allBoxes){
 				for(Goal g : a.initialState.goals2){
 					if(g.color == b.color){
 						done = true;
@@ -575,6 +578,10 @@ public class SearchClient {
 					}
 					newString += a.name + " is trapped = " + a.isTrapped;
 					System.err.println(newString);
+				}
+				
+				for(Box b : allBoxes){
+					System.err.println("Box at location " + b.position.toString() + " is blocking = " + b.isBlocking);
 				}
 			}
 			
