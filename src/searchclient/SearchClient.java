@@ -3,12 +3,16 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import searchclient.Heuristic.AStar;
 import searchclient.Heuristic.Greedy;
@@ -35,6 +39,12 @@ public class SearchClient {
 	
 	//color to agent map
 	public Map<String, Character> colorToAgent = new HashMap<>();
+	
+	//the map represented as a matrix for computing the shortest distances
+	//between all two pair of cells on the map
+	public char[][] map;
+	public static int levelRowSize;
+	public static int levelColumnSize;
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 
@@ -44,9 +54,11 @@ public class SearchClient {
 		allGoals = new ArrayList<>();
 		
 		int maxCol = 0;
+		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
 			if (!line.startsWith("+")) {
+				noOfActualRowsForTheLevel++;
 				String[] s = line.split(":");
 				String color = s[0];
 				String[] s1 = s[1].split(",");
@@ -96,10 +108,15 @@ public class SearchClient {
 		//add the node to the list. The index represents the agent.
 
 		for(int i = 0; i < agents.size(); i++) {
-			initialStates.add(new Node(null, lines.size(), maxCol));
+			initialStates.add(new Node(null, levelRowSize, maxCol));
 		}
 		
-		walls = new boolean[lines.size()][maxCol];
+		//lines.size() gives the no of rows on the map. maxCol is the no of columns
+		levelRowSize = lines.size() - noOfActualRowsForTheLevel;
+		levelColumnSize = maxCol;
+		System.err.println("Row = " + levelRowSize +  "  CCOL  = " + levelColumnSize);
+		walls = new boolean[levelRowSize][maxCol];
+		map = new char[levelRowSize][maxCol];
 
 		for (String l : lines) {
 			if(!l.startsWith("+")) {
@@ -107,7 +124,14 @@ public class SearchClient {
 			}
 			for (int col = 0; col < l.length(); col++) {
 				char chr = l.charAt(col);
-
+				
+				//update the general map => omit the agents and boxes
+				if(chr == '+') {
+					map[row][col] = chr;
+				} else {
+					map[row][col] = ' ';
+				}
+				
 				if (chr == '+') { // Wall.
 					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
@@ -117,7 +141,7 @@ public class SearchClient {
 					int index = agents.indexOf(new Agent(Integer.parseInt(""+chr), null));
 					if(index == -1) {
 						agents.add(new Agent(Integer.parseInt(""+chr), "blue", new Position(row, col), null));
-						initialStates.add(new Node(null, lines.size(), maxCol));
+						initialStates.add(new Node(null, levelRowSize, maxCol));
 					} else {
 						//update the position of the agents declared above the map into the input file
 						Agent a = agents.get(index);
@@ -166,6 +190,7 @@ public class SearchClient {
 		
 		System.err.println(" + Agents: " + agents);
 		System.err.println(" + Boxes: " + boxesToColor);
+		//TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
 		int i = 0;
@@ -175,7 +200,20 @@ public class SearchClient {
 			i++;
 			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 		}
-		System.err.println("\n ------------------------------------ \n");
+		System.err.println("\n ------------------------------------");
+		System.err.println("^^^^^^^^ THE MAP: ^^^^^^^");
+		
+		for(int i1 = 0; i1 <  levelRowSize; i1++) {
+			for (int j = 0; j < levelColumnSize; j++) {
+				System.err.print(map[i1][j]);
+			}
+			System.err.println("");
+		}
+		
+		System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
+		
+		
+		
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -231,17 +269,17 @@ public class SearchClient {
 			case "-dfs":
 				strategy = new StrategyDFS();
 				break;
-//			case "-astar":
-//				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
-//				break;
-//			case "-wastar":
-//				// You're welcome to test WA* out with different values, but for
-//				// the report you must at least indicate benchmarks for W = 5.
-//				strategy = new StrategyBestFirst(new WeightedAStar(client.initialState, 5));
-//				break;
-//			case "-greedy":
-//				strategy = new StrategyBestFirst(new Greedy(client.initialState));
-//				break;
+			case "-astar":
+				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
+				break;
+			case "-wastar":
+				// You're welcome to test WA* out with different values, but for
+				// the report you must at least indicate benchmarks for W = 5.
+				strategy = new StrategyBestFirst(new WeightedAStar(client.initialStates.get(0), 5));
+				break;
+			case "-greedy":
+				strategy = new StrategyBestFirst(new Greedy(client.initialStates.get(0)));
+				break;
 			default:
 				strategy = new StrategyBFS();
 				System.err.println(
@@ -280,9 +318,9 @@ public class SearchClient {
 			System.exit(0);
 			
 		} else {
-//			System.err.println("\nSummary for " + strategy.toString());
-//			System.err.println("Found solution of length " + solution.size());
-//			System.err.println(strategy.searchStatus());
+			System.err.println("\nSummary for " + strategy.toString());
+//			System.err.println("Found solution of length " + solutions.size());
+			System.err.println(strategy.searchStatus());
 			//Multi-agent commands
 			
 			int maxSol = 0;
