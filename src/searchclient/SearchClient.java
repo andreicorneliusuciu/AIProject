@@ -22,7 +22,124 @@ import searchclient.Strategy.StrategyDFS;
 
 
 public class SearchClient {
-	public int[][] flowFill(Agent agent, Node node){
+	public void storageAnalysis(Node node){//Swap out input with other types of data?
+		Cell[][] map = new Cell[rowSize][colSize];
+		
+		//Initialize cell map
+		for(int i = 0; i<rowSize; i++){
+			for(int i2 = 0; i2++<colSize; i2++){
+				map[i][i2] = new Cell(i,i2);
+				if (walls[i][i2]){
+					map[i][i2].type = 0;//Wall
+				} else {
+					map[i][i2].type = 1;//Free
+				}
+			}	
+		}
+		for(Goal g : this.allGoals){
+			map[g.position.row][g.position.col].type = 2; //Goal
+		}
+		
+		//Link up cells
+		for(int i = 0; i<rowSize; i++){
+			for(int i2 = 0; i2++<colSize; i2++){
+				if(map[i][i2].type >= 1){
+					if(map[i+1][i2].type >= 1){//+ is south, right?
+						map[i][i2].south = true;
+					}
+					if(map[i-1][i2].type >= 1){
+						map[i][i2].north = true;
+					}
+					if(map[i][i2+1].type >= 1){
+						map[i][i2].east = true;
+					}
+					if(map[i][i2-1].type >= 1){
+						map[i][i2].west = true;
+					}
+				}
+			}	
+		}
+		
+		//Create row objects
+		ArrayList<Line> rows = new ArrayList<Line>();
+		for(int i = 0; i<rowSize; i++){
+			for(int i2 = 0; i2++<colSize; i2++){
+				if(map[i][i2].type == 1){
+					boolean connected = true;
+					Line row = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while(connected){
+						if(map[i][i2].type == 1){
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				} else if(map[i][i2].type == 2){
+					boolean connected = true;
+					Line row = new Line();
+					row.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while(connected){
+						if(map[i][i2].type == 2){
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				}
+			}	
+		}
+		
+		//Create col objects
+		ArrayList<Line> cols = new ArrayList<Line>();
+		for(int i = 0; i<colSize; i++){
+			for(int i2 = 0; i2++<rowSize; i2++){
+				if(map[i2][i].type == 1){
+					boolean connected = true;
+					Line col = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while(connected){
+						if(map[i2][i].type == 1){
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				} else if(map[i2][i].type == 2){
+					boolean connected = true;
+					Line col = new Line();
+					col.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while(connected){
+						if(map[i2][i].type == 2){
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				}
+			}	
+		}
+		
+		//Connect them
+		
+		//Supernodes?
+	}
+	
+	public static int[][] flowFill(Agent agent, Node node){
 		int[][] matrix = new int[rowSize][colSize];
 		int[][] result = new int[rowSize][colSize];
 		
@@ -69,14 +186,14 @@ public class SearchClient {
 						blockage.add(new Position(p.row,p.col-1));
 					}
 				}
-				if((p.col+1)<this.colSize){
+				if((p.col+1)<colSize){
 					if(matrix[p.row][p.col+1] == 0 || matrix[p.row][p.col+1] == agent.color.hashCode()){
 						tempFlow.add(new Position(p.row,p.col+1));
 					} else if(matrix[p.row][p.col+1] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
 						blockage.add(new Position(p.row,p.col+1));
 					}
 				}
-				if((p.row+1) < this.rowSize){
+				if((p.row+1) < rowSize){
 					if(matrix[p.row+1][p.col] == 0 || matrix[p.row+1][p.col] == agent.color.hashCode()){
 						tempFlow.add(new Position(p.row+1,p.col));
 					} else if(matrix[p.row+1][p.col] != Integer.MAX_VALUE){//It isn't a wall or itself, so it must be a different colored box
@@ -103,6 +220,28 @@ public class SearchClient {
 		return result; //0 = Unconnected, 1 = Wall, 2 = Free flow, 3 = Blockage.
 	}
 	
+	public static void rescueUnit(Agent agent, ArrayList<Position> positions, Node node){//Analyse all the agents!
+		int[][] matrix = flowFill(agent,node);
+		for(Position p : positions){
+			if(matrix[p.row][p.col] != 2){//Blockage! Oh no!
+				agent.isTrapped = true;
+				for(int i = 0; i<rowSize; i++){
+					for(int i2 = 0; i2<colSize; i2++){
+						if(matrix[i][i2] == 3){
+							if(matrix[i-1][i2] == 0 || matrix[i+1][i2] == 0 || matrix[i][i2-1] == 0 || matrix[i][i2+1] == 0){
+								for(Box b : node.boxes2){
+									if(b.position.equals(new Position(i,i2))){
+										b.isBlocking = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	//The list of initial state for every agent
 	//public List<Node> initialStates;
 	public static boolean[][] walls;
@@ -120,7 +259,7 @@ public class SearchClient {
 	//Key = Color, Value = List of Box numbers
 	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
 	
-	public Map<Character, String> boxesToColor = new HashMap<>();
+	public static Map<Character, String> boxesToColor = new HashMap<>();
 	
 	//color to agent map
 	public Map<String, Character> colorToAgent = new HashMap<>();
@@ -271,12 +410,12 @@ public class SearchClient {
 	
 	
 	
-    if(agents.get(0)!=null)
-    {
-//        System.err.println("\n Not null"+agents.get(1));
-        Planner plan = new Planner(agents.get(0).initialState);
-        
-    }
+	    if(agents.get(0)!=null)
+	    {
+	//        System.err.println("\n Not null"+agents.get(1));
+	        Planner plan = new Planner(agents.get(0).initialState);
+	        
+	    }
 
 	}
 	
@@ -323,6 +462,24 @@ public class SearchClient {
 		
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
+		boolean done = false;
+		ArrayList<Position> positions = new ArrayList<Position>();
+		for(Agent a : agents){
+			for(Box b : a.initialState.boxes2){
+				for(Goal g : a.initialState.goals2){
+					if(g.color == b.color){
+						done = true;
+						positions.add(g.position);
+						positions.add(b.position);
+						rescueUnit(a,positions,a.initialState);
+						break;
+					}
+				}
+				if (done) break;
+			}
+			done = false;
+			positions = new ArrayList<Position>();
+		}
 		
 		Strategy strategy;
 
@@ -416,6 +573,7 @@ public class SearchClient {
 						}
 						newString += "\n";
 					}
+					newString += a.name + " is trapped = " + a.isTrapped;
 					System.err.println(newString);
 				}
 			}
