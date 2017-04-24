@@ -42,7 +42,7 @@ public class SearchClient {
 	
 	//the map represented as a matrix for computing the shortest distances
 	//between all two pair of cells on the map
-	public char[][] map;
+	public int[][] map;
 	public static int levelRowSize;
 	public static int levelColumnSize;
 
@@ -107,16 +107,20 @@ public class SearchClient {
 		this.initialStates = new LinkedList<>();
 		//add the node to the list. The index represents the agent.
 
-		for(int i = 0; i < agents.size(); i++) {
-			initialStates.add(new Node(null, levelRowSize, maxCol));
-		}
+//		for(int i = 0; i < agents.size(); i++) {
+//			initialStates.add(new Node(null, lines.size(), maxCol));
+//		}
 		
 		//lines.size() gives the no of rows on the map. maxCol is the no of columns
 		levelRowSize = lines.size() - noOfActualRowsForTheLevel;
 		levelColumnSize = maxCol;
 		System.err.println("Row = " + levelRowSize +  "  CCOL  = " + levelColumnSize);
 		walls = new boolean[levelRowSize][maxCol];
-		map = new char[levelRowSize][maxCol];
+		map = new int[levelRowSize][maxCol];
+		
+		for(int i = 0; i < agents.size(); i++) {
+			initialStates.add(new Node(null, levelRowSize, maxCol));
+		}
 
 		for (String l : lines) {
 			if(!l.startsWith("+")) {
@@ -127,9 +131,9 @@ public class SearchClient {
 				
 				//update the general map => omit the agents and boxes
 				if(chr == '+') {
-					map[row][col] = chr;
+					map[row][col] = -1;
 				} else {
-					map[row][col] = ' ';
+					map[row][col] = 0;
 				}
 				
 				if (chr == '+') { // Wall.
@@ -141,7 +145,7 @@ public class SearchClient {
 					int index = agents.indexOf(new Agent(Integer.parseInt(""+chr), null));
 					if(index == -1) {
 						agents.add(new Agent(Integer.parseInt(""+chr), "blue", new Position(row, col), null));
-						initialStates.add(new Node(null, levelRowSize, maxCol));
+						initialStates.add(new Node(null, lines.size(), maxCol));
 					} else {
 						//update the position of the agents declared above the map into the input file
 						Agent a = agents.get(index);
@@ -200,19 +204,35 @@ public class SearchClient {
 			i++;
 			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 		}
-		System.err.println("\n ------------------------------------");
-		System.err.println("^^^^^^^^ THE MAP: ^^^^^^^");
 		
-		for(int i1 = 0; i1 <  levelRowSize; i1++) {
-			for (int j = 0; j < levelColumnSize; j++) {
-				System.err.print(map[i1][j]);
+		int[][] mapWithoutBorders = new int[levelRowSize-2][levelColumnSize-2];
+		for(int i1 = 1; i1 < levelRowSize-1; i1++) {
+			for(int j1 = 1; j1 < levelColumnSize-1; j1++) {
+				mapWithoutBorders[i1-1][j1-1] = map[i1][j1];
+			}
+		}
+		
+		System.err.println("\n ------------------------------------");
+		System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
+		
+		for(int i1 = 0; i1 <  levelRowSize-2; i1++) {
+			for (int j = 0; j < levelColumnSize-2; j++) {
+				System.err.print(mapWithoutBorders[i1][j]);
 			}
 			System.err.println("");
 		}
 		
 		System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
 		
+		//Compute all the distances on a NxN map. It does not work for non square maps.
+		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
+		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0,0),
+				new Position(levelRowSize-3,levelColumnSize-3));
 		
+		//Test distances function
+		System.err.println("Distance between (5,0) and (7,0) = " +  
+		DistancesComputer.getDistanceBetween2Positions(new Position(5,0),
+				new Position(7,0)));
 		
 	}
 
@@ -361,3 +381,8 @@ public class SearchClient {
 		}
 	}
 }
+/*
+ * TODO Andrei: update the non square maps with wall on the empty spaces
+ * - update the boxes2 and the goals list in the Node class
+ * - call the heuristic function with the distances*/
+

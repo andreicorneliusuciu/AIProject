@@ -13,7 +13,8 @@ public abstract class Heuristic implements Comparator<Node> {
     //This is the goal state, represented as a list of the final intended positions of the boxes
     public List<Goal> goals;
     public List<Box> boxes;
-    public static int noOfGoals;
+    //this was static before but I am not sure it needs to be static again 
+    public int noOfGoals;
         
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
@@ -30,8 +31,9 @@ public abstract class Heuristic implements Comparator<Node> {
 		//Manhattan distance between box and its specific goal a -> A, b -> B etc.
 		for(int i = 0; i < noOfGoals; i++) {
 			//result += Math.abs(n.boxes2.get(i).row - goals.get(i).row) + Math.abs(n.boxes2.get(i).col - goals.get(i).col);
-			result += Math.abs(n.boxes2.get(i).position.row - goals.get(i).position.row) +
-					Math.abs(n.boxes2.get(i).position.col - goals.get(i).position.col);
+//			result += Math.abs(n.boxes2.get(i).position.row - goals.get(i).position.row) +
+//					Math.abs(n.boxes2.get(i).position.col - goals.get(i).position.col);
+			
 		}
 
 		return result;
