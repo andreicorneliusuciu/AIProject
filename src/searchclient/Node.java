@@ -25,6 +25,9 @@ public class Node {
 	public List<Goal> goals2 = new ArrayList<>();
 	public List<Box> boxes2 = new ArrayList<>();
 
+	//list of storagepositions filled in heuristics
+	public List<Position> storagePos = new ArrayList<Position>();
+
 	public Node parent;
 	public Command action;
 

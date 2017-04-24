@@ -16,13 +16,61 @@ public class Planner {
 	// we need the initialState of the agent to see everything but the other
 	// agents goals.
 
-	// agent contains specialised initialNode
+	List<Position> positions = new ArrayList<Position>();
+	List<Node> plan = new ArrayList<Node>();
+	List<Type> plantoPrint = new ArrayList<Type>();
 
 	private static enum Type {
 		MoveBoxToGoal, StoreBox, FreeAgent
 	};
 
 	public Planner(Agent theAgent) {
+
+		System.err.println("FindStorage for");
+		System.err.println(theAgent.initialState);
+
+		positions = Heuristic.findStorage(theAgent.initialState);
+		Heuristic.storageSpace = positions;
+		System.err.println(positions.toString());
+
+		// just debugging
+		StringBuilder s = new StringBuilder();
+		boolean x = false;
+
+		for (int row = 0; row < theAgent.initialState.MAX_ROW; row++) {
+			if (!SearchClient.walls[row][0]) {
+				break;
+			}
+			for (int col = 0; col < theAgent.initialState.MAX_COL; col++) {
+
+				if (theAgent.initialState.boxes[row][col] > 0) {
+					s.append(theAgent.initialState.boxes[row][col]);
+				} else if (theAgent.initialState.goals[row][col] > 0) {
+					s.append(theAgent.initialState.goals[row][col]);
+				} else if (SearchClient.walls[row][col]) {
+					s.append("+");
+				} else if (row == theAgent.initialState.agentRow && col == theAgent.initialState.agentCol) {
+					s.append("0");
+				} else {
+
+					for (Position p : positions) {
+						if (p.row == row && p.col == col) {
+							s.append("o");
+							x = true;
+						}
+					}
+					if (!x) {
+						s.append(" ");
+					}
+					x = false;
+				}
+
+			}
+			s.append("\n");
+		}
+
+		System.err.println(s);
+		////////////////////// debugabove//////////////////////////////////////
 
 		// TODO Make simplified level where commands have immediate effects.
 		// example: MoveBoxToGoal(1,A,a) moves A to a immediately.
@@ -35,52 +83,13 @@ public class Planner {
 		// feed the result to conflict resolution class.
 
 		this.agent = theAgent;
-		//this.agent = SearchClient.agents.get(1);
-		// this.agent = new Agent(0, "Blue", new Position(initialState.agentRow,
-		// initialState.agentCol), initialState);
-		// this.agent=agent;
-		this.state =agent.initialState;
 
-//
-		//SearchClient.agents.get(0).isTrapped = true;// test
-		//System.err.println("Trapped agent get(1): "+SearchClient.agents.get(1).name+" and agent.get(0) is: "+SearchClient.agents.get(0).name);
+		this.state = agent.initialState;
+
+		// TODO , HOWTHINGSWORK highest level commands generate goalastates to
+		// be achieved by normal moves.
 
 		findHighestPlan(agent, state);
-	
-
-	}
-
-	public Planner(Node initialState) // constructor just for testing
-	{
-
-		this.agent = SearchClient.agents.get(1);
-		// this.agent = new Agent(0, "Blue", new Position(initialState.agentRow,
-		// initialState.agentCol), initialState);
-		// this.agent=agent;
-		this.state = SearchClient.agents.get(1).initialState;
-//		System.err.println("Plan done by agent: "+agent);
-//
-//		System.err.println("\n ///////////////////////////////// \n");
-//		System.err.println("Initial:" + state.boxes2.get(0));
-//
-//		Node newN = MoveBoxToGoal(state, state.boxes2.get(0), state.goals2.get(0));
-//		System.err.println("MoveToGoal at " + state.goals2.get(0).position + " :" + newN.boxes2.get(0));
-//
-//		Node newN1 = StoreBox(state, state.boxes2.get(0));
-//		System.err.println("StoreBox " + state.boxes2.get(0).name + " :" + newN1.boxes2.get(0));
-//		System.err.println("\n ///////////////////////////////// \n");
-//
-//		Node newN2 = FreeAgent(state, agent);
-//		System.err.println("FreeAgent " + agent.name + " Node: " + newN2);
-//		System.err.println("\n ///////////////////////////////// \n");
-//
-		SearchClient.agents.get(0).isTrapped = true;// test
-		System.err.println("Trapped agent get(1): "+SearchClient.agents.get(1).name+" and agent.get(0) is: "+SearchClient.agents.get(0).name);
-
-		findHighestPlan(this.agent, this.state);
-		// List<Node> solutions = findHighestPlan(initialState);
-		// System.err.println("Solution: " + solutions);
-		// System.err.println("\n ///////////////////////////////// \n");
 
 	}
 
@@ -119,6 +128,7 @@ public class Planner {
 			}
 
 		}
+
 		return newState;
 	}
 
@@ -163,19 +173,22 @@ public class Planner {
 
 		if (!Heuristic.storageSpace.isEmpty()) {
 			for (Position p : Heuristic.storageSpace) {
-				if ((Math.abs((p.row - box.position.row) + Math.abs((p.col - box.position.col)))) < length) {
+				if (Position.manhattanDistance(p, box.position) < length && !p.equals(box.position)) {
 					length = (Math.abs((p.row - box.position.row) + Math.abs((p.col - box.position.col))));
 					shortestPos = p;
 				}
 			}
+
 		} else {
 			System.err.println("No storage space available");
 			// TODO what to do if no space available. Maybe move randomly.
 			return newState;
+
 		}
-		/////////////////////////////////////////////////////////////////////////////
 
 		// find the box, set its position
+
+		boolean flag = false;
 		if (!newState.boxes2.contains(box)) {
 			System.err.println("404: Box not found. Shit");
 			return null;
@@ -183,19 +196,24 @@ public class Planner {
 			for (Box b : newState.boxes2) {
 
 				if (b == box) {
+					System.err.println("Box moved: " + b + " from: " + b.position);
 					b.position = shortestPos;
+					System.err.println("to: " + b.position);
+
 					break;
 				}
 			}
 
+			plan.add(newState);
+			plantoPrint.add(Type.StoreBox);
+
 		}
+
 		return newState;
 	}
 
 	private List<Node> findHighestPlan(Agent theAgent, Node currentState) {
 
-		List<Node> plan = new ArrayList<Node>();
-		List<Type> plantoPrint = new ArrayList<Type>();
 		// TODO Have to expand all nodes in bfs fashion till goal state is
 		// reached.
 		// Take the shortest solution.
@@ -207,14 +225,14 @@ public class Planner {
 
 				Box blockingBox = findClosestBlockingBox(a, currentState);
 
-				if(blockingBox!=null){
-					if(blockingBox.color==agent.color)
-					{
-					plan.add(FreeAgent(currentState, a));
+				if (blockingBox != null) {
+					if (blockingBox.color == agent.color) {
+						plan.add(FreeAgent(currentState, a));
 					}
 					plantoPrint.add(Type.FreeAgent);
 					break; // only free one agent at a time, then this
-							// agent.isTrapped will be false and goes to next one
+							// agent.isTrapped will be false and goes to next
+							// one
 				}
 			}
 		}
@@ -223,7 +241,7 @@ public class Planner {
 		for (Goal g : currentState.goals2) {
 			Box aBox = null;
 
-			System.err.println("Goal :" +g.name+" ,"+g.color+" is satisfied: "+g.isSatisfied);
+			System.err.println("Goal :" + g.name + " ," + g.color + " is satisfied: " + g.isSatisfied);
 
 			if (!g.isSatisfied && g.color == theAgent.color) {
 				System.err.println("Goal accepted :" + g.name);
@@ -283,7 +301,8 @@ public class Planner {
 
 		for (Box b : node.boxes2) {
 
-			if (b.color == thisAgent.color && Position.manhattanDistance(thisAgent.position, b.position) < minDistance) {
+			if (b.color == thisAgent.color
+					&& Position.manhattanDistance(thisAgent.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(thisAgent.position, b.position);
 				box = b;
 
@@ -297,49 +316,6 @@ public class Planner {
 
 		return box;
 	}
-
-	// private List<Node> findHighestPlan(Node initialState) // testing only
-	// {
-	//
-	// // List<Node> solution = new ArrayList<Node>();
-	// Strategy strategy = new StrategyDFS();
-	//
-	// // strategy.addToFrontier(initialState);
-	//
-	// System.err.format("Search starting with strategy %s.\n",
-	// strategy.toString());
-	// strategy.addToFrontier(initialState);
-	//
-	// int iterations = 0;
-	// while (true) {
-	// if (iterations == 1000) {
-	// // System.err.println(strategy.searchStatus());
-	// iterations = 0;
-	// }
-	//
-	// if (strategy.frontierIsEmpty()) {
-	// return null;
-	// }
-	//
-	// Node leafNode = strategy.getAndRemoveLeaf();
-	//
-	// if (leafNode.isGoalState()) {
-	// return leafNode.extractPlan();
-	// }
-	//
-	// strategy.addToExplored(leafNode);
-	// for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
-	// // nodes is shuffled
-	// // randomly; see
-	// // Node.java.
-	// if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
-	// strategy.addToFrontier(n);
-	// }
-	// }
-	// iterations++;
-	// }
-	//
-	// }
 
 	// updates the status of all goals for a given node (agent sees and updates
 	// only his own goals!!!)
