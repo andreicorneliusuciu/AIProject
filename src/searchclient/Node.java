@@ -17,7 +17,8 @@ public class Node {
 
 	public int agentRow;
 	public int agentCol;
-	public Agent theAgent;
+	public int theAgentName; // = new Agent(0,null);
+	public String theAgentColor;
 
 	public char[][] boxes;
 	public char[][] goals;
@@ -26,6 +27,8 @@ public class Node {
 	public List<Goal> goals2 = new ArrayList<>();
 	public List<Box> boxes2 = new ArrayList<>();
 	public String agentColor = "";
+
+	public List<Box> myBoxes = new ArrayList<>();
 
 	// list of storagepositions filled in heuristics
 	public List<Position> storagePos = new ArrayList<Position>();
@@ -58,7 +61,6 @@ public class Node {
 		return this.parent == null;
 	}
 
-	
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
@@ -74,14 +76,22 @@ public class Node {
 
 	public ArrayList<Node> getExpandedNodes() {
 		Box theBox = null;
+
+		for (Box b : boxes2) {
+			if (b.color.equals(theAgentColor)) {
+				myBoxes.add(b);
+			}
+		}
+
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
-			//TODO pull push only same colors
-			
+			String boxColor = "";
+			// TODO pull push only same colors
+
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent
 				// is moving
@@ -91,10 +101,18 @@ public class Node {
 					n.agentRow = newAgentRow;
 					n.agentCol = newAgentCol;
 					expandedNodes.add(n);
+					System.err.println("ITIASS HAPPENING move");
+
 				}
 			} else if (c.actionType == Type.Push) {
+				for (Box b : boxes2) {
+					
+					if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
+						boxColor = b.color;
+					}
+				}
 
-				if (this.boxAt(newAgentRow, newAgentCol) ) {
+				if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
 					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
 					// .. and that new cell of box is free.
@@ -107,11 +125,8 @@ public class Node {
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 						// TODO: this 0 is not ok here. needs to be the agent's
 						// number
-						
-						
-						
-						n.boxes[newAgentRow][newAgentCol] = Character.forDigit(theAgent.name, 10);
-						System.err.println("Agent name : ->>>>>>>>>>>>>>>>>>>>>>> "+theAgent.name);
+
+						n.boxes[newAgentRow][newAgentCol] = '0';
 						expandedNodes.add(n);
 					}
 				}
@@ -123,24 +138,34 @@ public class Node {
 					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
 					// .. and there's a box in "dir2" of the agent
 
-					//////////////////////////////////////////////////////////////
 					
+					for(Box b : boxes2)
+					{
+						if(b.name.equals(this.boxes[boxRow][boxCol]))
+						{
+							boxColor = b.color;
+							System.err.println("ITIASS HAPPENING pull");
 
-					if (this.boxAt(boxRow, boxCol) ) {
+						}
+					}
+
+					if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
+
 						Node n = this.ChildNode();
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						n.boxes[boxRow][boxCol] = 0;
+						n.boxes[boxRow][boxCol] = '0';
+
 						expandedNodes.add(n);
 					}
 				}
 			}
-			
+
 		}
 		Collections.shuffle(expandedNodes, RND);
-		
+
 		return expandedNodes;
 	}
 
@@ -223,7 +248,7 @@ public class Node {
 				} else if (SearchClient.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
-					s.append("0");
+					s.append(Integer.toString(theAgentName));
 				} else {
 					s.append(" ");
 				}

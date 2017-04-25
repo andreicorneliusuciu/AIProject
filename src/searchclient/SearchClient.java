@@ -348,17 +348,7 @@ public class SearchClient {
 
 						// Box
 					} else if ('A' <= chr && chr <= 'Z') {
-						// It is not on the map
-						// if(!colorToBoxes.containsKey(color)){
-						// List boxes = new LinkedList<String>();
-						// boxes.add(""+chr);
-						// colorToBoxes.put(color, boxes);
-						// //It is already in the map. Update value
-						// } else {
-						// List boxes = colorToBoxes.get(color);
-						// boxes.add(""+chr);
-						// colorToBoxes.put(color, boxes);
-						// }
+						
 						// TODO: in the second loop, put the default ones
 						boxesToColor.put(chr, color);
 					} else {
@@ -405,8 +395,12 @@ public class SearchClient {
 					// TODO
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr), null));
 					if (index == -1) {
-						agents.add(new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col),
-								new Node(null, lines.size(), maxCol)));
+						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col),
+								new Node(null, lines.size(), maxCol));
+						agentT.initialState.theAgentColor = agentT.color;
+						agentT.initialState.theAgentName = agentT.name;
+						agents.add(agentT);
+						
 						// agents.add(new Node(null, lines.size(), maxCol));
 					} else {
 						// update the position of the agents declared above the
@@ -414,6 +408,8 @@ public class SearchClient {
 						Agent a = agents.get(index);
 						a.position.row = row;
 						a.position.col = col;
+						a.initialState.theAgentColor = a.color;
+						a.initialState.theAgentName = a.name;
 					}
 					agents.get(Integer.parseInt("" + chr)).initialState.agentRow = row;
 					agents.get(Integer.parseInt("" + chr)).initialState.agentCol = col;
