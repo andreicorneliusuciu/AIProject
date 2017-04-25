@@ -27,7 +27,7 @@ public class Agent {
 
 	@Override
 	public String toString() {
-		return "Agent [name=" + name + ", color=" + color + " position=" + position + " initialState=" + initialState + "]";
+		return "Agent [name=" + name + ", color=" + color + " position=" + position + " initialState.color=" + initialState.theAgentColor + "]";
 	}
 
 	@Override

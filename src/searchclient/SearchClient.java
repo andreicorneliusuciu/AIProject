@@ -410,6 +410,7 @@ public class SearchClient {
 						a.position.col = col;
 						a.initialState.theAgentColor = a.color;
 						a.initialState.theAgentName = a.name;
+						agents.set(index, a);
 					}
 					agents.get(Integer.parseInt("" + chr)).initialState.agentRow = row;
 					agents.get(Integer.parseInt("" + chr)).initialState.agentCol = col;
@@ -484,6 +485,7 @@ public class SearchClient {
 			}
 
 			if (strategy.frontierIsEmpty()) {
+				System.err.println("The frontier is empty");
 				return null;
 			}
 
@@ -579,7 +581,8 @@ public class SearchClient {
 
 		for (int i = 0; i < agents.size(); i++) {
 			try {
-				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
+				System.err.println(agents.size());
+				solution = client.Search(new StrategyDFS(), SearchClient.agents.get(i).initialState);
 				// add the partial solution to the list of total solutions
 				solutions.add(solution);
 
@@ -587,6 +590,7 @@ public class SearchClient {
 			} catch (Exception ex) {
 				// System.err.println("Maximum memory usage exceeded.");
 				System.err.println("Problems for agent " + i + " when solving the level");
+				ex.printStackTrace();
 				solutions = null;
 			}
 		}
