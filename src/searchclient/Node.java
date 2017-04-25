@@ -17,25 +17,27 @@ public class Node {
 
 	public int agentRow;
 	public int agentCol;
-	
+	public Agent theAgent;
+
 	public char[][] boxes;
 	public char[][] goals;
-	
-	//alphabetially sorted both lists
+
+	// alphabetially sorted both lists
 	public List<Goal> goals2 = new ArrayList<>();
 	public List<Box> boxes2 = new ArrayList<>();
+	public String agentColor = "";
 
-	//list of storagepositions filled in heuristics
+	// list of storagepositions filled in heuristics
 	public List<Position> storagePos = new ArrayList<Position>();
 
 	public Node parent;
 	public Command action;
 
 	private int g;
-	
+
 	private int _hash = 0;
 
-	public Node(Node parent,int maxRow,int maxCol) {
+	public Node(Node parent, int maxRow, int maxCol) {
 		this.parent = parent;
 		MAX_ROW = maxRow;
 		MAX_COL = maxCol;
@@ -57,7 +59,6 @@ public class Node {
 	}
 
 	
-	//TODO change to check if goal.isSatisfied == true for all goals. +Code to turn isSatisfied to true.
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
@@ -65,21 +66,25 @@ public class Node {
 				char b = Character.toLowerCase(boxes[row][col]);
 				if (g > 0 && b != g) {
 					return false;
-				} 
+				}
 			}
 		}
 		return true;
 	}
 
 	public ArrayList<Node> getExpandedNodes() {
+		Box theBox = null;
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
+			//TODO pull push only same colors
+			
 			if (c.actionType == Type.Move) {
-				// Check if there's a wall or box on the cell to which the agent is moving
+				// Check if there's a wall or box on the cell to which the agent
+				// is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
 					Node n = this.ChildNode();
 					n.action = c;
@@ -88,8 +93,8 @@ public class Node {
 					expandedNodes.add(n);
 				}
 			} else if (c.actionType == Type.Push) {
-				// Make sure that there's actually a box to move
-				if (this.boxAt(newAgentRow, newAgentCol)) {
+
+				if (this.boxAt(newAgentRow, newAgentCol) ) {
 					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
 					// .. and that new cell of box is free.
@@ -98,20 +103,30 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						
+
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						//TODO: this 0 is not ok here. needs to be the agent's number
-						n.boxes[newAgentRow][newAgentCol] = 0;
+						// TODO: this 0 is not ok here. needs to be the agent's
+						// number
+						
+						
+						
+						n.boxes[newAgentRow][newAgentCol] = Character.forDigit(theAgent.name, 10);
+						System.err.println("Agent name : ->>>>>>>>>>>>>>>>>>>>>>> "+theAgent.name);
 						expandedNodes.add(n);
 					}
 				}
 			} else if (c.actionType == Type.Pull) {
 				// Cell is free where agent is going
+
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
 					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
 					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
 					// .. and there's a box in "dir2" of the agent
-					if (this.boxAt(boxRow, boxCol)) {
+
+					//////////////////////////////////////////////////////////////
+					
+
+					if (this.boxAt(boxRow, boxCol) ) {
 						Node n = this.ChildNode();
 						n.action = c;
 						n.agentRow = newAgentRow;
@@ -122,8 +137,10 @@ public class Node {
 					}
 				}
 			}
+			
 		}
 		Collections.shuffle(expandedNodes, RND);
+		
 		return expandedNodes;
 	}
 
@@ -136,8 +153,8 @@ public class Node {
 	}
 
 	private Node ChildNode() {
-		Node copy = new Node(this,MAX_ROW,MAX_COL);
-		//aici
+		Node copy = new Node(this, MAX_ROW, MAX_COL);
+		// aici
 		for (int row = 0; row < MAX_ROW; row++) {
 			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);

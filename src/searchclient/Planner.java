@@ -90,6 +90,8 @@ public class Planner {
 		// be achieved by normal moves.
 
 		findHighestPlan(agent, state);
+		
+		
 
 	}
 
