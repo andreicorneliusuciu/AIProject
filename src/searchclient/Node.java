@@ -41,7 +41,8 @@ public class Node {
 
 	public Node(Node parent, int maxRow, int maxCol) {
 
-		// this.theAgentColor = color;
+		this.parent = parent;
+	
 		MAX_ROW = maxRow;
 		MAX_COL = maxCol;
 		boxes = new char[MAX_ROW][MAX_COL];
@@ -75,49 +76,57 @@ public class Node {
 	}
 
 	public ArrayList<Node> getExpandedNodes() {
-		Box theBox = null;
+		// Box theBox = null;
 
-		for (Box b : boxes2) {
-			if (b.color.equals(theAgentColor)) {
-				myBoxes.add(b);
-			}
-		}
-		System.err.println("MyBoxes: "+myBoxes);
+		
+        for (Box b : boxes2) {
+            if (b.color.equals(theAgentColor)) {
+                myBoxes.add(b);
+            }
+        }
 
-		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 
+		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length); // TODO this adds node without agent in it. Check
+																					//solved, its because agent is on goal
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
 			String boxColor = "";
-			// TODO pull push only same colors
+			
 
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent
 				// is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
 					Node n = this.ChildNode();
+					 //////System.err.println("Move!!! by: "+theAgentName);
+
 					n.action = c;
 					n.agentRow = newAgentRow;
 					n.agentCol = newAgentCol;
 					expandedNodes.add(n);
-					//System.err.println("Move \n" + n);
-					// System.err.println("ITIASS HAPPENING move");
+					// //////System.err.println("Move \n" + n);
+					// //////System.err.println("ITIASS HAPPENING move");
 
 				}
 			} else if (c.actionType == Type.Push) {
 
 				
-
-					if (myBoxes.indexOf(this.boxes[newAgentRow][newAgentCol])!=-1) {
-						boxColor = theAgentColor;
-					}
 				
+				 ////////System.err.println("MyBoxes: "+myBoxes);
+				for (Box b : myBoxes) {
 
-				//System.err.println("push: " + theAgentColor + " " + boxColor);
+					if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
+						boxColor = b.color;
+						// //////System.err.println("ITIASS HAPPENING pull");
+					}
+				}
+
 				if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
+					// //////System.err.println("yes it is");
+
 					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
 					// .. and that new cell of box is free.
@@ -126,6 +135,7 @@ public class Node {
 
 						Node n = this.ChildNode();
 
+						 //System.err.println("Push!!!" + boxes[newAgentRow][newAgentCol]+": "+boxColor+" by: "+theAgentName+": "+theAgentColor);
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
@@ -133,10 +143,8 @@ public class Node {
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 
 						n.boxes[newAgentRow][newAgentCol] = 0;
-						System.err.println("Push \n" + n);
 						expandedNodes.add(n);
 
-						// System.err.println("ITIASS HAPPENING push");
 					}
 
 				}
@@ -149,23 +157,33 @@ public class Node {
 					// .. and there's a box in "dir2" of the agent
 
 					for (Box b : myBoxes) {
+						// //////System.err.println("Box: "+b+" nameOfCharBox:
+						// "+this.boxes[boxRow][boxCol]);
 						if (b.name.equals(this.boxes[boxRow][boxCol])) {
 							boxColor = b.color;
-							// System.err.println("ITIASS HAPPENING pull");
+
+							// //////System.err.println("ITIASS HAPPENING pull");
 						}
 					}
-					// System.err.println(boxColor+" <- boxColor");
+					// //////System.err.println(boxColor+" <- boxColor,
+					// agentColor-->"+theAgentColor);
+					// "+theAgentColor);
+					// //////System.err.println("Pull!!! Box color: "+boxColor+" agentColoragentColor-->"+theAgentName+theAgentColor);
 
 					if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
 
+
 						Node n = this.ChildNode();
+
+						//System.err.println("Pull!!!" + boxes[boxRow][boxCol]+": "+boxColor+" by: "+theAgentName+": "+theAgentColor);
 
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
-						// System.err.println("Pull \n" + n);
+
+						// //////System.err.println("Pull \n" + n);
 						expandedNodes.add(n);
 
 					}
@@ -175,7 +193,7 @@ public class Node {
 		}
 		// Collections.shuffle(expandedNodes, RND);
 
-		// System.err.println("size: "+expandedNodes.size());
+		// //////System.err.println("size: "+expandedNodes);
 		return expandedNodes;
 	}
 
@@ -187,8 +205,10 @@ public class Node {
 		return this.boxes[row][col] > 0;
 	}
 
+	
 	private Node ChildNode() {
 		Node copy = new Node(this, MAX_ROW, MAX_COL);
+		
 		// aici
 		for (int row = 0; row < MAX_ROW; row++) {
 			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
@@ -197,16 +217,24 @@ public class Node {
 		}
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
+		copy.theAgentName = this.theAgentName;
+		// //////System.err.println("copy:::::"+copy.myBoxes);
+
 		return copy;
 	}
 
 	public LinkedList<Node> extractPlan() {
 		LinkedList<Node> plan = new LinkedList<Node>();
 		Node n = this;
+		////////System.err.println("initialNodeisinitialstate: " + n.parent + n.isGoalState());
 		while (!n.isInitialState()) {
+			////System.err.println("plan: " + n);
 			plan.addFirst(n);
+
 			n = n.parent;
+			////////System.err.println("parent: " + n);
 		}
+		////////System.err.println("the plan" + plan);
 		return plan;
 	}
 

@@ -1,6 +1,8 @@
 package searchclient;
 
-public class Agent {
+import java.util.Comparator;
+
+public class Agent implements Comparator<Agent>, Comparable<Agent>{
 	
 	public int name;
 	public String color;
@@ -13,6 +15,8 @@ public class Agent {
 		this.color = color;
 		this.position = position;
 		this.initialState = initialState;
+		
+
 	}
 	
 	public Agent(int name, Node initialState) {
@@ -23,6 +27,18 @@ public class Agent {
 	public void assignInitialState(Node initialState){
 		this.initialState = initialState;
 	}
+	
+	
+	public int compareTo(Agent agent) {
+		Integer thisName = new Integer(this.name);
+	      return (thisName).compareTo(agent.name);
+	   }
+
+	   // Overriding the compare method to sort the age 
+	   public int compare(Agent d, Agent d1) {
+	      return d.name - d1.name;
+	   }
+	
 	
 
 	@Override
