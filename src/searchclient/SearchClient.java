@@ -57,7 +57,7 @@ public class SearchClient {
 		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
-			if (!line.startsWith("+")) {
+			if (!line.startsWith("+")) { //or space
 				noOfActualRowsForTheLevel++;
 				String[] s = line.split(":");
 				String color = s[0];
@@ -91,7 +91,7 @@ public class SearchClient {
 					}
 				}
 			}
-
+			//careful when the level is narrow and the declarations are larger
 			if (line.length() > maxCol) {
 				maxCol = line.length();
 			}
@@ -123,7 +123,28 @@ public class SearchClient {
 		}
 
 		for (String l : lines) {
-			if(!l.startsWith("+")) {
+			if(!l.startsWith("+")){// && l.charAt(0) == ' ') {
+//				//I have to fill with walls here (level starts with no walls at the beginning)
+//				if(l.startsWith(" ")) {
+//					for (int col = 0; col < l.length(); col++) {
+//						char chr = l.charAt(col);
+//						
+//						//if we have spaces or actual wall, we fill it with "walls"
+//						if(chr == ' ') {
+//							map[row][col] = -1;
+//						} else if(chr == '+') {
+//							map[row][col] = -1;
+//							walls[row][col] = true;
+//						}else {
+//							map[row][col] = 0;
+//						}
+//					}
+//					row++;
+//				} else if(l.endsWith(" ")) { //fill with walls on the right part of the level
+//					
+//				} else
+//					continue;
+//			}
 				continue;
 			}
 			for (int col = 0; col < l.length(); col++) {
@@ -230,9 +251,9 @@ public class SearchClient {
 				new Position(levelRowSize-3,levelColumnSize-3));
 		
 		//Test distances function
-		System.err.println("Distance between (5,0) and (7,0) = " +  
-		DistancesComputer.getDistanceBetween2Positions(new Position(5,0),
-				new Position(7,0)));
+//		System.err.println("Distance between (5,0) and (7,0) = " +  
+//		DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
+//				new Position(7,0)));
 		
 	}
 
@@ -314,6 +335,7 @@ public class SearchClient {
 		LinkedList<Node> solution;
 		
 		//List containing all the solutions for every agent
+		//TODO: make astar work here. a loop with the switch-case
 		List<List<Node>> solutions = new ArrayList<>();
 			
 		for(int i = 0; i < agents.size(); i++) {
@@ -384,5 +406,7 @@ public class SearchClient {
 /*
  * TODO Andrei: update the non square maps with wall on the empty spaces
  * - update the boxes2 and the goals list in the Node class
- * - call the heuristic function with the distances*/
+ * - call the heuristic function with the distances
+ * - if starts with space and there is a wall, complete everithinh with walls
+ * - the annoying bug when parsing the level and the agents are not in the good position in the rows*/
 
