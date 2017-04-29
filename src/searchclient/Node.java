@@ -95,6 +95,8 @@ public class Node {
 						n.agentCol = newAgentCol;
 						
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
+						//here determine the box iondex and set it. The boxes2 needs to be sorted
+						//n.boxes2.set(arg0, arg1);
 						//TODO: this 0 is not ok here. needs to be the agent's number
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
