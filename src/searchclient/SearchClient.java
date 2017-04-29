@@ -600,94 +600,59 @@ public class SearchClient {
 		}
 		///////////////////////////////// readinput end
 
-//		LinkedList<Node> solution;
-//
-//		// List containing all the solutions for every agent
-//		List<List<Node>> solutions = new ArrayList<>();
-//
-//		for (int i = 0; i < agents.size(); i++) {
-//			try {
-//				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
-//				solutions.add(solution);
-//			} catch (Exception ex) {
-//				System.err.println("Problems for agent " + i + " when solving the level");
-//				ex.printStackTrace();
-//				solutions = null;
-//			}
-//		}
-//
-//		if (solutions == null) {
-//			System.err.println(strategy.searchStatus());
-//			System.err.println("Unable to solve level.");
-//
-//			System.exit(0);
-//
-//		} else {
-//
-//			int maxSol = 0;
-//			int m;
-//			for (int i = 0; i < solutions.size(); i++) {
-//				m = solutions.get(i).size();
-//				if (m > maxSol) {
-//					maxSol = m;
-//				}
-//			}
-			// DEBUG ALGORITHMS
-		
-		
-		int maxSol =0;
+	
+
+		int maxSol = 0;
 		List<List<Node>> solutions = new ArrayList<>();
-		
-		
-		
-		//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
+
+		// call planner for all agents, fill solutions, repeat. Pass strategy to
+		// planner.
 		Planner plan = null;
-		for(Agent a : agents){
-			
-			plan = new Planner(a); 
+		for (Agent a : agents) {
+
+			plan = new Planner(a);
 			solutions.add(plan.solution);
-			
+
 		}
 
-			for (int i = 0; i < maxSol; i++) {
+		for (int i = 0; i < maxSol; i++) {
 
-				StringBuilder jointAction = new StringBuilder();
+			StringBuilder jointAction = new StringBuilder();
 
-				jointAction.append('[');
-				// if (!solutions.isEmpty()) {
-				for (int j = 0; j < solutions.size(); j++) {
-					Node n = null;
-					try {
+			jointAction.append('[');
+			// if (!solutions.isEmpty()) {
+			for (int j = 0; j < solutions.size(); j++) {
+				Node n = null;
+				try {
 
-						n = solutions.get(j).get(i);
-						if (!n.doNoOp) {
-							jointAction.append(n.action.toString() + ",");
-						} else {
-							jointAction.append("NoOp,");
-						}
-					} catch (IndexOutOfBoundsException e) {
+					n = solutions.get(j).get(i);
+					if (!n.doNoOp) {
+						jointAction.append(n.action.toString() + ",");
+					} else {
 						jointAction.append("NoOp,");
 					}
+				} catch (IndexOutOfBoundsException e) {
+					jointAction.append("NoOp,");
 				}
-				// }
-				// } else {
-				// jointAction.append("NoOp,"); //TODO and this..check it out
-				// }
-				// replace the last comma with ']'
-				jointAction.setCharAt(jointAction.length() - 1, ']');
-				System.out.println(jointAction.toString());
-				System.err.println("===== " + jointAction.toString() + " ====");
-				String response = serverMessages.readLine();
-				if (response.contains("false")) {
-					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
-							jointAction.toString());
-					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
-					break;
-				}
+			}
+			// }
+			// } else {
+			// jointAction.append("NoOp,"); //TODO and this..check it out
+			// }
+			// replace the last comma with ']'
+			jointAction.setCharAt(jointAction.length() - 1, ']');
+			System.out.println(jointAction.toString());
+			System.err.println("===== " + jointAction.toString() + " ====");
+			String response = serverMessages.readLine();
+			if (response.contains("false")) {
+				System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
+						jointAction.toString());
+				System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
+				break;
 			}
 		}
 	}
-
+}
 
 /*
  * 
