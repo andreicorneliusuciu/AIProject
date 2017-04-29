@@ -126,7 +126,6 @@ public class SearchClient {
 
 		for (String l : lines) {
 			if(!l.startsWith("+")){// && l.charAt(0) == ' ') {
-//				//I have to fill with walls here (level starts with no walls at the beginning)
 //				if(l.startsWith(" ")) {
 //					for (int col = 0; col < l.length(); col++) {
 //						char chr = l.charAt(col);
@@ -668,52 +667,52 @@ public class SearchClient {
 		}
 		///////////////////////////////// readinput end
 
-//		LinkedList<Node> solution;
-//
-//		// List containing all the solutions for every agent
-//		List<List<Node>> solutions = new ArrayList<>();
-//
-//		for (int i = 0; i < agents.size(); i++) {
-//			try {
-//				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
-//				solutions.add(solution);
-//			} catch (Exception ex) {
-//				System.err.println("Problems for agent " + i + " when solving the level");
-//				ex.printStackTrace();
-//				solutions = null;
-//			}
-//		}
-//
-//		if (solutions == null) {
-//			System.err.println(strategy.searchStatus());
-//			System.err.println("Unable to solve level.");
-//
-//			System.exit(0);
-//
-//		} else {
-//
-//			int maxSol = 0;
-//			int m;
-//			for (int i = 0; i < solutions.size(); i++) {
-//				m = solutions.get(i).size();
-//				if (m > maxSol) {
-//					maxSol = m;
-//				}
-//			}
+		LinkedList<Node> solution;
+
+		// List containing all the solutions for every agent
+		List<List<Node>> solutions = new ArrayList<>();
+
+		for (int i = 0; i < agents.size(); i++) {
+			try {
+				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
+				solutions.add(solution);
+			} catch (Exception ex) {
+				System.err.println("Problems for agent " + i + " when solving the level");
+				ex.printStackTrace();
+				solutions = null;
+			}
+		}
+
+		if (solutions == null) {
+			System.err.println(strategy.searchStatus());
+			System.err.println("Unable to solve level.");
+
+			System.exit(0);
+
+		} else {
+
+			int maxSol = 0;
+			int m;
+			for (int i = 0; i < solutions.size(); i++) {
+				m = solutions.get(i).size();
+				if (m > maxSol) {
+					maxSol = m;
+				}
+			}
 			// DEBUG ALGORITHMS
-		int maxSol =0;
+		//int maxSol =0;
 		//List containing all the solutions for every agent
 		//TODO: make astar work here. a loop with the switch-case
-		List<List<Node>> solutions = new ArrayList<>();
+		//List<List<Node>> solutions = new ArrayList<>();
 		
 		//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
 		Planner plan = null;
-		for(Agent a : agents){
+		//for(Agent a : agents){
 			
-			plan = new Planner(a); 
-			solutions.add(plan.solution);
+			plan = new Planner(agents.get(0)); 
+			//solutions.add(plan.solution);
 			
-		}
+		//}
 
 
 		if (solutions == null) {
@@ -729,11 +728,11 @@ public class SearchClient {
 			//Multi-agent commands
 			
 
-			int m;
+			int m1;
 			for (int i = 0; i < solutions.size(); i++) {
-				m = solutions.get(i).size();
-				if (m > maxSol) {
-					maxSol = m;
+				m1 = solutions.get(i).size();
+				if (m1 > maxSol) {
+					maxSol = m1;
 				}
 			}
 			
@@ -776,7 +775,7 @@ public class SearchClient {
 			}
 		}
 	}
-}
+	}}
 /*
  * TODO Andrei: update the non square maps with wall on the empty spaces
  * - update the boxes2 and the goals list in the Node class
