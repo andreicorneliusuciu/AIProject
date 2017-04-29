@@ -1,7 +1,9 @@
 package searchclient;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ public class Planner {
 				} else if (SearchClient.walls[row][col]) {
 					s.append("+");
 				} else if (row == theAgent.initialState.agentRow && col == theAgent.initialState.agentCol) {
-					s.append("0");
+					s.append(theAgent.name);
 				} else {
 
 					for (Position p : positions) {
@@ -69,10 +71,10 @@ public class Planner {
 			s.append("\n");
 		}
 
-		System.err.println(s);
+		System.err.println("Planner "+s);
 		////////////////////// debugabove//////////////////////////////////////
 
-		// TODO Make simplified level where commands have immediate effects.
+		// Make simplified level where commands have immediate effects.
 		// example: MoveBoxToGoal(1,A,a) moves A to a immediately.
 		// Make high-level plan based on such moves.
 		// example: FreeAgent(1),MoveBoxToGoal(A,a),MoveBoxToGoal(B,b),
@@ -86,12 +88,12 @@ public class Planner {
 
 		this.state = agent.initialState;
 
-		// TODO , HOWTHINGSWORK highest level commands generate goalastates to
+		// HOWTHINGSWORK highest level commands generate goalastates to
 		// be achieved by normal moves.
 
+		
+		//TODO make this work and print shit and call implementighestPlan after it
 		findHighestPlan(agent, state);
-		
-		
 
 	}
 
@@ -136,10 +138,11 @@ public class Planner {
 
 	private Node FreeAgent(Node node, Agent agent) {
 		// look if the agent has isTrapped = true. Move same
-		// colored boxes to storage
+		// colored boxes to storage by turning storage into goal state and erasing existing goal states
 		// Always calls StoreBox()
 
 		Node newState = node;
+		//char[][] newGoalState = null;
 
 		if (!agent.isTrapped) {
 			return null;
@@ -156,7 +159,9 @@ public class Planner {
 
 		if (!blockingBoxes.isEmpty()) {
 			for (Box b : blockingBoxes) {
+				//the new node with the goal set to where the boxes should be stored
 				newState = StoreBox(newState, b);
+				
 			}
 		}
 
@@ -184,43 +189,58 @@ public class Planner {
 		} else {
 			System.err.println("No storage space available");
 			// TODO what to do if no space available. Maybe move randomly.
-			return newState;
+			return null;
 
 		}
 
 		// find the box, set its position
 
-		boolean flag = false;
+		char[][] newGoalState = node.goals.clone();
+		
+		//empty the array
+		for(Goal g : node.goals2)
+		{
+			
+			newGoalState[g.position.row][g.position.col] = 0;
+		}
+		
+		//fill it with the new goals bellow
+		
+		
+	//	boolean flag = false;
 		if (!newState.boxes2.contains(box)) {
 			System.err.println("404: Box not found. Shit");
 			return null;
 		} else {
-			for (Box b : newState.boxes2) {
-
-				if (b == box) {
-					System.err.println("Box moved: " + b + " from: " + b.position);
-					b.position = shortestPos;
-					System.err.println("to: " + b.position);
-
-					break;
-				}
+//			for (Box b : newState.boxes2) {
+//
+//				if (b.equals(box)) {
+//					b.position = shortestPos;
+//					//System.err.println("to: " + b.position);
+//
+//					break;
+//				}
+			//name it a random goal name of those the agent has
+			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.get(0).name;
 			}
+			System.err.println("Goal made in: " + shortestPos);
 
+			
+			//keeping these just in case, erase if cleaning
 			plan.add(newState);
 			plantoPrint.add(Type.StoreBox);
 
-		}
+			//this is the new node with the updated goalstate
+		newState.goals = newGoalState;
 
 		return newState;
 	}
 
-	private List<Node> findHighestPlan(Agent theAgent, Node currentState) {
-
-		// TODO Have to expand all nodes in bfs fashion till goal state is
-		// reached.
-		// Take the shortest solution.
-		// Limit FreeAgent to only happen on trapped agents but have highest
-		// priority.
+	private Node findHighestPlan(Agent theAgent, Node currentState) {
+		
+		char[][] theGoalState=null;
+		// TODO Create highest plan, take first highest action, create and
+		// return its goalState for further implementation
 		for (Agent a : SearchClient.agents) {
 
 			if (a.isTrapped == true && a.name != theAgent.name) {
@@ -229,6 +249,8 @@ public class Planner {
 
 				if (blockingBox != null) {
 					if (blockingBox.color == agent.color) {
+						//theGoalState = FreeAgent(currentState, a);
+						
 						plan.add(FreeAgent(currentState, a));
 					}
 					plantoPrint.add(Type.FreeAgent);
@@ -248,6 +270,8 @@ public class Planner {
 			if (!g.isSatisfied && g.color == theAgent.color) {
 				System.err.println("Goal accepted :" + g.name);
 				aBox = findClosestBox(theAgent, currentState);
+				
+				theGoalState = MoveBoxToGoal(currentState, aBox, g).goals;
 				plan.add(MoveBoxToGoal(currentState, aBox, g));
 				plantoPrint.add(Type.MoveBoxToGoal);
 
@@ -259,7 +283,77 @@ public class Planner {
 
 		/// System.err.println(" ");
 
-		return plan;
+		return plan.get(0);
+	}
+
+	private LinkedList<Node> implementHighPlan(Node initialState, Node goalState, Strategy strategy) {
+
+		LinkedList<Node> solution = new LinkedList<Node>();
+
+		StringBuilder jointAction = new StringBuilder();
+
+		jointAction.append('[');
+
+
+		strategy.addToFrontier(initialState);
+
+		int iterations = 0;
+		while (true) {
+			if (iterations == 1000) {
+				// System.err.println(strategy.searchStatus());
+				iterations = 0;
+			}
+
+			if (strategy.frontierIsEmpty()) {
+
+				System.err.println("The frontier is empty");
+				break;
+
+			}
+
+			Node leafNode = strategy.getAndRemoveLeaf();
+			// System.err.println("Leafn" + leafNode + leafNode.parent);
+
+			if (leafNode.isGoalState(goalState)) {
+				System.err.println("Returns" + leafNode.extractPlan());
+				solution = leafNode.extractPlan();
+			}
+
+			strategy.addToExplored(leafNode);
+			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
+															// nodes is shuffled
+															// randomly; see
+															// Node.java.
+				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
+					// System.err.println("Adding to frontier:
+					// "+n.theAgentName+" "+n);
+					strategy.addToFrontier(n);
+				}
+			}
+			iterations++;
+
+		}
+
+		// if (!solutions.isEmpty()) {
+		for (int j = 0; j < solution.size(); j++) {
+			Node n = null;
+			try {
+				n = solution.get(j);
+				jointAction.append(n.action.toString() + ",");
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		// }
+		// } else {
+		// jointAction.append("NoOp,"); //TODO and this..check it out
+		// }
+		// replace the last comma with ']'
+		// jointAction.setCharAt(jointAction.length() - 1, ']');
+		// System.out.println(jointAction.toString());
+		// System.err.println("===== " + jointAction.toString() + " ====");
+		System.err.println("Planner solution: " + solution + " for goal state: " + goalState);
+		return solution;
 	}
 
 	private Box findClosestBlockingBox(Agent trappedAgent, Node node) {

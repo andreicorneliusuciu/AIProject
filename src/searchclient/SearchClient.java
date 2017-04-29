@@ -21,7 +21,7 @@ import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
-	
+
 	// The list of initial state for every agent
 	// public List<Node> initialStates;
 	public static boolean[][] walls;
@@ -115,7 +115,7 @@ public class SearchClient {
 					walls[row][col] = true;
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					// if I find an agent with no color I make it blue
-					
+
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr), null));
 					if (index == -1) {
 						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col),
@@ -140,8 +140,10 @@ public class SearchClient {
 						a.initialState.agentRow = a.position.row;
 						agents.set(index, a);
 					}
-//					agents.get(Integer.parseInt("" + chr)).initialState.agentRow = row;
-//					agents.get(Integer.parseInt("" + chr)).initialState.agentCol = col;
+					// agents.get(Integer.parseInt("" +
+					// chr)).initialState.agentRow = row;
+					// agents.get(Integer.parseInt("" +
+					// chr)).initialState.agentCol = col;
 
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					if (!boxesToColor.containsKey(chr)) {
@@ -166,7 +168,6 @@ public class SearchClient {
 
 					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
 
-				
 					for (int i = 0; i < agents.size(); i++) {
 						// put the goal to the agent map just if they are the
 						// same color
@@ -192,14 +193,15 @@ public class SearchClient {
 		System.err.println(" + Boxes: " + boxesToColor);
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
-		//int i = 0;
-//		for (Agent a : agents) {
-//
-//			// agents.get(i).initialState = n;
-//			// i++;
-//			System.err.println("\n $ Goals: " + a.initialState.goals2 + " Boxes: " + a.initialState.boxes2);
-//		}
-//		System.err.println("\n ------------------------------------ \n");
+		// int i = 0;
+		// for (Agent a : agents) {
+		//
+		// // agents.get(i).initialState = n;
+		// // i++;
+		// System.err.println("\n $ Goals: " + a.initialState.goals2 + " Boxes:
+		// " + a.initialState.boxes2);
+		// }
+		// System.err.println("\n ------------------------------------ \n");
 
 	}
 
@@ -222,7 +224,7 @@ public class SearchClient {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-//			System.err.println("Leafn" + leafNode + leafNode.parent);
+			// System.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState()) {
 				System.err.println("Returns" + leafNode.extractPlan());
@@ -235,290 +237,292 @@ public class SearchClient {
 															// randomly; see
 															// Node.java.
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
-					//System.err.println("Adding to frontier: "+n.theAgentName+" "+n);
+					// System.err.println("Adding to frontier:
+					// "+n.theAgentName+" "+n);
 					strategy.addToFrontier(n);
 				}
 			}
 			iterations++;
 		}
 	}
+
 	public void storageAnalysis(Node node) {// Swap out input with other types
 		// of data?
-Cell[][] map = new Cell[rowSize][colSize];
+		Cell[][] map = new Cell[rowSize][colSize];
 
-// Initialize cell map
-for (int i = 0; i < rowSize; i++) {
-for (int i2 = 0; i2++ < colSize; i2++) {
-map[i][i2] = new Cell(i, i2);
-if (walls[i][i2]) {
-map[i][i2].type = 0;// Wall
-} else {
-map[i][i2].type = 1;// Free
-}
-}
-}
-for (Goal g : this.allGoals) {
-map[g.position.row][g.position.col].type = 2; // Goal
-}
+		// Initialize cell map
+		for (int i = 0; i < rowSize; i++) {
+			for (int i2 = 0; i2++ < colSize; i2++) {
+				map[i][i2] = new Cell(i, i2);
+				if (walls[i][i2]) {
+					map[i][i2].type = 0;// Wall
+				} else {
+					map[i][i2].type = 1;// Free
+				}
+			}
+		}
+		for (Goal g : this.allGoals) {
+			map[g.position.row][g.position.col].type = 2; // Goal
+		}
 
-// Link up cells
-for (int i = 0; i < rowSize; i++) {
-for (int i2 = 0; i2++ < colSize; i2++) {
-if (map[i][i2].type >= 1) {
-if (map[i + 1][i2].type >= 1) {// + is south, right?
-map[i][i2].south = true;
-}
-if (map[i - 1][i2].type >= 1) {
-map[i][i2].north = true;
-}
-if (map[i][i2 + 1].type >= 1) {
-map[i][i2].east = true;
-}
-if (map[i][i2 - 1].type >= 1) {
-map[i][i2].west = true;
-}
-}
-}
-}
+		// Link up cells
+		for (int i = 0; i < rowSize; i++) {
+			for (int i2 = 0; i2++ < colSize; i2++) {
+				if (map[i][i2].type >= 1) {
+					if (map[i + 1][i2].type >= 1) {// + is south, right?
+						map[i][i2].south = true;
+					}
+					if (map[i - 1][i2].type >= 1) {
+						map[i][i2].north = true;
+					}
+					if (map[i][i2 + 1].type >= 1) {
+						map[i][i2].east = true;
+					}
+					if (map[i][i2 - 1].type >= 1) {
+						map[i][i2].west = true;
+					}
+				}
+			}
+		}
 
-// Create row objects
-ArrayList<Line> rows = new ArrayList<Line>();
-for (int i = 0; i < rowSize; i++) {
-for (int i2 = 0; i2++ < colSize; i2++) {
-if (map[i][i2].type == 1) {
-boolean connected = true;
-Line row = new Line();
-ArrayList<Position> positions = new ArrayList<Position>();
-while (connected) {
-if (map[i][i2].type == 1) {
-positions.add(map[i][i2].position);
-i2++;
-} else {
-connected = false;
-}
-}
-row.positions = positions;
-rows.add(row);
-} else if (map[i][i2].type == 2) {
-boolean connected = true;
-Line row = new Line();
-row.goalLine = true;
-ArrayList<Position> positions = new ArrayList<Position>();
-while (connected) {
-if (map[i][i2].type == 2) {
-positions.add(map[i][i2].position);
-i2++;
-} else {
-connected = false;
-}
-}
-row.positions = positions;
-rows.add(row);
-}
-}
-}
+		// Create row objects
+		ArrayList<Line> rows = new ArrayList<Line>();
+		for (int i = 0; i < rowSize; i++) {
+			for (int i2 = 0; i2++ < colSize; i2++) {
+				if (map[i][i2].type == 1) {
+					boolean connected = true;
+					Line row = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i][i2].type == 1) {
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				} else if (map[i][i2].type == 2) {
+					boolean connected = true;
+					Line row = new Line();
+					row.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i][i2].type == 2) {
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				}
+			}
+		}
 
-// Create col objects
-ArrayList<Line> cols = new ArrayList<Line>();
-for (int i = 0; i < colSize; i++) {
-for (int i2 = 0; i2++ < rowSize; i2++) {
-if (map[i2][i].type == 1) {
-boolean connected = true;
-Line col = new Line();
-ArrayList<Position> positions = new ArrayList<Position>();
-while (connected) {
-if (map[i2][i].type == 1) {
-positions.add(map[i2][i].position);
-i2++;
-} else {
-connected = false;
-}
-}
-col.positions = positions;
-cols.add(col);
-} else if (map[i2][i].type == 2) {
-boolean connected = true;
-Line col = new Line();
-col.goalLine = true;
-ArrayList<Position> positions = new ArrayList<Position>();
-while (connected) {
-if (map[i2][i].type == 2) {
-positions.add(map[i2][i].position);
-i2++;
-} else {
-connected = false;
-}
-}
-col.positions = positions;
-cols.add(col);
-}
-}
-}
+		// Create col objects
+		ArrayList<Line> cols = new ArrayList<Line>();
+		for (int i = 0; i < colSize; i++) {
+			for (int i2 = 0; i2++ < rowSize; i2++) {
+				if (map[i2][i].type == 1) {
+					boolean connected = true;
+					Line col = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i2][i].type == 1) {
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				} else if (map[i2][i].type == 2) {
+					boolean connected = true;
+					Line col = new Line();
+					col.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i2][i].type == 2) {
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				}
+			}
+		}
 
-// Connect them
+		// Connect them
 
-// Supernodes?
-}
+		// Supernodes?
+	}
 
-public static int[][] flowFill(Agent agent, Node node) {
-int[][] matrix = new int[rowSize][colSize];
-int[][] result = new int[rowSize][colSize];
+	public static int[][] flowFill(Agent agent, Node node) {
+		int[][] matrix = new int[rowSize][colSize];
+		int[][] result = new int[rowSize][colSize];
 
-for (int i = 0; i < rowSize; i++) {
-for (int i2 = 0; i2 < colSize; i2++) {
-if (walls[i][i2]) {
-matrix[i][i2] = Integer.MAX_VALUE;// Wall!
-result[i][i2] = 1;// Wall
-}
-}
-}
+		for (int i = 0; i < rowSize; i++) {
+			for (int i2 = 0; i2 < colSize; i2++) {
+				if (walls[i][i2]) {
+					matrix[i][i2] = Integer.MAX_VALUE;// Wall!
+					result[i][i2] = 1;// Wall
+				}
+			}
+		}
 
-for (int i = 0; i < node.MAX_ROW; i++) {
-for (int i2 = 0; i2 < node.MAX_COL; i2++) {
-if (node.boxes[i][i2] != '\u0000') {
-matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
-// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
-// System.err.println(agent.color.hashCode());
-}
-}
-}
-// Find all boxes colors and put them into Matrix
+		for (int i = 0; i < node.MAX_ROW; i++) {
+			for (int i2 = 0; i2 < node.MAX_COL; i2++) {
+				if (node.boxes[i][i2] != '\u0000') {
+					matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
+					// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
+					// System.err.println(agent.color.hashCode());
+				}
+			}
+		}
+		// Find all boxes colors and put them into Matrix
 
-// flowfill algorithm
-Set<Position> flow = new HashSet<Position>();
-Set<Position> blockage = new HashSet<Position>();
-flow.add(agent.position);
-boolean found = true;
-while (found) {
-int curSize = flow.size();
-Set<Position> tempFlow = new HashSet<Position>();
-for (Position p : flow) {
-if (p.row - 1 >= 0) {
-if (matrix[p.row - 1][p.col] == 0 || matrix[p.row - 1][p.col] == agent.color.hashCode()) {
-tempFlow.add(new Position(p.row - 1, p.col));
-} else if (matrix[p.row - 1][p.col] != Integer.MAX_VALUE) {// It
-											// isn't
-											// a
-											// wall
-											// or
-											// itself,
-											// so
-											// it
-											// must
-											// be
-											// a
-											// different
-											// colored
-											// box
-blockage.add(new Position(p.row - 1, p.col));
-}
-}
-if (p.col - 1 >= 0) {
-if (matrix[p.row][p.col - 1] == 0 || matrix[p.row][p.col - 1] == agent.color.hashCode()) {
-tempFlow.add(new Position(p.row, p.col - 1));
-} else if (matrix[p.row][p.col - 1] != Integer.MAX_VALUE) {// It
-											// isn't
-											// a
-											// wall
-											// or
-											// itself,
-											// so
-											// it
-											// must
-											// be
-											// a
-											// different
-											// colored
-											// box
-blockage.add(new Position(p.row, p.col - 1));
-}
-}
-if ((p.col + 1) < colSize) {
-if (matrix[p.row][p.col + 1] == 0 || matrix[p.row][p.col + 1] == agent.color.hashCode()) {
-tempFlow.add(new Position(p.row, p.col + 1));
-} else if (matrix[p.row][p.col + 1] != Integer.MAX_VALUE) {// It
-											// isn't
-											// a
-											// wall
-											// or
-											// itself,
-											// so
-											// it
-											// must
-											// be
-											// a
-											// different
-											// colored
-											// box
-blockage.add(new Position(p.row, p.col + 1));
-}
-}
-if ((p.row + 1) < rowSize) {
-if (matrix[p.row + 1][p.col] == 0 || matrix[p.row + 1][p.col] == agent.color.hashCode()) {
-tempFlow.add(new Position(p.row + 1, p.col));
-} else if (matrix[p.row + 1][p.col] != Integer.MAX_VALUE) {// It
-											// isn't
-											// a
-											// wall
-											// or
-											// itself,
-											// so
-											// it
-											// must
-											// be
-											// a
-											// different
-											// colored
-											// box
-blockage.add(new Position(p.row + 1, p.col));
-}
-}
-}
-for (Position p : tempFlow) {
-flow.add(p);
-}
+		// flowfill algorithm
+		Set<Position> flow = new HashSet<Position>();
+		Set<Position> blockage = new HashSet<Position>();
+		flow.add(agent.position);
+		boolean found = true;
+		while (found) {
+			int curSize = flow.size();
+			Set<Position> tempFlow = new HashSet<Position>();
+			for (Position p : flow) {
+				if (p.row - 1 >= 0) {
+					if (matrix[p.row - 1][p.col] == 0 || matrix[p.row - 1][p.col] == agent.color.hashCode()) {
+						tempFlow.add(new Position(p.row - 1, p.col));
+					} else if (matrix[p.row - 1][p.col] != Integer.MAX_VALUE) {// It
+						// isn't
+						// a
+						// wall
+						// or
+						// itself,
+						// so
+						// it
+						// must
+						// be
+						// a
+						// different
+						// colored
+						// box
+						blockage.add(new Position(p.row - 1, p.col));
+					}
+				}
+				if (p.col - 1 >= 0) {
+					if (matrix[p.row][p.col - 1] == 0 || matrix[p.row][p.col - 1] == agent.color.hashCode()) {
+						tempFlow.add(new Position(p.row, p.col - 1));
+					} else if (matrix[p.row][p.col - 1] != Integer.MAX_VALUE) {// It
+						// isn't
+						// a
+						// wall
+						// or
+						// itself,
+						// so
+						// it
+						// must
+						// be
+						// a
+						// different
+						// colored
+						// box
+						blockage.add(new Position(p.row, p.col - 1));
+					}
+				}
+				if ((p.col + 1) < colSize) {
+					if (matrix[p.row][p.col + 1] == 0 || matrix[p.row][p.col + 1] == agent.color.hashCode()) {
+						tempFlow.add(new Position(p.row, p.col + 1));
+					} else if (matrix[p.row][p.col + 1] != Integer.MAX_VALUE) {// It
+						// isn't
+						// a
+						// wall
+						// or
+						// itself,
+						// so
+						// it
+						// must
+						// be
+						// a
+						// different
+						// colored
+						// box
+						blockage.add(new Position(p.row, p.col + 1));
+					}
+				}
+				if ((p.row + 1) < rowSize) {
+					if (matrix[p.row + 1][p.col] == 0 || matrix[p.row + 1][p.col] == agent.color.hashCode()) {
+						tempFlow.add(new Position(p.row + 1, p.col));
+					} else if (matrix[p.row + 1][p.col] != Integer.MAX_VALUE) {// It
+						// isn't
+						// a
+						// wall
+						// or
+						// itself,
+						// so
+						// it
+						// must
+						// be
+						// a
+						// different
+						// colored
+						// box
+						blockage.add(new Position(p.row + 1, p.col));
+					}
+				}
+			}
+			for (Position p : tempFlow) {
+				flow.add(p);
+			}
 
-if (flow.size() == curSize) {
-found = false;
-}
-}
-for (Position p : flow) {
-result[p.row][p.col] = 2; // Free flow!
-}
-for (Position p : blockage) {
-result[p.row][p.col] = 3; // Blockage!
-}
+			if (flow.size() == curSize) {
+				found = false;
+			}
+		}
+		for (Position p : flow) {
+			result[p.row][p.col] = 2; // Free flow!
+		}
+		for (Position p : blockage) {
+			result[p.row][p.col] = 3; // Blockage!
+		}
 
-System.err.println("0");
-return result; // 0 = Unconnected, 1 = Wall, 2 = Free flow, 3 =
-// Blockage.
-}
+		System.err.println("0");
+		return result; // 0 = Unconnected, 1 = Wall, 2 = Free flow, 3 =
+		// Blockage.
+	}
 
-public static void rescueUnit(Agent agent, ArrayList<Position> positions, Node node) {// Analyse
-														// all
-														// the
-														// agents!
-int[][] matrix = flowFill(agent, node);
-for (Position p : positions) {
-if (matrix[p.row][p.col] != 2) {// Blockage! Oh no!
-agent.isTrapped = true;
-for (int i = 0; i < rowSize; i++) {
-for (int i2 = 0; i2 < colSize; i2++) {
-if (matrix[i][i2] == 3) {
-if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0
-|| matrix[i][i2 + 1] == 0) {
-for (Box b : allBoxes) {
-if (b.position.equals(new Position(i, i2))) {
-	b.isBlocking = true;
-}
-}
-}
-}
-}
-}
-}
-}
-}
+	public static void rescueUnit(Agent agent, ArrayList<Position> positions, Node node) {// Analyse
+		// all
+		// the
+		// agents!
+		int[][] matrix = flowFill(agent, node);
+		for (Position p : positions) {
+			if (matrix[p.row][p.col] != 2) {// Blockage! Oh no!
+				agent.isTrapped = true;
+				for (int i = 0; i < rowSize; i++) {
+					for (int i2 = 0; i2 < colSize; i2++) {
+						if (matrix[i][i2] == 3) {
+							if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0
+									|| matrix[i][i2 + 1] == 0) {
+								for (Box b : allBoxes) {
+									if (b.position.equals(new Position(i, i2))) {
+										b.isBlocking = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
@@ -593,12 +597,12 @@ if (b.position.equals(new Position(i, i2))) {
 
 		for (int i = 0; i < agents.size(); i++) {
 			try {
-				//System.err.println(agents.size());
+				// System.err.println(agents.size());
 				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
 				// add the partial solution to the list of total solutions
-//				if (solution == null)
-//
-					solutions.add(solution);
+				// if (solution == null)
+				//
+				solutions.add(solution);
 
 				// System.err.println("Found solution for agent " + i + " that
 				// is:"+solution.size());
@@ -626,13 +630,13 @@ if (b.position.equals(new Position(i, i2))) {
 			int maxSol = 0;
 			int m;
 			for (int i = 0; i < solutions.size(); i++) {
-			//	if (!(solutions.get(i)==null)) { //TODO this if i added
-					m = solutions.get(i).size();
-					if (m > maxSol) {
-						maxSol = m;
-					}
-				//}
-			
+				// if (!(solutions.get(i)==null)) { //TODO this if i added
+				m = solutions.get(i).size();
+				if (m > maxSol) {
+					maxSol = m;
+				}
+				// }
+
 			}
 			// DEBUG ALGORITHMS
 			boolean debugAlgo = false;
@@ -663,26 +667,25 @@ if (b.position.equals(new Position(i, i2))) {
 				}
 			}
 
-		
 			for (int i = 0; i < maxSol; i++) {
 
 				StringBuilder jointAction = new StringBuilder();
 
 				jointAction.append('[');
-				//if (!solutions.isEmpty()) {
-					for (int j = 0; j < solutions.size(); j++) {
-						Node n = null;
-						try {
-							n = solutions.get(j).get(i);
-							jointAction.append(n.action.toString() + ",");
-						} catch (IndexOutOfBoundsException e) {
-							jointAction.append("NoOp,");
-						}
+				// if (!solutions.isEmpty()) {
+				for (int j = 0; j < solutions.size(); j++) {
+					Node n = null;
+					try {
+						n = solutions.get(j).get(i);
+						jointAction.append(n.action.toString() + ",");
+					} catch (IndexOutOfBoundsException e) {
+						jointAction.append("NoOp,");
 					}
-				//}
-//				} else {
-//					jointAction.append("NoOp,"); //TODO and this..check it out
-//				}
+				}
+				// }
+				// } else {
+				// jointAction.append("NoOp,"); //TODO and this..check it out
+				// }
 				// replace the last comma with ']'
 				jointAction.setCharAt(jointAction.length() - 1, ']');
 				System.out.println(jointAction.toString());
@@ -699,38 +702,15 @@ if (b.position.equals(new Position(i, i2))) {
 	}
 }
 
-
-
 /*
  * 
  * 
- *                                                                                 
-                                         __                 _
-                                        /  \__..---.._    ,'/
-                                       ( /  \_        `..' /   
-                                       | |            ,'  /      
-                                       ( '.   _____     _/       
-                                        \    /   __\   / `.      
-                                        (\_ (   / .-|  |-.|                     
-                                        |    \ ( (WW|  \W)j      
-                                        |     \_\_`_|   ``-.      
-                                        |              \__/
-                                        )      -,______.-' 
-                            ___________/          /
-                         .-'                     (
-                        /                         \        
-                       |                           |        
-                       |                           |       
-                       |                           |        
-                      / \        /             \__/        
-                 ..--'   |      /-,_______\       \                
-               .`      _/      /     |    |\       \         
-                \     /       /     |     | `--,    \        
-                 \    |      |      |     |   /      )     
-                  \__/|      |      |      | (       |     
-                      |      |      |      |  \      |     
-                      |       \     |       \  `.___/      
-                       \_______)     \_______)             
-                                                            
- 
+ * 
+ * __ _ / \__..---.._ ,'/ ( / \_ `..' / | | ,' / ( '. _____ _/ \ / __\ / `. (\_
+ * ( / .-| |-.| | \ ( (WW| \W)j | \_\_`_| ``-. | \__/ ) -,______.-' ___________/
+ * / .-' ( / \ | | | | | | / \ / \__/ ..--' | /-,_______\ \ .` _/ / | |\ \ \ / /
+ * | | `--, \ \ | | | | / ) \__/| | | | ( | | | | | \ | | \ | \ `.___/ \_______)
+ * \_______)
+ * 
+ * 
  */
