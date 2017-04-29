@@ -3,6 +3,7 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import searchclient.Heuristic.AStar;
@@ -45,6 +47,12 @@ public class SearchClient {
 
 	// color to agent map
 	public Map<String, Character> colorToAgent = new HashMap<>();
+	
+	//the map represented as a matrix for computing the shortest distances
+	//between all two pair of cells on the map
+	public int[][] map;
+	public static int levelRowSize;
+	public static int levelColumnSize;
 
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 
@@ -54,9 +62,11 @@ public class SearchClient {
 		allGoals = new ArrayList<>();
 
 		int maxCol = 0;
+		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
-			if (!line.startsWith("+")) {
+			if (!line.startsWith("+")) { //or space
+				noOfActualRowsForTheLevel++;
 				String[] s = line.split(":");
 				String color = s[0];
 				String[] s1 = s[1].split(",");
@@ -78,7 +88,7 @@ public class SearchClient {
 					}
 				}
 			}
-
+			//careful when the level is narrow and the declarations are larger
 			if (line.length() > maxCol) {
 				maxCol = line.length();
 			}
@@ -98,18 +108,55 @@ public class SearchClient {
 			agents.get(i).assignInitialState(new Node(null, lines.size(), maxCol));
 			// initialStates.add(new Node(null, lines.size(), maxCol));
 		}
-
-		walls = new boolean[lines.size()][maxCol];
 		this.rowSize = lines.size();// Keeps track of map size
 		this.colSize = maxCol;
+    
+		//lines.size() gives the no of rows on the map. maxCol is the no of columns
+		levelRowSize = lines.size() - noOfActualRowsForTheLevel;
+		levelColumnSize = maxCol;
+		System.err.println("Row = " + levelRowSize +  "  CCOL  = " + levelColumnSize);
+		walls = new boolean[levelRowSize][maxCol];
+		map = new int[levelRowSize][maxCol];
+		
+// 		for(int i = 0; i < agents.size(); i++) {
+// 			initialStates.add(new Node(null, levelRowSize, maxCol));
+// 		}
 
 		for (String l : lines) {
-			if (!l.startsWith("+")) {
+			if(!l.startsWith("+")){// && l.charAt(0) == ' ') {
+//				//I have to fill with walls here (level starts with no walls at the beginning)
+//				if(l.startsWith(" ")) {
+//					for (int col = 0; col < l.length(); col++) {
+//						char chr = l.charAt(col);
+//						
+//						//if we have spaces or actual wall, we fill it with "walls"
+//						if(chr == ' ') {
+//							map[row][col] = -1;
+//						} else if(chr == '+') {
+//							map[row][col] = -1;
+//							walls[row][col] = true;
+//						}else {
+//							map[row][col] = 0;
+//						}
+//					}
+//					row++;
+//				} else if(l.endsWith(" ")) { //fill with walls on the right part of the level
+//					
+//				} else
+//					continue;
+//			}
 				continue;
 			}
 			for (int col = 0; col < l.length(); col++) {
 				char chr = l.charAt(col);
-
+				
+				//update the general map => omit the agents and boxes
+				if(chr == '+') {
+					map[row][col] = -1;
+				} else {
+					map[row][col] = 0;
+				}
+				
 				if (chr == '+') { // Wall.
 					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
@@ -140,10 +187,6 @@ public class SearchClient {
 						a.initialState.agentRow = a.position.row;
 						agents.set(index, a);
 					}
-					// agents.get(Integer.parseInt("" +
-					// chr)).initialState.agentRow = row;
-					// agents.get(Integer.parseInt("" +
-					// chr)).initialState.agentCol = col;
 
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					if (!boxesToColor.containsKey(chr)) {
@@ -191,18 +234,46 @@ public class SearchClient {
 		Collections.sort(agents);
 		System.err.println(" + Agents: " + agents);
 		System.err.println(" + Boxes: " + boxesToColor);
+		//TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
-		// int i = 0;
-		// for (Agent a : agents) {
-		//
-		// // agents.get(i).initialState = n;
-		// // i++;
-		// System.err.println("\n $ Goals: " + a.initialState.goals2 + " Boxes:
-		// " + a.initialState.boxes2);
-		// }
-		// System.err.println("\n ------------------------------------ \n");
 
+		int i = 0;
+		for (Node n : initialStates) {
+			
+			agents.get(i).initialState = n;
+			i++;
+			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
+		}
+		
+		int[][] mapWithoutBorders = new int[levelRowSize-2][levelColumnSize-2];
+		for(int i1 = 1; i1 < levelRowSize-1; i1++) {
+			for(int j1 = 1; j1 < levelColumnSize-1; j1++) {
+				mapWithoutBorders[i1-1][j1-1] = map[i1][j1];
+			}
+		}
+		
+		System.err.println("\n ------------------------------------");
+		System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
+		
+		for(int i1 = 0; i1 <  levelRowSize-2; i1++) {
+			for (int j = 0; j < levelColumnSize-2; j++) {
+				System.err.print(mapWithoutBorders[i1][j]);
+			}
+			System.err.println("");
+		}
+		
+		System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
+		
+		//Compute all the distances on a NxN map. It does not work for non square maps.
+		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
+		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0,0),
+				new Position(levelRowSize-3,levelColumnSize-3));
+		
+		//Test distances function
+//		System.err.println("Distance between (5,0) and (7,0) = " +  
+//		DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
+//				new Position(7,0)));
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -574,20 +645,17 @@ public class SearchClient {
 			case "-dfs":
 				strategy = new StrategyDFS();
 				break;
-			// case "-astar":
-			// strategy = new StrategyBestFirst(new
-			// AStar(client.initialStates.get(0)));
-			// break;
-			// case "-wastar":
-			// // You're welcome to test WA* out with different values, but for
-			// // the report you must at least indicate benchmarks for W = 5.
-			// strategy = new StrategyBestFirst(new
-			// WeightedAStar(client.initialState, 5));
-			// break;
-			// case "-greedy":
-			// strategy = new StrategyBestFirst(new
-			// Greedy(client.initialState));
-			// break;
+			case "-astar":
+				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
+				break;
+			case "-wastar":
+				// You're welcome to test WA* out with different values, but for
+				// the report you must at least indicate benchmarks for W = 5.
+				strategy = new StrategyBestFirst(new WeightedAStar(client.initialStates.get(0), 5));
+				break;
+			case "-greedy":
+				strategy = new StrategyBestFirst(new Greedy(client.initialStates.get(0)));
+				break;
 			default:
 				strategy = new StrategyBFS();
 				System.err.println(
@@ -633,12 +701,10 @@ public class SearchClient {
 //				}
 //			}
 			// DEBUG ALGORITHMS
-		
-		
 		int maxSol =0;
+		//List containing all the solutions for every agent
+		//TODO: make astar work here. a loop with the switch-case
 		List<List<Node>> solutions = new ArrayList<>();
-		
-		
 		
 		//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
 		Planner plan = null;
@@ -649,8 +715,31 @@ public class SearchClient {
 			
 		}
 
-			for (int i = 0; i < maxSol; i++) {
 
+		if (solutions == null) {
+			System.err.println(strategy.searchStatus());
+			System.err.println("Unable to solve level.");
+			
+			System.exit(0);
+			
+		} else {
+			System.err.println("\nSummary for " + strategy.toString());
+//			System.err.println("Found solution of length " + solutions.size());
+			System.err.println(strategy.searchStatus());
+			//Multi-agent commands
+			
+			int maxSol = 0;
+			int m;
+			for (int i = 0; i < solutions.size(); i++) {
+				m = solutions.get(i).size();
+				if (m > maxSol) {
+					maxSol = m;
+				}
+			}
+			
+			//TODO: empty the same string builder object
+			for(int i = 0; i < maxSol; i++) {
+			
 				StringBuilder jointAction = new StringBuilder();
 
 				jointAction.append('[');
@@ -687,13 +776,10 @@ public class SearchClient {
 			}
 		}
 	}
-
-
+}
 /*
- * 
- * 
- * 
-
- * 
- * 
- */
+ * TODO Andrei: update the non square maps with wall on the empty spaces
+ * - update the boxes2 and the goals list in the Node class
+ * - call the heuristic function with the distances
+ * - if starts with space and there is a wall, complete everithinh with walls
+ * - the annoying bug when parsing the level and the agents are not in the good position in the rows*/
