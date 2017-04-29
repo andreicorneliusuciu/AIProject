@@ -1,6 +1,6 @@
 package searchclient;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,6 +21,7 @@ public class Planner {
 	List<Position> positions = new ArrayList<Position>();
 	List<Node> plan = new ArrayList<Node>();
 	List<Type> plantoPrint = new ArrayList<Type>();
+	public LinkedList<Node> solution = new LinkedList<Node>();
 
 	private static enum Type {
 		MoveBoxToGoal, StoreBox, FreeAgent
@@ -28,61 +29,12 @@ public class Planner {
 
 	public Planner(Agent theAgent) {
 
-		System.err.println("FindStorage for");
-		System.err.println(theAgent.initialState);
+		// System.err.println("FindStorage for");
+		// System.err.println(theAgent.initialState);
 
 		positions = Heuristic.findStorage(theAgent.initialState);
 		Heuristic.storageSpace = positions;
 		System.err.println(positions.toString());
-
-		// just debugging
-		StringBuilder s = new StringBuilder();
-		boolean x = false;
-
-		for (int row = 0; row < theAgent.initialState.MAX_ROW; row++) {
-			if (!SearchClient.walls[row][0]) {
-				break;
-			}
-			for (int col = 0; col < theAgent.initialState.MAX_COL; col++) {
-
-				if (theAgent.initialState.boxes[row][col] > 0) {
-					s.append(theAgent.initialState.boxes[row][col]);
-				} else if (theAgent.initialState.goals[row][col] > 0) {
-					s.append(theAgent.initialState.goals[row][col]);
-				} else if (SearchClient.walls[row][col]) {
-					s.append("+");
-				} else if (row == theAgent.initialState.agentRow && col == theAgent.initialState.agentCol) {
-					s.append(theAgent.name);
-				} else {
-
-					for (Position p : positions) {
-						if (p.row == row && p.col == col) {
-							s.append("o");
-							x = true;
-						}
-					}
-					if (!x) {
-						s.append(" ");
-					}
-					x = false;
-				}
-
-			}
-			s.append("\n");
-		}
-
-		System.err.println("Planner " + s);
-		////////////////////// debugabove//////////////////////////////////////
-
-		// Make simplified level where commands have immediate effects.
-		// example: MoveBoxToGoal(1,A,a) moves A to a immediately.
-		// Make high-level plan based on such moves.
-		// example: FreeAgent(1),MoveBoxToGoal(A,a),MoveBoxToGoal(B,b),
-		// StoreBox(B,Position x)
-		// Take the moves, use classical heuristic methods to implement them.
-		// Use custom, appropriate goalStates.
-		// Make low-level plan for the agent (solution).
-		// feed the result to conflict resolution class.
 
 		this.agent = theAgent;
 
@@ -94,8 +46,8 @@ public class Planner {
 		// TODO make this work and print shit and call implementighestPlan after
 		// it
 		Node thePlan = findHighestPlan(agent, state); // returns goal state
-		LinkedList<Node> solution = implementHighPlan(this.state, thePlan, new StrategyBFS());
-		System.err.println("HighestSolution: "+solution);
+		solution = implementHighPlan(this.state, thePlan, new StrategyBFS());
+		System.err.println("HighestSolution: " + solution);
 
 	}
 
@@ -239,7 +191,9 @@ public class Planner {
 
 	private Node findHighestPlan(Agent theAgent, Node currentState) {
 
+		// use that if needed, clean if not. Clean the below error too.
 		char[][] theGoalState = null;
+
 		// TODO Create highest plan, take first highest action, create and
 		// return its goalState for further implementation
 		for (Agent a : SearchClient.agents) {
@@ -287,15 +241,9 @@ public class Planner {
 		return plan.get(0);
 	}
 
-	private LinkedList<Node> implementHighPlan(Node initialState, Node goalState, Strategy strategy) {
-
-		LinkedList<Node> solution = new LinkedList<Node>();
-
-		StringBuilder jointAction = new StringBuilder();
-
-		jointAction.append('[');
-
-		strategy.addToFrontier(initialState);
+	public LinkedList<Node> implementHighPlan(Node goalState, Node initialNode, Strategy strategy) {
+		System.err.format("Search starting with strategy %s.\n", strategy.toString());
+		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
 		while (true) {
@@ -306,8 +254,11 @@ public class Planner {
 
 			if (strategy.frontierIsEmpty()) {
 
+				LinkedList<Node> noOpList = new LinkedList<Node>();
+				initialNode.doNoOp = true;
+				noOpList.add(initialNode);
 				System.err.println("The frontier is empty");
-				break;
+				return noOpList;
 
 			}
 
@@ -316,7 +267,7 @@ public class Planner {
 
 			if (leafNode.isGoalState(goalState)) {
 				System.err.println("Returns" + leafNode.extractPlan());
-				solution = leafNode.extractPlan();
+				return leafNode.extractPlan();
 			}
 
 			strategy.addToExplored(leafNode);
@@ -331,30 +282,10 @@ public class Planner {
 				}
 			}
 			iterations++;
-
 		}
-
-		// if (!solutions.isEmpty()) {
-		for (int j = 0; j < solution.size(); j++) {
-			Node n = null;
-			try {
-				n = solution.get(j);
-				jointAction.append(n.action.toString() + ",");
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-		}
-		// }
-		// } else {
-		// jointAction.append("NoOp,"); //TODO and this..check it out
-		// }
-		// replace the last comma with ']'
-		// jointAction.setCharAt(jointAction.length() - 1, ']');
-		// System.out.println(jointAction.toString());
-		// System.err.println("===== " + jointAction.toString() + " ====");
-		System.err.println("Planner solution: " + solution + " for goal state: " + goalState);
-		return solution;
 	}
+
+	//
 
 	private Box findClosestBlockingBox(Agent trappedAgent, Node node) {
 
@@ -368,15 +299,13 @@ public class Planner {
 
 		for (Box b : SearchClient.allBoxes) {
 
-			System.err.println("Box: "+b);
-			System.err.println("Planning box distance: "+Position.manhattanDistance(trappedAgent.position, b.position)+" minDistance: "+minDistance+" boxColor: "+b.color+" agentColor: "+agent.color);
 			if (b.color == agent.color && b.isBlocking
 					&& Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(trappedAgent.position, b.position);
 				box = b;
 
-				
-			//	 System.err.println("Box found for agent "+trappedAgent+" box is: "+box);
+				// System.err.println("Box found for agent "+trappedAgent+" box
+				// is: "+box);
 			}
 		}
 

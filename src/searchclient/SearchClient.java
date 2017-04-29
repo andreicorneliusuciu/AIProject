@@ -536,7 +536,12 @@ public class SearchClient {
 
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
-		allBoxes = agents.get(0).initialState.boxes2;
+
+		allBoxes = agents.get(0).initialState.boxes2; // TODO update allBoxes
+														// positions, check if
+														// they are updating
+
+		// this is preprocessing shit
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
 		for (Agent a : agents) {
@@ -556,12 +561,9 @@ public class SearchClient {
 			done = false;
 			positions = new ArrayList<Position>();
 		}
+		//////////////////////////////////////////
 
-		// temp plan debugging
-		// for (Agent a : agents) {
-		// Planner plan = new Planner(agents.get(0));
-		// }
-
+		// read the input
 		Strategy strategy;
 
 		if (args.length > 0) {
@@ -596,83 +598,56 @@ public class SearchClient {
 			System.err.println(
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
+		///////////////////////////////// readinput end
 
-		LinkedList<Node> solution;
-
-		// List containing all the solutions for every agent
-		List<List<Node>> solutions = new ArrayList<>();
-
-		for (int i = 0; i < agents.size(); i++) {
-			try {
-				// System.err.println(agents.size());
-				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
-				// add the partial solution to the list of total solutions
-				// if (solution == null)
-				//
-				solutions.add(solution);
-
-				// System.err.println("Found solution for agent " + i + " that
-				// is:"+solution.size());
-			} catch (Exception ex) {
-				// System.err.println("Maximum memory usage exceeded.");
-				System.err.println("Problems for agent " + i + " when solving the level");
-				ex.printStackTrace();
-				solutions = null;
-			}
-		}
-
-		if (solutions == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-
-			System.exit(0);
-
-		} else {
-			// System.err.println("\nSummary for " + strategy.toString());
-			// System.err.println("Found solution of length " +
-			// solution.size());
-			// System.err.println(strategy.searchStatus());
-			// Multi-agent commands
-
-			int maxSol = 0;
-			int m;
-			for (int i = 0; i < solutions.size(); i++) {
-				// if (!(solutions.get(i)==null)) { //TODO this if i added
-				m = solutions.get(i).size();
-				if (m > maxSol) {
-					maxSol = m;
-				}
-				// }
-
-			}
+//		LinkedList<Node> solution;
+//
+//		// List containing all the solutions for every agent
+//		List<List<Node>> solutions = new ArrayList<>();
+//
+//		for (int i = 0; i < agents.size(); i++) {
+//			try {
+//				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
+//				solutions.add(solution);
+//			} catch (Exception ex) {
+//				System.err.println("Problems for agent " + i + " when solving the level");
+//				ex.printStackTrace();
+//				solutions = null;
+//			}
+//		}
+//
+//		if (solutions == null) {
+//			System.err.println(strategy.searchStatus());
+//			System.err.println("Unable to solve level.");
+//
+//			System.exit(0);
+//
+//		} else {
+//
+//			int maxSol = 0;
+//			int m;
+//			for (int i = 0; i < solutions.size(); i++) {
+//				m = solutions.get(i).size();
+//				if (m > maxSol) {
+//					maxSol = m;
+//				}
+//			}
 			// DEBUG ALGORITHMS
-			boolean debugAlgo = false;
-			if (debugAlgo) {
-				for (Agent a : agents) {
-					String newString = "";
-					int[][] result = SearchClient.flowFill(a, a.initialState);
-					for (int i = 0; i < SearchClient.rowSize; i++) {
-						for (int i2 = 0; i2 < SearchClient.colSize; i2++) {
-							if (result[i][i2] == 0) {
-								newString += " ";
-							} else if (result[i][i2] == 1) {
-								newString += "+";
-							} else if (result[i][i2] == 2) {
-								newString += "F";
-							} else if (result[i][i2] == 3) {
-								newString += "X";
-							}
-						}
-						newString += "\n";
-					}
-					newString += a.name + " is trapped = " + a.isTrapped;
-					System.err.println(newString);
-				}
-
-				for (Box b : allBoxes) {
-					System.err.println("Box at location " + b.position.toString() + " is blocking = " + b.isBlocking);
-				}
-			}
+		
+		
+		int maxSol =0;
+		List<List<Node>> solutions = new ArrayList<>();
+		
+		
+		
+		//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
+		Planner plan = null;
+		for(Agent a : agents){
+			
+			plan = new Planner(a); 
+			solutions.add(plan.solution);
+			
+		}
 
 			for (int i = 0; i < maxSol; i++) {
 
@@ -687,8 +662,7 @@ public class SearchClient {
 						n = solutions.get(j).get(i);
 						if (!n.doNoOp) {
 							jointAction.append(n.action.toString() + ",");
-						}
-						else{
+						} else {
 							jointAction.append("NoOp,");
 						}
 					} catch (IndexOutOfBoundsException e) {
@@ -713,7 +687,7 @@ public class SearchClient {
 			}
 		}
 	}
-}
+
 
 /*
  * 
