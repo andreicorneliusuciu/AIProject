@@ -5,6 +5,8 @@ public class Box {
 	public Character name;
 	public String color;
 	public Position position;
+    public boolean isBlocking = false;
+
 	
 	public Box(Character name, String color, Position position) {
 		super();

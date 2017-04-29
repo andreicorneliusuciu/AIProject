@@ -6,6 +6,7 @@ public class Agent {
 	public String color;
 	public Position position;
 	public Node initialState;
+	public boolean isTrapped = false;
 	
 	public Agent(int name, String color, Position position, Node initialState) {
 		this.name = name;
@@ -19,6 +20,7 @@ public class Agent {
 		this.initialState = initialState;
 	}
 
+	
 
 	@Override
 	public String toString() {
