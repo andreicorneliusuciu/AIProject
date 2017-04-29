@@ -25,6 +25,6 @@ public class Box {
 
 	@Override
 	public String toString() {
-		return "Box [name=" + name + ", color=" + color + ", position=" + position + "]";
+		return "Box [name=" + name + ", color=" + color + ", position=" + position +", isBlocking="+isBlocking+ "]";
 	}
 }

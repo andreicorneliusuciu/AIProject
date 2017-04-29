@@ -218,8 +218,11 @@ public class SearchClient {
 
 			if (strategy.frontierIsEmpty()) {
 
+				LinkedList<Node> noOpList = new LinkedList<Node>();
+				initialNode.doNoOp = true;
+				noOpList.add(initialNode);
 				System.err.println("The frontier is empty");
-				return null;
+				return noOpList;
 
 			}
 
@@ -514,6 +517,7 @@ public class SearchClient {
 								for (Box b : allBoxes) {
 									if (b.position.equals(new Position(i, i2))) {
 										b.isBlocking = true;
+										System.err.println("Box blocking found and is: " + b);
 									}
 								}
 							}
@@ -552,9 +556,12 @@ public class SearchClient {
 			done = false;
 			positions = new ArrayList<Position>();
 		}
-		for (Agent a : agents) {
-			Planner plan = new Planner(a);
-		}
+
+		// temp plan debugging
+		// for (Agent a : agents) {
+		// Planner plan = new Planner(agents.get(0));
+		// }
+
 		Strategy strategy;
 
 		if (args.length > 0) {
@@ -676,8 +683,14 @@ public class SearchClient {
 				for (int j = 0; j < solutions.size(); j++) {
 					Node n = null;
 					try {
+
 						n = solutions.get(j).get(i);
-						jointAction.append(n.action.toString() + ",");
+						if (!n.doNoOp) {
+							jointAction.append(n.action.toString() + ",");
+						}
+						else{
+							jointAction.append("NoOp,");
+						}
 					} catch (IndexOutOfBoundsException e) {
 						jointAction.append("NoOp,");
 					}
@@ -706,11 +719,7 @@ public class SearchClient {
  * 
  * 
  * 
- * __ _ / \__..---.._ ,'/ ( / \_ `..' / | | ,' / ( '. _____ _/ \ / __\ / `. (\_
- * ( / .-| |-.| | \ ( (WW| \W)j | \_\_`_| ``-. | \__/ ) -,______.-' ___________/
- * / .-' ( / \ | | | | | | / \ / \__/ ..--' | /-,_______\ \ .` _/ / | |\ \ \ / /
- * | | `--, \ \ | | | | / ) \__/| | | | ( | | | | | \ | | \ | \ `.___/ \_______)
- * \_______)
+
  * 
  * 
  */

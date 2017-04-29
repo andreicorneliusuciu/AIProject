@@ -19,6 +19,9 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
+	
+	public boolean doNoOp = false;
+
 
 	public char[][] boxes;
 	public char[][] goals;
