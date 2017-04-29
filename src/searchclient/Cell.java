@@ -2,16 +2,7 @@ package searchclient;
 
 // <<<<<<< PlanningImplementation
 // public class Cell {
-// 	Position position;
-// 	int type; //0 = wall, 1 = Free, 2 = goal. To be swapped out with enum?
-// 	boolean north = false;
-// 	boolean east = false;
-// 	boolean west = false;
-// 	boolean south = false;
-	
-// 	public Cell(int row, int col){
-// 		this.position = new Position(row,col);
-// 		//More data to be entered later
+// 	
 // =======
 import java.util.Map;
 
@@ -19,6 +10,12 @@ public class Cell {
 	
 	//the position of the cell
 	public Position cellPostition;
+	Position position;
+	int type; //0 = wall, 1 = Free, 2 = goal. To be swapped out with enum?
+	boolean north = false;
+	boolean east = false;
+	boolean west = false;
+	boolean south = false;
 	
 	/*Contains all the other cells and the distance to the current cell(the field above).
 	 *  For instance if you want the distance from (0, 0) to (5, 10):
@@ -30,6 +27,10 @@ public class Cell {
 		
 		this.cellPostition = cellPostition;
 		this.otherCellsDistance = otherCellsDistance;
+	}
+	
+	public Cell(int row, int col){
+  		this.position = new Position(row,col);
 	}
 
 	@Override
