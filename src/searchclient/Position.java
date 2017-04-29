@@ -12,6 +12,15 @@ public class Position {
 
 	public Position() {
 	}
+	
+	public static float manhattanDistance(Position a, Position b)
+	{
+		float distance = 0;
+		
+		distance = Math.abs(a.row-b.row) + Math.abs(a.col - b.col);
+		if(distance == 0) System.err.println("Problem with distance: 0");
+		return distance;
+	}
 
 	@Override
 	public String toString() {
