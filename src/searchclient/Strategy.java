@@ -26,6 +26,11 @@ public abstract class Strategy {
 		return this.explored.contains(n);
 	}
 
+	
+	public void clearFrontier(){
+		
+	}
+	
 	public int countExplored() {
 		return this.explored.size();
 	}
@@ -57,8 +62,10 @@ public abstract class Strategy {
 
 		public StrategyBFS() {
 			super();
+			
 			frontier = new ArrayDeque<Node>();
 			frontierSet = new HashSet<Node>();
+			clearFrontier();
 		}
 
 		@Override
@@ -85,6 +92,12 @@ public abstract class Strategy {
 		}
 
 		@Override
+		public void clearFrontier(){
+			frontier.clear();
+			frontierSet.clear();
+		}
+		
+		@Override
 		public boolean inFrontier(Node n) {
 			return frontierSet.contains(n);
 		}
@@ -104,6 +117,7 @@ public abstract class Strategy {
 			super();
 			frontier = new Stack<Node>();
 			frontierSet = new HashSet<Node>();
+			clearFrontier();
 		}
 
 		@Override
@@ -120,7 +134,11 @@ public abstract class Strategy {
 			frontier.push(n);
 			frontierSet.add(n);
 		}
-
+		@Override
+		public void clearFrontier(){
+			frontier.clear();
+			frontierSet.clear();
+		}
 		@Override
 		public int countFrontier() {
 			return frontier.size();
@@ -156,6 +174,7 @@ public abstract class Strategy {
 
 			frontier = new PriorityQueue<Node>(h);
 			frontierSet = new HashSet<Node>();
+			clearFrontier();
 		}
 
 		@Override
@@ -173,6 +192,12 @@ public abstract class Strategy {
 			frontierSet.add(n);
 		}
 
+		@Override
+		public void clearFrontier(){
+			frontier.clear();
+			frontierSet.clear();
+		}
+		
 		@Override
 		public int countFrontier() {
 			return frontier.size();

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,7 +113,8 @@ public class SearchClient {
 		levelRowSize = lines.size() - noOfActualRowsForTheLevel;
 		levelColumnSize = maxCol;
 
-		System.err.println("Row = " + levelRowSize + "  CCOL  = " + levelColumnSize);
+		// System.err.println("Row = " + levelRowSize + " CCOL = " +
+		// levelColumnSize);
 		walls = new boolean[levelRowSize][levelColumnSize];
 		map = new int[levelRowSize][levelColumnSize];
 
@@ -233,7 +235,7 @@ public class SearchClient {
 			row++;
 		}
 
-		System.err.println(" + Agents: " + agents);
+		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
 		System.err.println(" + Agents: " + agents);
 		System.err.println(" + Boxes: " + boxesToColor);
@@ -254,17 +256,17 @@ public class SearchClient {
 			}
 		}
 
-		System.err.println("\n ------------------------------------");
-		System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
+		// System.err.println("\n ------------------------------------");
+		// System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
+		//
+		// for (int i1 = 0; i1 < levelRowSize - 2; i1++) {
+		// for (int j = 0; j < levelColumnSize - 2; j++) {
+		// System.err.print(mapWithoutBorders[i1][j]);
+		// }
+		// System.err.println("");
+		// }
 
-		for (int i1 = 0; i1 < levelRowSize - 2; i1++) {
-			for (int j = 0; j < levelColumnSize - 2; j++) {
-				System.err.print(mapWithoutBorders[i1][j]);
-			}
-			System.err.println("");
-		}
-
-		System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
+		// System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
 
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
@@ -303,7 +305,7 @@ public class SearchClient {
 			// System.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState()) {
-				System.err.println("Returns" + leafNode.extractPlan());
+				// System.err.println("Returns" + leafNode.extractPlan());
 				return leafNode.extractPlan();
 			}
 
@@ -569,7 +571,7 @@ public class SearchClient {
 			result[p.row][p.col] = 3; // Blockage!
 		}
 
-		System.err.println("0");
+		// System.err.println("0");
 		return result; // 0 = Unconnected, 1 = Wall, 2 = Free flow, 3 =
 		// Blockage.
 	}
@@ -671,124 +673,156 @@ public class SearchClient {
 			System.err.println(
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
-		///////////////////////////////// readinput end
 
-		// LinkedList<Node> solution;
-		//
-		// // List containing all the solutions for every agent
-		// List<List<Node>> solutions = new ArrayList<>();
-		//
-		// for (int i = 0; i < agents.size(); i++) {
-		// try {
-		// solution = client.Search(new StrategyBFS(),
-		// SearchClient.agents.get(i).initialState);
-		// solutions.add(solution);
-		// } catch (Exception ex) {
-		// System.err.println("Problems for agent " + i + " when solving the
-		// level");
-		// ex.printStackTrace();
-		// solutions = null;
-		// }
-		// }
-		//
-		// if (solutions == null) {
-		// System.err.println(strategy.searchStatus());
-		// System.err.println("Unable to solve level.");
-		//
-		// System.exit(0);
-		//
-		// } else {
-		//
-		// int maxSol = 0;
-		// int m;
-		// for (int i = 0; i < solutions.size(); i++) {
-		// m = solutions.get(i).size();
-		// if (m > maxSol) {
-		// maxSol = m;
-		// }
-		// }
-		// DEBUG ALGORITHMS
-		// int maxSol =0;
-		// List containing all the solutions for every agent
-		// TODO: make astar work here. a loop with the switch-case
-		// List<List<Node>> solutions = new ArrayList<>();
+		
 
-		// call planner for all agents, fill solutions, repeat. Pass strategy to
-		// planner.
-		Planner plan = null;
-		// for(Agent a : agents){
-
-		plan = new Planner(agents.get(0));
-		// solutions.add(plan.solution);
-
-		// }
-
-		List<List<Node>> solutions = new ArrayList<List<Node>>();
-
-		if (solutions == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-
-			System.exit(0);
-
-		} else {
-			System.err.println("\nSummary for " + strategy.toString());
-			// System.err.println("Found solution of length " +
-			// solutions.size());
-			System.err.println(strategy.searchStatus());
-			// Multi-agent commands
-
-			int maxSol = 0;
-			int m1;
-			for (int i = 0; i < solutions.size(); i++) {
-				m1 = solutions.get(i).size();
-				if (m1 > maxSol) {
-					maxSol = m1;
+		// check if goal is reached
+		while (true) {
+			
+			//TODO solve second agent second loop being a piece of manure
+			Planner plan = null;
+			List<List<Node>> solutions = new ArrayList<List<Node>>();
+			LinkedList<Node> solution = new LinkedList<Node>();
+			
+			boolean isGoalState = true;
+			for (Goal g : allGoals) {
+				if (!g.isSatisfied) {
+					isGoalState = false;
+					break;
 				}
 			}
 
-			// TODO: empty the same string builder object
-			for (int i = 0; i < maxSol; i++) {
+			if (isGoalState == true) {
+				System.err.println("Success!!!");
+				break;
+			}
 
-				StringBuilder jointAction = new StringBuilder();
+			Node updatedNode = null;
+			for (Agent a : agents) {
 
-				jointAction.append('[');
-				// if (!solutions.isEmpty()) {
-				for (int j = 0; j < solutions.size(); j++) {
-					Node n = null;
-					try {
+				if (!a.isTrapped) {
+					System.err.println("Initializing planner again for "+a.name+"with initial state: /n" +a.initialState);
+					plan = new Planner(agents.get(a.name));
+	
+					solution =plan.findSolution();
+					
+					updatedNode = solution.getLast();
+					updatedNode.parent = null;
+					//System.err.println("=================daadadddaDD>Ad.da.dad.a>>>>>new initialState parent "+updatedNode.parent);
+					System.err.println("=================>>>>plan: "+solution);
 
-						n = solutions.get(j).get(i);
-						if (!n.doNoOp) {
-							jointAction.append(n.action.toString() + ",");
-						} else {
-							jointAction.append("NoOp,");
+					System.err.println("=================>>>>updatednode: "+updatedNode);
+					
+					
+					//put the goals back
+					for(int i=0; i<Node.MAX_ROW;i++)
+						for(int j=0; j<Node.MAX_COL;j++)
+						{
+							if(updatedNode.goals[i][j]!=0)
+							{
+								updatedNode.goals[i][j]=0;
+							}
 						}
-					} catch (IndexOutOfBoundsException e) {
-						jointAction.append("NoOp,");
+					
+					for(Goal g : updatedNode.goals2)
+					{
+						
+						updatedNode.goals[g.position.row][g.position.col]= g.name;
+					}
+					
+					a.initialState = updatedNode;
+					//System.err.println("solution for agent " + a.name + " :" + plan.solution);
+					//System.err.println("Goals for new initialstate: "+plan.solution.getLast().goals2);
+					solutions.add(solution);
+				} else {
+
+					System.err.println(
+							"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
+					LinkedList<Node> tempList = new LinkedList<Node>();
+					Node tempInitialState = a.initialState;
+					tempInitialState.doNoOp = true;
+					tempList.add(tempInitialState);
+					solutions.add(tempList);
+					a.isTrapped = false;
+					//Position ap = new Position(a.initialState.agentRow,a.initialState.agentCol);
+					//a.initialState = updatedNode;
+				}
+
+			}
+
+			if (solutions == null) {
+				System.err.println(strategy.searchStatus());
+				System.err.println("Unable to solve level.");
+
+				System.exit(0);
+
+			} else {
+				System.err.println("Found solution of length " + solutions.size());
+
+				int maxSol = 0;
+				int m1;
+				for (int i = 0; i < solutions.size(); i++) {
+					m1 = solutions.get(i).size();
+					if (m1 > maxSol) {
+						maxSol = m1;
 					}
 				}
-				// }
-				// } else {
-				// jointAction.append("NoOp,"); //TODO and this..check it out
-				// }
-				// replace the last comma with ']'
-				jointAction.setCharAt(jointAction.length() - 1, ']');
-				System.out.println(jointAction.toString());
-				System.err.println("===== " + jointAction.toString() + " ====");
-				String response = serverMessages.readLine();
-				if (response.contains("false")) {
-					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
-							jointAction.toString());
-					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
-					String f = "false";
-					int spot = response.indexOf(f);
-					jointAction.replace(spot, spot+f.length(), "NoOp");
-					String test = "";
-					test ="[NoOp,NoOp]";
-					System.out.println(test);
+
+				// TODO: empty the same string builder object
+				for (int i = 0; i < maxSol; i++) {
+
+					StringBuilder jointAction = new StringBuilder();
+
+					jointAction.append('[');
+					// if (!solutions.isEmpty()) {
+					for (int j = 0; j < solutions.size(); j++) {
+						Node n = null;
+						try {
+
+							n = solutions.get(j).get(i);
+
+							// System.err.println("DEBUG MASTER!!!!; "+n+"
+							// blalaalalalalala");
+
+							if (!n.doNoOp) {
+								// if(n.action == null)
+								// {System.err.println("null solution: "+n);
+								// }
+								jointAction.append(n.action.toString() + ",");
+							} else {
+								jointAction.append("NoOp,");
+							}
+						} catch (IndexOutOfBoundsException e) {
+							jointAction.append("NoOp,");
+						}
+					}
+					// replace the last comma with ']'
+					jointAction.setCharAt(jointAction.length() - 1, ']');
+					System.out.println(jointAction.toString());
+					System.err.println("===== " + jointAction.toString() + " ====");
+					String response = serverMessages.readLine();
+					if (response.contains("false")) {
+						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
+								jointAction.toString());
+						System.err.format("%s was attempted in \n%s\n", jointAction.toString(),
+								"Problems with the moves");
+						String f = "false";
+						int spot = response.indexOf(f);
+						int increase = 0;
+						if (jointAction.charAt(spot + 2) == 'v') {
+							increase = 1;
+						} else {
+							increase = 3;
+						}
+
+						jointAction.replace(spot, spot + f.length() + increase + 1, "NoOp");
+						System.out.println(jointAction);
+					}
 				}
 			}
+
+			// initialize and reset variables
+
 		}
 	}
 }

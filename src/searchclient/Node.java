@@ -78,19 +78,19 @@ public class Node {
 		return true;
 	}
 
-	public boolean isGoalState(Node goalState) {
-		for (int row = 1; row < MAX_ROW - 1; row++) {
-			for (int col = 1; col < MAX_COL - 1; col++) {
-				char g = goalState.goals[row][col];
-				char b = Character.toLowerCase(goalState.boxes[row][col]);
-				if (g > 0 && b != g) {
-					return false;
-				}
-			}
-		}
-		return true;
-
-	}
+//	public boolean isGoalState(Node goalState) {
+//		for (int row = 1; row < MAX_ROW - 1; row++) {
+//			for (int col = 1; col < MAX_COL - 1; col++) {
+//				char g = goalState.goals[row][col];
+//				char b = Character.toLowerCase(goalState.boxes[row][col]);
+//				if (g > 0 && b != g) {
+//					return false;
+//				}
+//			}
+//		}
+//		return true;
+//
+//	}
 
 	public ArrayList<Node> getExpandedNodes() {
 		// Box theBox = null;
@@ -251,6 +251,8 @@ public class Node {
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
+		copy.goals2 = this.goals2;
+		copy.boxes2 = this.boxes2;
 		// //////System.err.println("copy:::::"+copy.myBoxes);
 
 		return copy;

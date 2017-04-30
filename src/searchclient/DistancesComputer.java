@@ -74,26 +74,26 @@ public class DistancesComputer {
 	}
 	
 	public void printMap(Position start, Position end) {
-		System.err.println("\n ------------------------------------");
-		System.err.println("###### THE Distance for [" + start.row + ", " + start.col+ "] :");
-		
-		for(int i1 = 0; i1 <  levelRowSize; i1++) {
-			for (int j = 0; j < levelColSize; j++) {
-				if(map[i1][j] == -1) {
-					System.err.print("+"+" ");
-				} else if(i1 == start.row && j == start.col) {
-					System.err.print("S" + " ");
-				} else if(i1 == end.row && j == end.col) {
-					
-					System.err.print("E" + " ");
-				} else {
-					System.err.print(map[i1][j] + " ");
-				}
-			}
-			System.err.println("");
-		}
-		
-		System.err.println(" ###### Endo of distance [" + end.row + ", " + end.col+ "] ####");
+//		//System.err.println("\n ------------------------------------");
+//		//System.err.println("###### THE Distance for [" + start.row + ", " + start.col+ "] :");
+//		
+//		for(int i1 = 0; i1 <  levelRowSize; i1++) {
+//			for (int j = 0; j < levelColSize; j++) {
+//				if(map[i1][j] == -1) {
+//					System.err.print("+"+" ");
+//				} else if(i1 == start.row && j == start.col) {
+//					System.err.print("S" + " ");
+//				} else if(i1 == end.row && j == end.col) {
+//					
+//					System.err.print("E" + " ");
+//				} else {
+//					System.err.print(map[i1][j] + " ");
+//				}
+//			}
+//			System.err.println("");
+//		}
+//		
+//		System.err.println(" ###### Endo of distance [" + end.row + ", " + end.col+ "] ####");
 	}
 	
 	public List<Position> getExpandedCells(Position cell) {
