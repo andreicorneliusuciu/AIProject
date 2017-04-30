@@ -784,7 +784,9 @@ public class SearchClient {
 					String f = "false";
 					int spot = response.indexOf(f);
 					jointAction.replace(spot, spot+f.length(), "NoOp");
-					System.out.println(jointAction.toString());
+					String test = "";
+					test ="[NoOp,NoOp]";
+					System.out.println(test);
 				}
 			}
 		}
