@@ -781,7 +781,10 @@ public class SearchClient {
 					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
 							jointAction.toString());
 					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
-					break;
+					String f = "false";
+					int spot = response.indexOf(f);
+					jointAction.replace(spot, spot+f.length(), "NoOp");
+					System.out.println(jointAction.toString());
 				}
 			}
 		}
