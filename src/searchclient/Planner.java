@@ -34,7 +34,7 @@ public class Planner {
 
 		positions = Heuristic.findStorage(theAgent.initialState);
 		Heuristic.storageSpace = positions;
-		System.err.println(positions.toString());
+		//System.err.println(positions.toString());
 
 		this.agent = theAgent;
 
@@ -47,7 +47,7 @@ public class Planner {
 		// it
 		Node thePlan = findHighestPlan(agent, state); // returns goal state
 		solution = implementHighPlan(this.state, thePlan, new StrategyBFS());
-		System.err.println("HighestSolution: " + solution);
+		//System.err.println("HighestSolution: " + solution);
 
 	}
 
@@ -177,7 +177,7 @@ public class Planner {
 			// name it a random goal name of those the agent has
 			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.get(0).name;
 		}
-		System.err.println("Goal made in: " + shortestPos);
+		//System.err.println("Goal made in: " + shortestPos);
 
 		// keeping these just in case, erase if cleaning
 		plan.add(newState);
@@ -220,10 +220,10 @@ public class Planner {
 		for (Goal g : currentState.goals2) {
 			Box aBox = null;
 
-			System.err.println("Goal :" + g.name + " ," + g.color + " is satisfied: " + g.isSatisfied);
+			//System.err.println("Goal :" + g.name + " ," + g.color + " is satisfied: " + g.isSatisfied);
 
 			if (!g.isSatisfied && g.color == theAgent.color) {
-				System.err.println("Goal accepted :" + g.name);
+				//System.err.println("Goal accepted :" + g.name);
 				aBox = findClosestBox(theAgent, currentState);
 
 				theGoalState = MoveBoxToGoal(currentState, aBox, g).goals;
@@ -234,7 +234,7 @@ public class Planner {
 		}
 
 		// Object plantoString;
-		System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
+		//System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
 
 		/// System.err.println(" ");
 
@@ -242,7 +242,7 @@ public class Planner {
 	}
 
 	public LinkedList<Node> implementHighPlan(Node goalState, Node initialNode, Strategy strategy) {
-		System.err.format("Search starting with strategy %s.\n", strategy.toString());
+		System.err.format("{Planner} Search starting with strategy %s.\n", strategy.toString());
 		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
@@ -261,12 +261,11 @@ public class Planner {
 				return noOpList;
 
 			}
-
 			Node leafNode = strategy.getAndRemoveLeaf();
 			// System.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState(goalState)) {
-				System.err.println("Returns" + leafNode.extractPlan());
+				//System.err.println("Returns" + leafNode.extractPlan());
 				return leafNode.extractPlan();
 			}
 
@@ -309,9 +308,10 @@ public class Planner {
 			}
 		}
 
-		if (box == null)
-			System.err.println("No blocking Box found");
-
+		if (box == null) {
+			//System.err.println("No blocking Box found");
+		}
+		
 		return box;
 	}
 
@@ -319,7 +319,7 @@ public class Planner {
 	{
 
 		if (thisAgent == null) {
-			System.err.println("Null agent when going into findClosestBox in Planner");
+			//System.err.println("Null agent when going into findClosestBox in Planner");
 		}
 
 		Box box = null;

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import searchclient.Command.Type;
 
@@ -29,8 +31,11 @@ public class Node {
 	// alphabetially sorted both lists
 	public List<Goal> goals2 = new ArrayList<>();
 	public List<Box> boxes2 = new ArrayList<>();
-
+	
+	//This should be computed only once
 	public List<Box> myBoxes = new ArrayList<>();
+	
+	public Set<Box> myBoxesFinal = new TreeSet<>();
 
 	// list of storagepositions filled in heuristics
 	public List<Position> storagePos = new ArrayList<Position>();
@@ -43,13 +48,15 @@ public class Node {
 	private int _hash = 0;
 
 	public Node(Node parent, int maxRow, int maxCol) {
-
+		//boxes
+		
 		this.parent = parent;
 
 		MAX_ROW = maxRow;
 		MAX_COL = maxCol;
 		boxes = new char[MAX_ROW][MAX_COL];
 		goals = new char[MAX_ROW][MAX_COL];
+		
 		if (parent == null) {
 			this.g = 0;
 		} else {
@@ -169,10 +176,19 @@ public class Node {
 						n.agentCol = newAgentCol;
 
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-
+						//Update the new position of the box
+						//n.boxes2.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), new Position(newBoxRow, newBoxCol));
 						//here determine the box iondex and set it. The boxes2 needs to be sorted
 						//n.boxes2.set(arg0, arg1);
 						//TODO: this 0 is not ok here. needs to be the agent's number
+						
+						//get the box I want to move from the specific index
+//						System.err.println(n.boxes[newBoxRow][newBoxCol] - 'A');
+//						Box b = n.myBoxes.get(n.boxes[newBoxRow][newBoxCol] - 'A');
+//						//update its position in the same index
+//						b.position.row = newBoxRow;
+//						b.position.col = newBoxCol;
+//						n.myBoxes.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), b);
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
 
@@ -216,7 +232,13 @@ public class Node {
 						n.agentCol = newAgentCol;
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
-
+						
+//						//get the box I want to move from the specific index
+//						Box b = n.myBoxes.get(n.boxes[this.agentRow][this.agentCol] - 'A');
+//						//update its position in the same index
+//						b.position.row = this.agentRow;
+//						b.position.col = this.agentCol;
+//						n.myBoxes.set((int)(n.boxes[this.agentRow][this.agentCol] - 'A'), b);
 						// //////System.err.println("Pull \n" + n);
 						expandedNodes.add(n);
 
@@ -251,6 +273,8 @@ public class Node {
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
+		copy.myBoxesFinal = this.myBoxesFinal;
+		copy.goals2 = this.goals2;
 		// //////System.err.println("copy:::::"+copy.myBoxes);
 
 		return copy;

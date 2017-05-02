@@ -201,6 +201,10 @@ public class SearchClient {
 						agents.get(i).initialState.boxes[row][col] = chr;
 						agents.get(i).initialState.boxes2
 								.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						if(agents.get(i).color.equals(boxesToColor.get(chr))) {
+							agents.get(i).initialState.myBoxesFinal
+							.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						}
 						// }
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -238,17 +242,30 @@ public class SearchClient {
 		//TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
-
+		
+		for (int i = 0; i < agents.size(); i++) {
+			System.err.println("For agent " + i + ":");
+			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
+			System.err.println("&&&& Goals2 = " + agents.get(i).initialState.goals2);
+			System.err.println(" --------------------- ");
+		}
 //		for (int i = 0 ; i < agents.size(); i++) {
 //			
 //			agents.get(i).initialState = n;
 //			System.err.println("\n $ Goals: " + n.goals2 + " Boxes: "  +n.boxes2); 
 //		}
 		
-		int[][] mapWithoutBorders = new int[levelRowSize-2][levelColumnSize-2];
-		for(int i1 = 1; i1 < levelRowSize-1; i1++) {
-			for(int j1 = 1; j1 < levelColumnSize-1; j1++) {
-				mapWithoutBorders[i1-1][j1-1] = map[i1][j1];
+//		int[][] mapWithoutBorders = new int[levelRowSize-2][levelColumnSize-2];
+//		for(int i1 = 1; i1 < levelRowSize-1; i1++) {
+//			for(int j1 = 1; j1 < levelColumnSize-1; j1++) {
+//				mapWithoutBorders[i1-1][j1-1] = map[i1][j1];
+//			}
+//		}
+		
+		int[][] mapWithoutBorders = new int[levelRowSize][levelColumnSize];
+		for(int i1 = 0; i1 < levelRowSize; i1++) {
+			for(int j1 = 0; j1 < levelColumnSize; j1++) {
+				mapWithoutBorders[i1][j1] = map[i1][j1];
 			}
 		}
 		
@@ -266,13 +283,15 @@ public class SearchClient {
 		
 		//Compute all the distances on a NxN map. It does not work for non square maps.
 		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
-		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0,0),
-				new Position(levelRowSize-3,levelColumnSize-3));
+		distancesComputer.computeDistanceBetweenTwoPoints(new Position(1,1),
+				new Position(levelRowSize-1,levelColumnSize-1));
 		
 		//Test distances function
 //		System.err.println("Distance between (5,0) and (7,0) = " +  
 //		DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
 //				new Position(7,0)));
+		//Test Independent goals
+		
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -300,7 +319,7 @@ public class SearchClient {
 			// System.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState()) {
-				System.err.println("Returns" + leafNode.extractPlan());
+				//System.err.println("Returns" + leafNode.extractPlan());
 				return leafNode.extractPlan();
 			}
 
@@ -597,6 +616,48 @@ public class SearchClient {
 			}
 		}
 	}
+	
+	public List<Strategy> getStrategies(String str) {
+		
+		List<Strategy> strategies = new ArrayList<>(agents.size());
+		
+		
+		switch (str.toLowerCase()) {
+			case "-bfs":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBFS());
+				break;
+			case "-dfs":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyDFS());
+				System.err.println("DFS Strategy.");
+				break;
+			case "-astar":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new AStar(agents.get(i).initialState)));
+				System.err.println("A* Strategy.");
+				break;
+			case "-wastar":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new WeightedAStar(agents.get(i).initialState, 5)));
+				System.err.println("WA* Strategy.");
+				break;
+			case "-greedy":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new Greedy(agents.get(i).initialState)));
+				System.err.println("Greedy Best First Strategy.");
+				break;
+			default:
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBFS());
+				System.err.println(
+						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+				break;
+		}
+		
+		
+		return strategies;
+	}
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
@@ -634,34 +695,14 @@ public class SearchClient {
 		//////////////////////////////////////////
 
 		// read the input
-		Strategy strategy;
-
+		List<Strategy> strategies = null;
+		
 		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-//			case "-astar":
-//				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
-//				break;
-//			case "-wastar":
-//				// You're welcome to test WA* out with different values, but for
-//				// the report you must at least indicate benchmarks for W = 5.
-//				strategy = new StrategyBestFirst(new WeightedAStar(client.initialStates.get(0), 5));
-//				break;
-//			case "-greedy":
-//				strategy = new StrategyBestFirst(new Greedy(client.initialStates.get(0)));
-//				break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
+			strategies = client.getStrategies(args[0]);
 		} else {
-			strategy = new StrategyBFS();
+			strategies = new ArrayList<>(agents.size());
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
 			System.err.println(
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
@@ -674,7 +715,7 @@ public class SearchClient {
 
 		for (int i = 0; i < agents.size(); i++) {
 			try {
-				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
+				solution = client.Search(strategies.get(i), SearchClient.agents.get(i).initialState);
 				solutions.add(solution);
 			} catch (Exception ex) {
 				System.err.println("Problems for agent " + i + " when solving the level");
@@ -684,7 +725,7 @@ public class SearchClient {
 		}
 
 		if (solutions == null) {
-			System.err.println(strategy.searchStatus());
+			printSearchStatus(strategies, solutions);
 			System.err.println("Unable to solve level.");
 
 			System.exit(0);
@@ -700,33 +741,19 @@ public class SearchClient {
 				}
 			}
 			// DEBUG ALGORITHMS
-		//int maxSol =0;
-		//List containing all the solutions for every agent
-		//TODO: make astar work here. a loop with the switch-case
-		//List<List<Node>> solutions = new ArrayList<>();
-		
-		//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
-		Planner plan = null;
-		//for(Agent a : agents){
+			//int maxSol =0;
+			//List containing all the solutions for every agent
+			//List<List<Node>> solutions = new ArrayList<>();
+			
+			//call planner for all agents, fill solutions, repeat. Pass strategy to planner.
+			Planner plan = null;
+			//for(Agent a : agents){
 			
 			plan = new Planner(agents.get(0)); 
 			//solutions.add(plan.solution);
 			
-		//}
-
-
-		if (solutions == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-			
-			System.exit(0);
-			
-		} else {
-			System.err.println("\nSummary for " + strategy.toString());
-//			System.err.println("Found solution of length " + solutions.size());
-			System.err.println(strategy.searchStatus());
-			//Multi-agent commands
-			
+			//}
+			printSearchStatus(strategies, solutions);
 
 			int m1;
 			for (int i = 0; i < solutions.size(); i++) {
@@ -775,10 +802,24 @@ public class SearchClient {
 			}
 		}
 	}
-	}}
+
+	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+		int i = 0;
+		for(Strategy s: strategiesSearchResults) {
+			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+			System.err.println(s.searchStatus() + "\n");
+			i++;
+		}
+	}
+}
 /*
  * TODO Andrei: update the non square maps with wall on the empty spaces
  * - update the boxes2 and the goals list in the Node class
+ * - compute the distance from the closest to the furtheres point (now is [1,1] -> [levelRow-1, levCol-1])
+ * - Make the agents (when more of the same color) to pick the closest obj to the goal and then goal is satisfied NoOp
+ * - A* heuristics make it to work
+ * - more boxes of tjhe same color but just one (or less ) goals
+ * - Add distance from angent to the box in the heuristic as well
  * - call the heuristic function with the distances
  * - if starts with space and there is a wall, complete everithinh with walls
  * - the annoying bug when parsing the level and the agents are not in the good position in the rows*/

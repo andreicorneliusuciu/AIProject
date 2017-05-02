@@ -68,9 +68,9 @@ public class DistancesComputer {
 	
 	public static int getDistanceBetween2Positions(Position p1, Position p2) {
 		int dist = Math.abs(map[p2.row][p2.col] - map[p1.row][p1.col]);
-		if(dist != 0)
+//		if(dist != 0)
 			return dist;
-		else return Integer.MAX_VALUE;
+	//	else return Integer.MAX_VALUE;
 	}
 	
 	public void printMap(Position start, Position end) {

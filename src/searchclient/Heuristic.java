@@ -3,6 +3,7 @@ package searchclient;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.List;
 import java.lang.Math;
 
@@ -153,8 +154,47 @@ public abstract class Heuristic implements Comparator<Node> {
 		// result += Math.abs(n.boxes2.get(i).row - goals.get(i).row) +
 		// Math.abs(n.boxes2.get(i).col - goals.get(i).col);
 		// }
-
+		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
+		//System.err.println("[H] h func, goals 2 = " + n.goals2);
+		int i = 0;
+		for(Box b:boxesOrderedAlphabetically) {
+			//	ADD dist			box						the goal
+			Position goal = n.goals2.get(i).position;
+//			goal.row = goal.row - 1;
+//			goal.col = goal.col - 1;
+//			b.position.row--;
+//			b.position.col--;
+			result += DistancesComputer.
+					getDistanceBetween2Positions(b.position, goal);//here???
+			i++;
+		}
+		//System.err.println("[H] Heuristic result = " + result);
 		return result;
+	}
+	
+	public Set<Box> getBoxesPosition(Node n) {
+		Set<Box> boxesPosition = new TreeSet<>();
+		for(int i = 0; i <  DistancesComputer.levelRowSize; i++) {
+			for(int j = 0; j < DistancesComputer.levelColSize; j++) {
+				//is char initialized with 0 by default?
+				//System.err.println("[H] myBoxesFinal " + n.myBoxesFinal);
+				if('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
+					boxesPosition.add(
+							new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
+					//System.err.println("[H] AICI" );
+					
+				}
+				
+			}
+			
+		}
+		//System.err.println("THe size of the boxes is " + boxesPosition.size());
+		
+//		for(Box b:n.myBoxes) {
+//			boxesPosition.add(b);
+//		}
+		
+		return boxesPosition;
 	}
 
 	public abstract int f(Node n);
