@@ -43,7 +43,7 @@ public class Agent implements Comparator<Agent>, Comparable<Agent>{
 
 	@Override
 	public String toString() {
-		return "Agent [name=" + name + ", color=" + color + " position=" + position + " initialState=" + initialState + "]";
+		return "Agent [name=" + name + ", color=" + color + " position=" + position + " initialState= \n" + initialState + "]";
 	}
 
 	@Override

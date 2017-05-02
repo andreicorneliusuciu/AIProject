@@ -3,24 +3,16 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
-import searchclient.Heuristic.AStar;
-import searchclient.Heuristic.Greedy;
-import searchclient.Heuristic.WeightedAStar;
 import searchclient.Strategy.StrategyBFS;
-import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
@@ -33,6 +25,7 @@ public class SearchClient {
 	// public static int levelColSize;
 	// public static int levelRowSize;
 
+	public static Node copy;
 	// The list of agents. Index represents the agent, the value is the color
 	public static List<Agent> agents;
 
@@ -196,6 +189,7 @@ public class SearchClient {
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					if (!boxesToColor.containsKey(chr)) {
 						boxesToColor.put(chr, "blue");
+
 					}
 					for (int i = 0; i < agents.size(); i++) {
 						// if the color of the box is the same as the agent =>
@@ -221,6 +215,8 @@ public class SearchClient {
 						// same color
 						if (agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
 							agents.get(i).initialState.goals[row][col] = chr;
+							// System.err.println("goal made here: " + row + ","
+							// + col + " by agent " + agents.get(i));
 							agents.get(i).initialState.goals2
 									.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
@@ -234,11 +230,12 @@ public class SearchClient {
 			}
 			row++;
 		}
+		// agents.get(1).initialState.printGoals();
 
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
-		System.err.println(" + Agents: " + agents);
-		System.err.println(" + Boxes: " + boxesToColor);
+		System.err.println(" + Agents without updated boxes: " + agents);
+		System.err.println(" + Boxes without updates: " + boxesToColor);
 		// TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
@@ -294,7 +291,7 @@ public class SearchClient {
 			if (strategy.frontierIsEmpty()) {
 
 				LinkedList<Node> noOpList = new LinkedList<Node>();
-			//	initialNode.doNoOp = true;
+				// initialNode.doNoOp = true;
 				noOpList.add(initialNode);
 				System.err.println("The frontier is empty");
 				return noOpList;
@@ -324,122 +321,346 @@ public class SearchClient {
 		}
 	}
 
-	public void storageAnalysis(Node node) {// Swap out input with other types
-		// of data?
-		Cell[][] map = new Cell[levelRowSize][levelColumnSize];
+	public static void main(String[] args) throws Exception {
+		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
-		// Initialize cell map
-		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
-				map[i][i2] = new Cell(i, i2);
-				if (walls[i][i2]) {
-					map[i][i2].type = 0;// Wall
-				} else {
-					map[i][i2].type = 1;// Free
-				}
-			}
-		}
-		for (Goal g : this.allGoals) {
-			map[g.position.row][g.position.col].type = 2; // Goal
+		// Use stderr to print to console
+		System.err.println("SearchClient initializing. I am sending this using the error output stream.");
+
+		// Read level and create the initial state of the problem
+		SearchClient client = new SearchClient(serverMessages);
+
+		// TODO update allBoxes and allgoals
+
+		for (Agent a : agents) { // positions, check if
+			allBoxes = agents.get(a.name).initialState.boxes2;
 		}
 
-		// Link up cells
-		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
-				if (map[i][i2].type >= 1) {
-					if (map[i + 1][i2].type >= 1) {// + is south, right?
-						map[i][i2].south = true;
-					}
-					if (map[i - 1][i2].type >= 1) {
-						map[i][i2].north = true;
-					}
-					if (map[i][i2 + 1].type >= 1) {
-						map[i][i2].east = true;
-					}
-					if (map[i][i2 - 1].type >= 1) {
-						map[i][i2].west = true;
-					}
-				}
-			}
+		for (Agent a : agents) { // positions, check if
+			allGoals = agents.get(a.name).initialState.goals2;
 		}
 
-		// Create row objects
-		ArrayList<Line> rows = new ArrayList<Line>();
-		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
-				if (map[i][i2].type == 1) {
-					boolean connected = true;
-					Line row = new Line();
-					ArrayList<Position> positions = new ArrayList<Position>();
-					while (connected) {
-						if (map[i][i2].type == 1) {
-							positions.add(map[i][i2].position);
-							i2++;
-						} else {
-							connected = false;
+		for (Goal g : allGoals)
+			for (Box b : allBoxes) {
+				{
+					for (Agent a : agents) {
+						if (a.color.equals(g.color) && !a.initialState.goals2.contains(g)) {
+							a.initialState.goals2.add(g);
+							a.initialState.goals[g.position.row][g.position.col] = g.name;
+						}
+
+						if (a.color.equals(b.color) && !a.initialState.boxes2.contains(b)) {
+							a.initialState.boxes2.add(b);
+							a.initialState.boxes[b.position.row][b.position.col] = b.name;
 						}
 					}
-					row.positions = positions;
-					rows.add(row);
-				} else if (map[i][i2].type == 2) {
-					boolean connected = true;
-					Line row = new Line();
-					row.goalLine = true;
-					ArrayList<Position> positions = new ArrayList<Position>();
-					while (connected) {
-						if (map[i][i2].type == 2) {
-							positions.add(map[i][i2].position);
-							i2++;
-						} else {
-							connected = false;
-						}
-					}
-					row.positions = positions;
-					rows.add(row);
 				}
 			}
+		// they are updating
+		for (Agent g : agents) {
+			g.initialState.printGoals();
+		}
+		// this is preprocessing shit
+
+		boolean done = false;
+		ArrayList<Position> positions = new ArrayList<Position>();
+		for (Agent a : agents) {
+			for (Box b : allBoxes) {
+				for (Goal g : a.initialState.goals2) {
+					if (g.color == b.color) {
+						done = true;
+						positions.add(g.position);
+						positions.add(b.position);
+						rescueUnit(a, positions, a.initialState);
+						break;
+					}
+				}
+				if (done)
+					break;
+			}
+			done = false;
+			positions = new ArrayList<Position>();
+		}
+		//////////////////////////////////////////
+
+		// read the input
+		Strategy strategy;
+
+		if (args.length > 0) {
+			switch (args[0].toLowerCase()) {
+			case "-bfs":
+				strategy = new StrategyBFS();
+				break;
+			case "-dfs":
+				strategy = new StrategyDFS();
+				break;
+			// case "-astar":
+			// strategy = new StrategyBestFirst(new
+			// AStar(client.initialStates.get(0)));
+			// break;
+			// case "-wastar":
+			// // You're welcome to test WA* out with different values, but for
+			// // the report you must at least indicate benchmarks for W = 5.
+			// strategy = new StrategyBestFirst(new
+			// WeightedAStar(client.initialStates.get(0), 5));
+			// break;
+			// case "-greedy":
+			// strategy = new StrategyBestFirst(new
+			// Greedy(client.initialStates.get(0)));
+			// break;
+			default:
+				strategy = new StrategyBFS();
+				System.err.println(
+						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			}
+		} else {
+			strategy = new StrategyBFS();
+			System.err.println(
+					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
-		// Create col objects
-		ArrayList<Line> cols = new ArrayList<Line>();
-		for (int i = 0; i < levelColumnSize; i++) {
-			for (int i2 = 0; i2++ < levelRowSize; i2++) {
-				if (map[i2][i].type == 1) {
-					boolean connected = true;
-					Line col = new Line();
-					ArrayList<Position> positions = new ArrayList<Position>();
-					while (connected) {
-						if (map[i2][i].type == 1) {
-							positions.add(map[i2][i].position);
-							i2++;
-						} else {
-							connected = false;
-						}
-					}
-					col.positions = positions;
-					cols.add(col);
-				} else if (map[i2][i].type == 2) {
-					boolean connected = true;
-					Line col = new Line();
-					col.goalLine = true;
-					ArrayList<Position> positions = new ArrayList<Position>();
-					while (connected) {
-						if (map[i2][i].type == 2) {
-							positions.add(map[i2][i].position);
-							i2++;
-						} else {
-							connected = false;
-						}
-					}
-					col.positions = positions;
-					cols.add(col);
+		// check if goal is reached
+		while (true) {
+
+			// TODO solve second agent second loop being a piece of manure
+			Planner plan = null;
+			List<List<Node>> solutions = new ArrayList<List<Node>>();
+			LinkedList<Node> solution = new LinkedList<Node>();
+
+			boolean isGoalState = true;
+			for (Goal g : allGoals) {
+				if (!g.isSatisfied) {
+					isGoalState = false;
+					break;
 				}
 			}
+
+			if (isGoalState == true) {
+				System.err.println("Success!!!");
+				break;
+			}
+
+			Node updatedNode = null;
+
+
+			
+			
+			for (Agent a : agents) {
+
+				if (!a.isTrapped && !a.initialState.isGoalState()) {
+
+					System.err.println("Initializing planner for " + a.name + "with initial state: /n" + a.initialState);
+					plan = new Planner(agents.get(a.name));
+
+					solution = plan.findSolution();
+
+					updatedNode = solution.getLast();
+					updatedNode.parent = null;
+
+					System.err.println("=================>>>>plan: \n" + solution);
+
+					// put the goals back
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (updatedNode.goals[i][j] != 0) {
+								updatedNode.goals[i][j] = 0;
+							}
+						}
+
+					for (Goal g : updatedNode.goals2) {
+
+						updatedNode.goals[g.position.row][g.position.col] = g.name;
+					}
+
+					plan.updateGoalStates(updatedNode);
+					System.err.println("=================>>>>NEWupdatednode: \n" + updatedNode);
+
+					
+					
+					//a.initialState = updatedNode;
+
+
+					
+					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
+
+
+						a.initialState = updatedNode;
+						
+//						tempN = updatedNode;
+						copy = updatedNode;
+						copy.parent = null;
+
+						//bug is updating this updates the other initialstate too
+						System.err.println("Agents meow 0" + agents);
+	
+						
+						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
+						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
+						copy.theAgentName = agents.get(plan.trappedAgent).name;
+						copy.goals2.clear();
+						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
+						copy.goals = agents.get(plan.trappedAgent).initialState.goals;
+						copy.theAgentColor = agents.get(plan.trappedAgent).initialState.theAgentColor;
+//						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
+//						copy.boxes = agents.get(plan.trappedAgent).initialState.boxes;
+					
+						System.err.println("Agents meow 1" + agents);
+
+						System.err.println("The copy====================> whoe "+copy.toString());
+					//	agents.get(plan.trappedAgent).initialState = copy;
+
+					} else {
+						a.initialState = updatedNode;
+					}
+					
+
+					
+					solutions.add(solution);
+				} else if (a.isTrapped && !a.initialState.isGoalState()) { // if
+																			// agent
+																			// trapped
+
+//					System.err.println(
+//							"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
+					LinkedList<Node> tempList = new LinkedList<Node>();
+					Node tempInitialState = a.initialState;
+					System.err.println(
+							"InitialState for trapped agent " + a.name + " with initialState " + a.initialState);
+					tempInitialState.doNoOp = true; // append noop in
+													// joinedaction
+					tempList.add(tempInitialState);
+					solutions.add(tempList);
+
+
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (a.initialState.goals[i][j] != 0) {
+								a.initialState.goals[i][j] = 0;
+							}
+						}
+
+
+					for (Goal g : a.initialState.goals2) {
+
+						a.initialState.goals[g.position.row][g.position.col] = g.name;
+					}
+
+					// a.initialState = updatedNode;
+
+					
+					a.initialState = copy;
+					
+					a.isTrapped = false;
+
+
+				}
+				// else if(a.initialState.isGoalState()) //if you finish your
+				// goals
+				// {
+				// // System.err.println(
+				// // "Agent: " + a + " is trapped, shit. Reseting plan.
+				// Remember to update agent.initialState");
+				// LinkedList<Node> tempList = new LinkedList<Node>();
+				// Node tempInitialState = a.initialState;
+				// tempInitialState.doNoOp = true;
+				// tempList.add(tempInitialState);
+				// solutions.add(tempList);
+				// a.isTrapped = false;
+				// }
+			//	System.err.println("Agents meow0 " + agents);
+
+			}
+
+			if (solutions == null) {
+				System.err.println(strategy.searchStatus());
+				System.err.println("Unable to solve level.");
+
+				System.exit(0);
+
+			} else {
+				System.err.println("Found solution of length " + solutions.size());
+
+				int maxSol = 0;
+				int m1;
+				for (int i = 0; i < solutions.size(); i++) {
+					m1 = solutions.get(i).size();
+					if (m1 > maxSol) {
+						maxSol = m1;
+					}
+				}
+
+				// TODO: empty the same string builder object
+				for (int i = 0; i < maxSol; i++) {
+
+					StringBuilder jointAction = new StringBuilder();
+
+					jointAction.append('[');
+					// if (!solutions.isEmpty()) {
+					for (int j = 0; j < solutions.size(); j++) {
+						Node n = null;
+						try {
+
+							n = solutions.get(j).get(i);
+
+							// System.err.println("DEBUG MASTER!!!!; "+n+"
+							// blalaalalalalala");
+
+							if (!n.doNoOp) {
+								// if(n.action == null)
+								// {System.err.println("null solution: "+n);
+								// }
+								jointAction.append(n.action.toString() + ",");
+							} else {
+								jointAction.append("NoOp,");
+							}
+						} catch (IndexOutOfBoundsException e) {
+							jointAction.append("NoOp,");
+						}
+					}
+					// replace the last comma with ']'
+					jointAction.setCharAt(jointAction.length() - 1, ']');
+					System.out.println(jointAction.toString());
+					System.err.println("===== " + jointAction.toString() + " ====");
+					String response = serverMessages.readLine();
+					if (response.contains("false")) {
+						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
+								jointAction.toString());
+						System.err.format("%s was attempted in \n%s\n", jointAction.toString(),
+								"Problems with the moves");
+						// String f = "false"; this needs debugging because
+						// false/true have different lengths and it fails for
+						// [true,false]
+						// int spot = response.indexOf(f);
+						// int placeInIndex =0;
+						// if(spot<2){
+						// placeInIndex =0;
+						// }
+						// else if(spot>2 && spot < 10)
+						// {
+						// placeInIndex = 1;
+						//
+						// }
+						//
+						// int increase = 0;
+						// if (jointAction.charAt(spot) == 'M') {
+						// increase = 2;
+						// } else {
+						// increase = 4;
+						// }
+
+						// jointAction.replace(spot, spot + f.length() +
+						// increase, "NoOp");
+						// System.out.println(jointAction);
+						// System.err.println("jointAction after false:
+						// "+jointAction);
+						break;
+					}
+				}
+			}
+
+			// initialize and reset variables
+
 		}
-
-		// Connect them
-
-		// Supernodes?
 	}
 
 	public static int[][] flowFill(Agent agent, Node node) {
@@ -455,8 +676,8 @@ public class SearchClient {
 			}
 		}
 
-		for (int i = 0; i < node.MAX_ROW; i++) {
-			for (int i2 = 0; i2 < node.MAX_COL; i2++) {
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			for (int i2 = 0; i2 < Node.MAX_COL; i2++) {
 				if (node.boxes[i][i2] != '\u0000') {
 					matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
 					// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
@@ -603,280 +824,122 @@ public class SearchClient {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
+	public void storageAnalysis(Node node) {// Swap out input with other types
+		// of data?
+		Cell[][] map = new Cell[levelRowSize][levelColumnSize];
 
-		// Use stderr to print to console
-		System.err.println("SearchClient initializing. I am sending this using the error output stream.");
-
-		// Read level and create the initial state of the problem
-		SearchClient client = new SearchClient(serverMessages);
-
-		allBoxes = agents.get(0).initialState.boxes2; // TODO update allBoxes
-														// positions, check if
-														// they are updating
-
-		// this is preprocessing shit
-		boolean done = false;
-		ArrayList<Position> positions = new ArrayList<Position>();
-		for (Agent a : agents) {
-			for (Box b : allBoxes) {
-				for (Goal g : a.initialState.goals2) {
-					if (g.color == b.color) {
-						done = true;
-						positions.add(g.position);
-						positions.add(b.position);
-						rescueUnit(a, positions, a.initialState);
-						break;
-					}
+		// Initialize cell map
+		for (int i = 0; i < levelRowSize; i++) {
+			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
+				map[i][i2] = new Cell(i, i2);
+				if (walls[i][i2]) {
+					map[i][i2].type = 0;// Wall
+				} else {
+					map[i][i2].type = 1;// Free
 				}
-				if (done)
-					break;
 			}
-			done = false;
-			positions = new ArrayList<Position>();
 		}
-		//////////////////////////////////////////
-
-		// read the input
-		Strategy strategy;
-
-		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-			// case "-astar":
-			// strategy = new StrategyBestFirst(new
-			// AStar(client.initialStates.get(0)));
-			// break;
-			// case "-wastar":
-			// // You're welcome to test WA* out with different values, but for
-			// // the report you must at least indicate benchmarks for W = 5.
-			// strategy = new StrategyBestFirst(new
-			// WeightedAStar(client.initialStates.get(0), 5));
-			// break;
-			// case "-greedy":
-			// strategy = new StrategyBestFirst(new
-			// Greedy(client.initialStates.get(0)));
-			// break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
-		} else {
-			strategy = new StrategyBFS();
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+		for (Goal g : SearchClient.allGoals) {
+			map[g.position.row][g.position.col].type = 2; // Goal
 		}
 
-		// check if goal is reached
-		while (true) {
-
-			// TODO solve second agent second loop being a piece of manure
-			Planner plan = null;
-			List<List<Node>> solutions = new ArrayList<List<Node>>();
-			LinkedList<Node> solution = new LinkedList<Node>();
-
-			boolean isGoalState = true;
-			for (Goal g : allGoals) {
-				if (!g.isSatisfied) {
-					isGoalState = false;
-					break;
-				}
-			}
-
-			if (isGoalState == true) {
-				System.err.println("Success!!!");
-				break;
-			}
-
-			Node updatedNode = null;
-		//	System.err.println("=================>>>>agentsdDADAADADA: " + agents);
-
-			for (Agent a : agents) {
-
-				//System.err.println("=================>>>>agentsdDADAADADA inside: " + agents);
-
-				if (!a.isTrapped && !a.initialState.isGoalState() ) {
-
-					System.err.println(
-							"Initializing planner again for " + a.name + "with initial state: /n" + a.initialState);
-					plan = new Planner(agents.get(a.name));
-					//System.err.println("=================>>>>agentsdDADAADADA in if: " + agents.get(a.name));
-
-					//System.err.println("=================>>>>agentsdDADAADADA: " + agents);
-
-					solution = plan.findSolution();
-
-					updatedNode = solution.getLast();
-					updatedNode.parent = null;
-					
-
-					System.err.println("=================>>>>plan: " + solution);
-
-					System.err.println("=================>>>>updatednode: " + updatedNode);
-
-					
-
-					// put the goals back
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (updatedNode.goals[i][j] != 0) {
-								updatedNode.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : updatedNode.goals2) {
-
-						
-						updatedNode.goals[g.position.row][g.position.col] = g.name;
+		// Link up cells
+		for (int i = 0; i < levelRowSize; i++) {
+			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
+				if (map[i][i2].type >= 1) {
+					if (map[i + 1][i2].type >= 1) {// + is south, right?
+						map[i][i2].south = true;
 					}
-
-					plan.updateGoalStates(updatedNode);
-					System.err.println("=================>>>>NEWupdatednode: " + updatedNode);
-					
-					a.initialState = updatedNode;
-					
-					solutions.add(solution);
-				} else if(a.isTrapped && !a.initialState.isGoalState()) { //if agent trapped
-
-					System.err.println(
-							"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
-					LinkedList<Node> tempList = new LinkedList<Node>();
-					Node tempInitialState = a.initialState;
-					System.err.println("InitialState for trapped agent "+a.name+" with initialState "+a.initialState);
-				 	tempInitialState.doNoOp = true;  //append noop in joinedaction
-					tempList.add(tempInitialState);
-					solutions.add(tempList);
-					
-					
-					
-					
-					
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (a.initialState.goals[i][j] != 0) {
-								a.initialState.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : a.initialState.goals2) {
-
-						a.initialState.goals[g.position.row][g.position.col] = g.name;
+					if (map[i - 1][i2].type >= 1) {
+						map[i][i2].north = true;
 					}
-
-				//	a.initialState = updatedNode;
-					
-					
-					
-					a.isTrapped = false;
-				
-				}
-//				else if(a.initialState.isGoalState()) //if you finish your goals
-//				{
-//				//	System.err.println(
-//					//		"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
-//					LinkedList<Node> tempList = new LinkedList<Node>();
-//					Node tempInitialState = a.initialState;
-//					tempInitialState.doNoOp = true;
-//					tempList.add(tempInitialState);
-//					solutions.add(tempList);
-//					a.isTrapped = false;
-//				}
-
-			}
-
-			if (solutions == null) {
-				System.err.println(strategy.searchStatus());
-				System.err.println("Unable to solve level.");
-
-				System.exit(0);
-
-			} else {
-				System.err.println("Found solution of length " + solutions.size());
-
-				int maxSol = 0;
-				int m1;
-				for (int i = 0; i < solutions.size(); i++) {
-					m1 = solutions.get(i).size();
-					if (m1 > maxSol) {
-						maxSol = m1;
+					if (map[i][i2 + 1].type >= 1) {
+						map[i][i2].east = true;
 					}
-				}
-
-				// TODO: empty the same string builder object
-				for (int i = 0; i < maxSol; i++) {
-
-					StringBuilder jointAction = new StringBuilder();
-
-					jointAction.append('[');
-					// if (!solutions.isEmpty()) {
-					for (int j = 0; j < solutions.size(); j++) {
-						Node n = null;
-						try {
-
-							n = solutions.get(j).get(i);
-
-							// System.err.println("DEBUG MASTER!!!!; "+n+"
-							// blalaalalalalala");
-
-							if (!n.doNoOp) {
-								// if(n.action == null)
-								// {System.err.println("null solution: "+n);
-								// }
-								jointAction.append(n.action.toString() + ",");
-							} else {
-								jointAction.append("NoOp,");
-							}
-						} catch (IndexOutOfBoundsException e) {
-							jointAction.append("NoOp,");
-						}
-					}
-					// replace the last comma with ']'
-					jointAction.setCharAt(jointAction.length() - 1, ']');
-					System.out.println(jointAction.toString());
-					System.err.println("===== " + jointAction.toString() + " ====");
-					String response = serverMessages.readLine();
-					if (response.contains("false")) {
-						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
-								jointAction.toString());
-						System.err.format("%s was attempted in \n%s\n", jointAction.toString(),
-								"Problems with the moves");
-//						String f = "false";      this needs debugging because false/true have different lengths and it fails for [true,false]
-//						int spot = response.indexOf(f);
-//						int placeInIndex =0;
-//						if(spot<2){
-//							placeInIndex =0;
-//						}
-//						else if(spot>2 && spot < 10)
-//						{
-//							placeInIndex = 1;
-//							
-//						}
-//						
-//						int increase = 0;
-//						if (jointAction.charAt(spot) == 'M') {
-//							increase = 2;
-//						} else {
-//							increase = 4;
-//						}
-
-						//jointAction.replace(spot, spot + f.length() + increase, "NoOp");
-						//System.out.println(jointAction);
-						//System.err.println("jointAction after false: "+jointAction);
-						break;
+					if (map[i][i2 - 1].type >= 1) {
+						map[i][i2].west = true;
 					}
 				}
 			}
-
-			// initialize and reset variables
-
 		}
+
+		// Create row objects
+		ArrayList<Line> rows = new ArrayList<Line>();
+		for (int i = 0; i < levelRowSize; i++) {
+			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
+				if (map[i][i2].type == 1) {
+					boolean connected = true;
+					Line row = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i][i2].type == 1) {
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				} else if (map[i][i2].type == 2) {
+					boolean connected = true;
+					Line row = new Line();
+					row.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i][i2].type == 2) {
+							positions.add(map[i][i2].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					row.positions = positions;
+					rows.add(row);
+				}
+			}
+		}
+
+		// Create col objects
+		ArrayList<Line> cols = new ArrayList<Line>();
+		for (int i = 0; i < levelColumnSize; i++) {
+			for (int i2 = 0; i2++ < levelRowSize; i2++) {
+				if (map[i2][i].type == 1) {
+					boolean connected = true;
+					Line col = new Line();
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i2][i].type == 1) {
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				} else if (map[i2][i].type == 2) {
+					boolean connected = true;
+					Line col = new Line();
+					col.goalLine = true;
+					ArrayList<Position> positions = new ArrayList<Position>();
+					while (connected) {
+						if (map[i2][i].type == 2) {
+							positions.add(map[i2][i].position);
+							i2++;
+						} else {
+							connected = false;
+						}
+					}
+					col.positions = positions;
+					cols.add(col);
+				}
+			}
+		}
+
+		// Connect them
+
+		// Supernodes?
 	}
 }
 /*

@@ -289,6 +289,22 @@ public class Node {
 		return this._hash;
 	}
 
+	
+	
+	public void printGoals(){
+		System.err.println("__________________________________________________\n");
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			System.err.print("\n");
+			for (int j = 0; j < Node.MAX_COL; j++) {
+
+				System.err.print(this.goals[i][j]);
+			}
+		}
+		System.err.println("\n__________________________________________________");
+
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
