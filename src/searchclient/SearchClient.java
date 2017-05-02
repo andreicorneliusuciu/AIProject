@@ -294,7 +294,7 @@ public class SearchClient {
 			if (strategy.frontierIsEmpty()) {
 
 				LinkedList<Node> noOpList = new LinkedList<Node>();
-				initialNode.doNoOp = true;
+			//	initialNode.doNoOp = true;
 				noOpList.add(initialNode);
 				System.err.println("The frontier is empty");
 				return noOpList;
@@ -674,16 +674,14 @@ public class SearchClient {
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
-		
-
 		// check if goal is reached
 		while (true) {
-			
-			//TODO solve second agent second loop being a piece of manure
+
+			// TODO solve second agent second loop being a piece of manure
 			Planner plan = null;
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
-			
+
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
 				if (!g.isSatisfied) {
@@ -698,55 +696,98 @@ public class SearchClient {
 			}
 
 			Node updatedNode = null;
+		//	System.err.println("=================>>>>agentsdDADAADADA: " + agents);
+
 			for (Agent a : agents) {
 
-				if (!a.isTrapped) {
-					System.err.println("Initializing planner again for "+a.name+"with initial state: /n" +a.initialState);
+				//System.err.println("=================>>>>agentsdDADAADADA inside: " + agents);
+
+				if (!a.isTrapped && !a.initialState.isGoalState() ) {
+
+					System.err.println(
+							"Initializing planner again for " + a.name + "with initial state: /n" + a.initialState);
 					plan = new Planner(agents.get(a.name));
-	
-					solution =plan.findSolution();
-					
+					//System.err.println("=================>>>>agentsdDADAADADA in if: " + agents.get(a.name));
+
+					//System.err.println("=================>>>>agentsdDADAADADA: " + agents);
+
+					solution = plan.findSolution();
+
 					updatedNode = solution.getLast();
 					updatedNode.parent = null;
-					//System.err.println("=================daadadddaDD>Ad.da.dad.a>>>>>new initialState parent "+updatedNode.parent);
-					System.err.println("=================>>>>plan: "+solution);
+					
 
-					System.err.println("=================>>>>updatednode: "+updatedNode);
+					System.err.println("=================>>>>plan: " + solution);
+
+					System.err.println("=================>>>>updatednode: " + updatedNode);
+
 					
-					
-					//put the goals back
-					for(int i=0; i<Node.MAX_ROW;i++)
-						for(int j=0; j<Node.MAX_COL;j++)
-						{
-							if(updatedNode.goals[i][j]!=0)
-							{
-								updatedNode.goals[i][j]=0;
+
+					// put the goals back
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (updatedNode.goals[i][j] != 0) {
+								updatedNode.goals[i][j] = 0;
 							}
 						}
-					
-					for(Goal g : updatedNode.goals2)
-					{
+
+					for (Goal g : updatedNode.goals2) {
+
 						
-						updatedNode.goals[g.position.row][g.position.col]= g.name;
+						updatedNode.goals[g.position.row][g.position.col] = g.name;
 					}
+
+					plan.updateGoalStates(updatedNode);
+					System.err.println("=================>>>>NEWupdatednode: " + updatedNode);
 					
 					a.initialState = updatedNode;
-					//System.err.println("solution for agent " + a.name + " :" + plan.solution);
-					//System.err.println("Goals for new initialstate: "+plan.solution.getLast().goals2);
+					
 					solutions.add(solution);
-				} else {
+				} else if(a.isTrapped && !a.initialState.isGoalState()) { //if agent trapped
 
 					System.err.println(
 							"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
 					LinkedList<Node> tempList = new LinkedList<Node>();
 					Node tempInitialState = a.initialState;
-					tempInitialState.doNoOp = true;
+					System.err.println("InitialState for trapped agent "+a.name+" with initialState "+a.initialState);
+				 	tempInitialState.doNoOp = true;  //append noop in joinedaction
 					tempList.add(tempInitialState);
 					solutions.add(tempList);
+					
+					
+					
+					
+					
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (a.initialState.goals[i][j] != 0) {
+								a.initialState.goals[i][j] = 0;
+							}
+						}
+
+					for (Goal g : a.initialState.goals2) {
+
+						a.initialState.goals[g.position.row][g.position.col] = g.name;
+					}
+
+				//	a.initialState = updatedNode;
+					
+					
+					
 					a.isTrapped = false;
-					//Position ap = new Position(a.initialState.agentRow,a.initialState.agentCol);
-					//a.initialState = updatedNode;
+				
 				}
+//				else if(a.initialState.isGoalState()) //if you finish your goals
+//				{
+//				//	System.err.println(
+//					//		"Agent: " + a + " is trapped, shit. Reseting plan. Remember to update agent.initialState");
+//					LinkedList<Node> tempList = new LinkedList<Node>();
+//					Node tempInitialState = a.initialState;
+//					tempInitialState.doNoOp = true;
+//					tempList.add(tempInitialState);
+//					solutions.add(tempList);
+//					a.isTrapped = false;
+//				}
 
 			}
 
@@ -806,17 +847,29 @@ public class SearchClient {
 								jointAction.toString());
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(),
 								"Problems with the moves");
-						String f = "false";
-						int spot = response.indexOf(f);
-						int increase = 0;
-						if (jointAction.charAt(spot + 2) == 'v') {
-							increase = 1;
-						} else {
-							increase = 3;
-						}
+//						String f = "false";      this needs debugging because false/true have different lengths and it fails for [true,false]
+//						int spot = response.indexOf(f);
+//						int placeInIndex =0;
+//						if(spot<2){
+//							placeInIndex =0;
+//						}
+//						else if(spot>2 && spot < 10)
+//						{
+//							placeInIndex = 1;
+//							
+//						}
+//						
+//						int increase = 0;
+//						if (jointAction.charAt(spot) == 'M') {
+//							increase = 2;
+//						} else {
+//							increase = 4;
+//						}
 
-						jointAction.replace(spot, spot + f.length() + increase + 1, "NoOp");
-						System.out.println(jointAction);
+						//jointAction.replace(spot, spot + f.length() + increase, "NoOp");
+						//System.out.println(jointAction);
+						//System.err.println("jointAction after false: "+jointAction);
+						break;
 					}
 				}
 			}
