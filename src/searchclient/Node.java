@@ -3,6 +3,7 @@ package searchclient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -19,9 +20,8 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
-	
-	public boolean doNoOp = false;
 
+	public boolean doNoOp = false;
 
 	public char[][] boxes;
 	public char[][] goals;
@@ -57,6 +57,40 @@ public class Node {
 		}
 	}
 
+	public Node Copy() {
+		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+
+		copy.parent = this.parent;
+		copy.agentRow = this.agentRow;
+		copy.agentCol = this.agentCol;
+		copy.theAgentName = this.theAgentName;
+		copy.theAgentColor = this.theAgentColor;
+		copy.boxes = this.boxes;
+		copy.boxes2 = this.boxes2;
+		copy.goals = this.goals;
+		copy.goals2 = this.goals2;
+		copy.myBoxes = this.myBoxes;
+		copy.action = this.action;
+		copy.doNoOp = this.doNoOp;
+		//copy._hash =this._hash;
+		copy.g = this.g;
+
+
+		return copy;
+	}
+	
+	public void clearGoals(){
+		
+		for (int i = 0; i < goals2.size(); i++) {
+			goals2.remove(i);
+		}
+	}
+	public void clearBoxes(){
+		
+		for (int i = 0; i < boxes2.size(); i++) {
+			boxes2.remove(i);
+		}
+	}
 	public int g() {
 		return this.g;
 	}
@@ -78,19 +112,19 @@ public class Node {
 		return true;
 	}
 
-//	public boolean isGoalState(Node goalState) {
-//		for (int row = 1; row < MAX_ROW - 1; row++) {
-//			for (int col = 1; col < MAX_COL - 1; col++) {
-//				char g = goalState.goals[row][col];
-//				char b = Character.toLowerCase(goalState.boxes[row][col]);
-//				if (g > 0 && b != g) {
-//					return false;
-//				}
-//			}
-//		}
-//		return true;
-//
-//	}
+	// public boolean isGoalState(Node goalState) {
+	// for (int row = 1; row < MAX_ROW - 1; row++) {
+	// for (int col = 1; col < MAX_COL - 1; col++) {
+	// char g = goalState.goals[row][col];
+	// char b = Character.toLowerCase(goalState.boxes[row][col]);
+	// if (g > 0 && b != g) {
+	// return false;
+	// }
+	// }
+	// }
+	// return true;
+	//
+	// }
 
 	public ArrayList<Node> getExpandedNodes() {
 		// Box theBox = null;
@@ -170,9 +204,11 @@ public class Node {
 
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 
-						//here determine the box iondex and set it. The boxes2 needs to be sorted
-						//n.boxes2.set(arg0, arg1);
-						//TODO: this 0 is not ok here. needs to be the agent's number
+						// here determine the box iondex and set it. The boxes2
+						// needs to be sorted
+						// n.boxes2.set(arg0, arg1);
+						// TODO: this 0 is not ok here. needs to be the agent's
+						// number
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
 
@@ -289,9 +325,7 @@ public class Node {
 		return this._hash;
 	}
 
-	
-	
-	public void printGoals(){
+	public void printGoals() {
 		System.err.println("__________________________________________________\n");
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			System.err.print("\n");
@@ -303,8 +337,7 @@ public class Node {
 		System.err.println("\n__________________________________________________");
 
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

@@ -59,7 +59,7 @@ public class Planner {
 
 	public LinkedList<Node> findSolution() {
 		LinkedList<Node> solution = new LinkedList<Node>();
-
+		
 		Node thePlan = findHighestPlan(this.agent, this.state); // returns goal
 		// state
 
@@ -87,6 +87,7 @@ public class Planner {
 
 		// find the goal position
 		if (!newState.goals2.contains(goal)) {
+			
 			System.err.println("404: Goal not found. Shit");
 			return null;
 		} else {
