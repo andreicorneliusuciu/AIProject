@@ -29,12 +29,12 @@ public class Planner {
 
 	public Planner(Agent theAgent) {
 
-		// System.err.println("FindStorage for");
+		// //system.err.println("FindStorage for");
 		// System.err.println(theAgent.initialState);
 
 		positions = Heuristic.findStorage(theAgent.initialState);
 		Heuristic.storageSpace = positions;
-		System.err.println(positions.toString());
+		//system.err.println(positions.toString());
 
 		this.agent = theAgent;
 
@@ -47,7 +47,7 @@ public class Planner {
 		// it
 		Node thePlan = findHighestPlan(agent, state); // returns goal state
 		solution = implementHighPlan(this.state, thePlan, new StrategyBFS());
-		System.err.println("HighestSolution: " + solution);
+		//system.err.println("HighestSolution: " + solution);
 
 	}
 
@@ -60,7 +60,7 @@ public class Planner {
 
 		// find the goal position
 		if (!newState.goals2.contains(goal)) {
-			System.err.println("404: Goal not found. Shit");
+			//system.err.println("404: Goal not found. Shit");
 			return null;
 		} else {
 			for (Goal b : newState.goals2) {
@@ -74,7 +74,7 @@ public class Planner {
 		}
 		// find the box, set its position to goalPosition
 		if (!newState.boxes2.contains(box)) {
-			System.err.println("404: Box not found. Shit");
+			//system.err.println("404: Box not found. Shit");
 			return null;
 		} else {
 			for (Box b : newState.boxes2) {
@@ -143,7 +143,7 @@ public class Planner {
 			}
 
 		} else {
-			System.err.println("No storage space available");
+			//system.err.println("No storage space available");
 			// TODO what to do if no space available. Maybe move randomly.
 			return null;
 
@@ -163,21 +163,21 @@ public class Planner {
 
 		// boolean flag = false;
 		if (!newState.boxes2.contains(box)) {
-			System.err.println("404: Box not found. Shit");
+			//system.err.println("404: Box not found. Shit");
 			return null;
 		} else {
 			// for (Box b : newState.boxes2) {
 			//
 			// if (b.equals(box)) {
 			// b.position = shortestPos;
-			// //System.err.println("to: " + b.position);
+			// ////system.err.println("to: " + b.position);
 			//
 			// break;
 			// }
 			// name it a random goal name of those the agent has
 			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.get(0).name;
 		}
-		System.err.println("Goal made in: " + shortestPos);
+		//system.err.println("Goal made in: " + shortestPos);
 
 		// keeping these just in case, erase if cleaning
 		plan.add(newState);
@@ -220,10 +220,10 @@ public class Planner {
 		for (Goal g : currentState.goals2) {
 			Box aBox = null;
 
-			System.err.println("Goal :" + g.name + " ," + g.color + " is satisfied: " + g.isSatisfied);
+			//system.err.println("Goal :" + g.name + " ," + g.color + " is satisfied: " + g.isSatisfied);
 
 			if (!g.isSatisfied && g.color == theAgent.color) {
-				System.err.println("Goal accepted :" + g.name);
+				//system.err.println("Goal accepted :" + g.name);
 				aBox = findClosestBox(theAgent, currentState);
 
 				theGoalState = MoveBoxToGoal(currentState, aBox, g).goals;
@@ -234,21 +234,21 @@ public class Planner {
 		}
 
 		// Object plantoString;
-		System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
+		//system.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
 
-		/// System.err.println(" ");
+		/// //system.err.println(" ");
 
 		return plan.get(0);
 	}
 
 	public LinkedList<Node> implementHighPlan(Node goalState, Node initialNode, Strategy strategy) {
-		System.err.format("Search starting with strategy %s.\n", strategy.toString());
+		//system.err.format("Search starting with strategy %s.\n", strategy.toString());
 		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
 		while (true) {
 			if (iterations == 1000) {
-				// System.err.println(strategy.searchStatus());
+				// //system.err.println(strategy.searchStatus());
 				iterations = 0;
 			}
 
@@ -257,16 +257,16 @@ public class Planner {
 				LinkedList<Node> noOpList = new LinkedList<Node>();
 				initialNode.doNoOp = true;
 				noOpList.add(initialNode);
-				System.err.println("The frontier is empty");
+				//system.err.println("The frontier is empty");
 				return noOpList;
 
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-			// System.err.println("Leafn" + leafNode + leafNode.parent);
+			// //system.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState(goalState)) {
-				System.err.println("Returns" + leafNode.extractPlan());
+				//system.err.println("Returns" + leafNode.extractPlan());
 				return leafNode.extractPlan();
 			}
 
@@ -276,7 +276,7 @@ public class Planner {
 															// randomly; see
 															// Node.java.
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
-					// System.err.println("Adding to frontier:
+					// //system.err.println("Adding to frontier:
 					// "+n.theAgentName+" "+n);
 					strategy.addToFrontier(n);
 				}
@@ -290,7 +290,7 @@ public class Planner {
 	private Box findClosestBlockingBox(Agent trappedAgent, Node node) {
 
 		if (agent == null) {
-			System.err.println("Null agent when going into findClosestBox in Planner");
+			//system.err.println("Null agent when going into findClosestBox in Planner");
 		}
 
 		Box box = null;
@@ -304,13 +304,13 @@ public class Planner {
 				minDistance = Position.manhattanDistance(trappedAgent.position, b.position);
 				box = b;
 
-				// System.err.println("Box found for agent "+trappedAgent+" box
+				// //system.err.println("Box found for agent "+trappedAgent+" box
 				// is: "+box);
 			}
 		}
 
-		if (box == null)
-			System.err.println("No blocking Box found");
+		//if (box == null)
+			//system.err.println("No blocking Box found");
 
 		return box;
 	}
@@ -319,7 +319,7 @@ public class Planner {
 	{
 
 		if (thisAgent == null) {
-			System.err.println("Null agent when going into findClosestBox in Planner");
+			//system.err.println("Null agent when going into findClosestBox in Planner");
 		}
 
 		Box box = null;
@@ -333,13 +333,13 @@ public class Planner {
 				minDistance = Position.manhattanDistance(thisAgent.position, b.position);
 				box = b;
 
-				// System.err.println("Box found for agent "+agent+" , box is:
+				// //system.err.println("Box found for agent "+agent+" , box is:
 				// "+box);
 			}
 		}
 
-		if (box == null)
-			System.err.println("No Box found");
+		//if (box == null)
+			//system.err.println("No Box found");
 
 		return box;
 	}

@@ -300,7 +300,7 @@ public class SearchClient {
 			// System.err.println("Leafn" + leafNode + leafNode.parent);
 
 			if (leafNode.isGoalState()) {
-				System.err.println("Returns" + leafNode.extractPlan());
+				//System.err.println("Returns" + leafNode.extractPlan());
 				return leafNode.extractPlan();
 			}
 
@@ -319,13 +319,13 @@ public class SearchClient {
 		}
 	}
 
-	public void storageAnalysis(Node node) {// Swap out input with other types
+	public static void storageAnalysis(Node node) {// Swap out input with other types
 		// of data?
 		Cell[][] map = new Cell[levelRowSize][levelColumnSize];
 
 		// Initialize cell map
 		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
+			for (int i2 = 0; i2 < levelColumnSize; i2++) {
 				map[i][i2] = new Cell(i, i2);
 				if (walls[i][i2]) {
 					map[i][i2].type = 0;// Wall
@@ -334,18 +334,20 @@ public class SearchClient {
 				}
 			}
 		}
-		for (Goal g : this.allGoals) {
-			map[g.position.row][g.position.col].type = 2; // Goal
+		for (Goal g : allGoals) {
+			//map[g.position.row][g.position.col] = new Cell(g.position.row, g.position.col);
+			//map[g.position.row][g.position.col].type = 2; // Goal
 		}
 
+		
 		// Link up cells
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
 				if (map[i][i2].type >= 1) {
-					if (map[i + 1][i2].type >= 1) {// + is south, right?
+					if (map[i - 1][i2].type >= 1) {// + is south, right?
 						map[i][i2].south = true;
 					}
-					if (map[i - 1][i2].type >= 1) {
+					if (map[i + 1][i2].type >= 1) {
 						map[i][i2].north = true;
 					}
 					if (map[i][i2 + 1].type >= 1) {
@@ -361,13 +363,14 @@ public class SearchClient {
 		// Create row objects
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2++ < levelColumnSize; i2++) {
+			for (int i2 = 0; i2 < levelColumnSize; i2++) {
 				if (map[i][i2].type == 1) {
 					boolean connected = true;
 					Line row = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
 						if (map[i][i2].type == 1) {
+							map[i][i2].rowID = rows.size();
 							positions.add(map[i][i2].position);
 							i2++;
 						} else {
@@ -383,6 +386,7 @@ public class SearchClient {
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
 						if (map[i][i2].type == 2) {
+							map[i][i2].rowID = rows.size();
 							positions.add(map[i][i2].position);
 							i2++;
 						} else {
@@ -399,12 +403,13 @@ public class SearchClient {
 		ArrayList<Line> cols = new ArrayList<Line>();
 		for (int i = 0; i < levelColumnSize; i++) {
 			for (int i2 = 0; i2++ < levelRowSize; i2++) {
-				if (map[i2][i].type == 1) {
+				if (map[i2][i].type == 1) {//White
 					boolean connected = true;
 					Line col = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
 						if (map[i2][i].type == 1) {
+							map[i2][i].colID = cols.size();
 							positions.add(map[i2][i].position);
 							i2++;
 						} else {
@@ -413,13 +418,14 @@ public class SearchClient {
 					}
 					col.positions = positions;
 					cols.add(col);
-				} else if (map[i2][i].type == 2) {
+				} else if (map[i2][i].type == 2) {//Goal
 					boolean connected = true;
 					Line col = new Line();
 					col.goalLine = true;
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
 						if (map[i2][i].type == 2) {
+							map[i2][i].colID = cols.size();
 							positions.add(map[i2][i].position);
 							i2++;
 						} else {
@@ -431,10 +437,98 @@ public class SearchClient {
 				}
 			}
 		}
-
 		// Connect them
-
-		// Supernodes?
+		for(int i = 0; i<levelRowSize; i++){
+			for(int i2 = 0; i2<levelColumnSize; i2++){
+				int curRow = map[i][i2].rowID;
+				int curCol = map[i][i2].colID;
+				if(map[i][i2].east){
+					int nextRow = map[i+1][i2].rowID;
+					int nextCol = map[i+1][i2].colID;
+					
+					if(nextRow != curRow){
+						rows.get(curRow).east.add(nextRow);
+					}
+					if(nextCol != curCol){
+						cols.get(curCol).east.add(nextCol);
+					}
+				}
+				if(map[i][i2].north){
+					int nextRow = map[i][i2-1].rowID;
+					int nextCol = map[i][i2-1].colID;
+					
+					if(nextRow != curRow){
+						rows.get(curRow).north.add(nextRow);
+					}
+					if(nextCol != curCol){
+						cols.get(curCol).north.add(nextCol);
+					}
+				}
+				if(map[i][i2].west){
+					int nextRow = map[i-1][i2].rowID;
+					int nextCol = map[i-1][i2].colID;
+					
+					if(nextRow != curRow){
+						rows.get(curRow).west.add(nextRow);
+					}
+					if(nextCol != curCol){
+						cols.get(curCol).west.add(nextCol);
+					}
+				}
+				if(map[i][i2].south){
+					int nextRow = map[i][i2+1].rowID;
+					int nextCol = map[i][i2+1].colID;
+					
+					if(nextRow != curRow){
+						rows.get(curRow).south.add(nextRow);
+					}
+					if(nextCol != curCol){
+						cols.get(curCol).south.add(nextCol);
+					}
+				}
+			}
+		}
+		
+		//TEST
+		//for(int i = 0; i<rows.size(); i++){
+		String debug = "East: !" + rows.get(0).east.isEmpty() + "\n";
+		debug += "West: !" + rows.get(0).west.isEmpty() + "\n";
+		debug += "North: !" + rows.get(0).north.isEmpty() + "\n";
+		debug += "South: !" + rows.get(0).south.isEmpty() + "\n";
+		for(Position p : rows.get(0).positions){
+			debug += p.toString() + "\n";
+		}
+		//}
+			
+		//}
+		System.err.println(debug);
+		
+		//Draw virtual line
+		/*ArrayList<Position> deadEnds = new ArrayList<Position>();
+		boolean done = false;
+		while(!done){
+			int curSize = deadEnds.size();
+			for(Line l : rows){
+				int connectionCount = 0;
+				if(l.east.size()>0){
+					connectionCtoun
+				}
+			}
+		}*/
+		
+		//TODO : Make diagonal lines for the supernode setup
+		//Prioritize cells based on dead ends
+		boolean done = true;
+		while(!done){
+			for(Goal g : allGoals){
+				//If g isn't a dead end...
+				//And all neighbors are walls and dead ends except one
+				//This is a dead end. Priority should be lower than innermost dead end.
+			}
+		}
+		// Supernode setup
+		//If a line of only goals (even diagonal) completely cuts off a part of the level, it is a goal supernode. Goal supernodes are composed of all goals that touch one another directly.
+		
 	}
 
 	public static int[][] flowFill(Agent agent, Node node) {
@@ -607,6 +701,10 @@ public class SearchClient {
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
 
+		//TEST
+		storageAnalysis(agents.get(0).initialState);
+		
+		//Normal functionality
 		allBoxes = agents.get(0).initialState.boxes2; // TODO update allBoxes
 														// positions, check if
 														// they are updating
@@ -722,7 +820,7 @@ public class SearchClient {
 			System.exit(0);
 			
 		} else {
-			System.err.println("\nSummary for " + strategy.toString());
+			//System.err.println("\nSummary for " + strategy.toString());
 //			System.err.println("Found solution of length " + solutions.size());
 			System.err.println(strategy.searchStatus());
 			//Multi-agent commands
