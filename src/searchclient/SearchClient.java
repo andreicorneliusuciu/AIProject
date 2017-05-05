@@ -21,6 +21,7 @@ public class SearchClient {
 	// public List<Node> initialStates;
 	public static boolean[][] walls;
 
+	public Node uberNode;
 	// The size of the map
 	// public static int levelColSize;
 	// public static int levelRowSize;
@@ -117,6 +118,7 @@ public class SearchClient {
 			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize));
 			// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
 		}
+		uberNode = new Node(null, levelRowSize, levelColumnSize);
 
 		for (String l : lines) {
 			if (!l.startsWith("+")) {// && l.charAt(0) == ' ') {
@@ -161,8 +163,7 @@ public class SearchClient {
 
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr), null));
 					if (index == -1) {
-						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col),
-								new Node(null, levelRowSize, levelColumnSize));
+						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col), new Node(null, levelRowSize, levelColumnSize));
 						agentT.initialState.theAgentColor = agentT.color;
 						agentT.initialState.theAgentName = agentT.name;
 						agentT.initialState.agentCol = agentT.position.col;
@@ -196,8 +197,10 @@ public class SearchClient {
 						// if(boxesToColor.get(chr).equals(agents.get(i).color))
 						// {
 						agents.get(i).initialState.boxes[row][col] = chr;
-						agents.get(i).initialState.boxes2
-								.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						uberNode.boxes[row][col] = chr;
+						// uberNode.boxes2.add(new Box(chr,
+						// boxesToColor.get(chr), new Position(row, col)));
 						// }
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -216,8 +219,7 @@ public class SearchClient {
 							agents.get(i).initialState.goals[row][col] = chr;
 							// System.err.println("goal made here: " + row + ","
 							// + col + " by agent " + agents.get(i));
-							agents.get(i).initialState.goals2
-									.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
+							agents.get(i).initialState.goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
 				} else if (chr == ' ') {
@@ -229,7 +231,12 @@ public class SearchClient {
 			}
 			row++;
 		}
-		// agents.get(1).initialState.printGoals();
+
+		// fill up the central node
+		uberNode.goals2 = allGoals;
+		uberNode.boxes2 = allBoxes;
+
+		System.err.println("The node uber alles: " + uberNode);
 
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
@@ -267,8 +274,7 @@ public class SearchClient {
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
 		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
-		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0, 0),
-				new Position(levelRowSize - 3, levelColumnSize - 3));
+		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0, 0), new Position(levelRowSize - 3, levelColumnSize - 3));
 
 		// Test distances function
 		// System.err.println("Distance between (5,0) and (7,0) = " +
@@ -409,13 +415,11 @@ public class SearchClient {
 			// break;
 			default:
 				strategy = new StrategyBFS();
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+				System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 			}
 		} else {
 			strategy = new StrategyBFS();
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
 		// check if goal is reached
@@ -434,28 +438,30 @@ public class SearchClient {
 				}
 			}
 
+			//TODO it crashes here. Sth wrong with goals. Sth wrong with the initialstate of the agent that did not stop.
 			if (isGoalState == true) {
 				System.err.println("Success!!!");
 				break;
 			}
 
-			Node updatedNode = new Node(null,Node.MAX_ROW,Node.MAX_COL);
-			Node copy = new Node(null,Node.MAX_ROW,Node.MAX_COL);
+			System.err.println("Initializing planner for with initial state: /n" + agents);
+
+			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
-			
 				if (!a.isTrapped && !a.initialState.isGoalState()) {
 
-					System.err
-							.println("Initializing planner for " + a.name + "with initial state: /n" + a.initialState);
+					System.err.println("Initializing planner for " + a.name + "with initial state: /n" + a.initialState);
 					plan = new Planner(agents.get(a.name));
-				
+
 					solution = plan.findSolution();
 
 					updatedNode = solution.getLast().Copy();
 					updatedNode.parent = null;
 
-					System.err.println("=================>>>>plan: \n" + solution);
+					// System.err.println("=================>>>>plan: \n" +
+					// solution);
 
 					// put the goals back
 					for (int i = 0; i < Node.MAX_ROW; i++)
@@ -471,24 +477,15 @@ public class SearchClient {
 					}
 
 					plan.updateGoalStates(updatedNode);
-					System.err.println("=================>>>>NEWupdatednode: \n" + updatedNode);
-
-					// a.initialState = updatedNode;
-
-				
 
 					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
 
-						
-					//	a.initialState = updatedNode;
-						
-		
-						
-						
+						// a.initialState = updatedNode;
+
 						// tempN = updatedNode;
 						copy = updatedNode.Copy();
 						copy.parent = null;
-						
+
 						// bug is updating this updates the other initialstate
 						// too
 						System.err.println("Agents meow 0" + agents);
@@ -496,40 +493,18 @@ public class SearchClient {
 						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
 						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
 						copy.theAgentName = agents.get(plan.trappedAgent).name;
-						System.err.println("haha 0:  agent 0     "+a.initialState.goals2);
-						//copy.clearGoals();
-						System.err.println("haha 1:  agent 1     "+a.initialState.goals2);
 						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
 						copy.goals = agents.get(plan.trappedAgent).initialState.goals;
 						copy.theAgentColor = agents.get(plan.trappedAgent).initialState.theAgentColor;
 						copy.action = agents.get(plan.trappedAgent).initialState.action;
-						
-						
-						//copy.boxes = agents.get(plan.trappedAgent).initialState.boxes;
-						
-						//copy.clearBoxes();
 						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
-						// copy.boxes2 =
-						// agents.get(plan.trappedAgent).initialState.boxes2;
-						// copy.boxes =
-						// agents.get(plan.trappedAgent).initialState.boxes;
-					
-						System.err.println("Agent" + a+" before copy with initialstate goals: " + a.initialState.goals2);
 
 						a.initialState = updatedNode.Copy();
-	
-						System.err.println("Agent" + a+" after copy with initialstate goals: " + a.initialState.goals2);
-
-						
-						System.err.println("The copy====================> whoe " + copy);
-						// agents.get(plan.trappedAgent).initialState = copy;
 
 					} else {
-						System.err.println("Agent" + a+" for no trapped: " + a.initialState.goals2);
+						System.err.println("Agent" + a + " for no trapped: " + a.initialState.goals2);
 
-						a.initialState =  updatedNode.Copy();
-						System.err.println("a.initialState ====================> lhoe " + a.initialState);
-
+						a.initialState = updatedNode.Copy();
 					}
 
 					solutions.add(solution);
@@ -537,13 +512,9 @@ public class SearchClient {
 																			// agent
 																			// trapped
 
-					// System.err.println(
-					// "Agent: " + a + " is trapped, shit. Reseting plan.
-					// Remember to update agent.initialState");
 					LinkedList<Node> tempList = new LinkedList<Node>();
 					Node tempInitialState = a.initialState;
-					System.err.println(
-							"InitialState for trapped agent " + a.name + " with initialState " + a.initialState);
+					System.err.println("InitialState for trapped agent " + a.name + " with initialState " + a.initialState);
 					tempInitialState.doNoOp = true; // append noop in
 													// joinedaction
 					tempList.add(tempInitialState);
@@ -560,13 +531,8 @@ public class SearchClient {
 
 						a.initialState.goals[g.position.row][g.position.col] = g.name;
 					}
-
-					// a.initialState = updatedNode;
-
 					a.initialState = copy.Copy();
-
 					System.err.println("a.initialState ====================> lhoe " + a.initialState);
-
 					a.isTrapped = false;
 
 				}
@@ -587,14 +553,14 @@ public class SearchClient {
 
 			}
 
-			if (solutions == null) {
+			if (solutions.isEmpty()) {
 				System.err.println(strategy.searchStatus());
 				System.err.println("Unable to solve level.");
 
 				System.exit(0);
 
 			} else {
-				System.err.println("Found solution of length " + solutions.size());
+				System.err.println("Found solution of max length " + solutions.size());
 
 				int maxSol = 0;
 				int m1;
@@ -612,19 +578,48 @@ public class SearchClient {
 
 					jointAction.append('[');
 					// if (!solutions.isEmpty()) {
+
+					// for every agent
 					for (int j = 0; j < solutions.size(); j++) {
-						Node n = new Node(null,Node.MAX_ROW,Node.MAX_COL);
+						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 						try {
 
 							n = solutions.get(j).get(i);
 
-							// System.err.println("DEBUG MASTER!!!!; "+n+"
-							// blalaalalalalala");
+							// check if conflict on same node with the other
+							// agents
+							for (Agent agent : agents) {
+								if (agent.name != j) {
+									System.err.println("the two possible conflciting nodes:/n/n" + solutions.get(j).get(i) + solutions.get(agent.name).get(i) + "/n");
+									if (!n.doNoOp && !solutions.get(agent.name).get(i).doNoOp) {
+										if (n.isConflict(solutions.get(agent.name).get(i))) {
+											// conflict
+											System.err.println("i am in" + agents);
+											
+											agents.get(j).initialState = solutions.get(j).get(i - 1);
+											agents.get(j).initialState.parent = null;
+											System.err.println("i am shrek " + agents);
+											
+											for(int o = i; o<= maxSol; o++)
+											{
+												Node tnode = solutions.get(j).get(i-1);
+												tnode.doNoOp=true;
+												tnode.parent = null;
+												solutions.get(j).set(o,tnode);
+											}
+											//n.doNoOp = true;
+											//make everything for one of the two agents NoOp
+											break;
+										}
+
+										else {
+											//do sth? maybe?
+										}
+									}
+								}
+							}
 
 							if (!n.doNoOp) {
-								// if(n.action == null)
-								// {System.err.println("null solution: "+n);
-								// }
 								jointAction.append(n.action.toString() + ",");
 							} else {
 								jointAction.append("NoOp,");
@@ -635,40 +630,14 @@ public class SearchClient {
 					}
 					// replace the last comma with ']'
 					jointAction.setCharAt(jointAction.length() - 1, ']');
+
 					System.out.println(jointAction.toString());
 					System.err.println("===== " + jointAction.toString() + " ====");
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
-						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response,
-								jointAction.toString());
-						System.err.format("%s was attempted in \n%s\n", jointAction.toString(),
-								"Problems with the moves");
-						// String f = "false"; this needs debugging because
-						// false/true have different lengths and it fails for
-						// [true,false]
-						// int spot = response.indexOf(f);
-						// int placeInIndex =0;
-						// if(spot<2){
-						// placeInIndex =0;
-						// }
-						// else if(spot>2 && spot < 10)
-						// {
-						// placeInIndex = 1;
-						//
-						// }
-						//
-						// int increase = 0;
-						// if (jointAction.charAt(spot) == 'M') {
-						// increase = 2;
-						// } else {
-						// increase = 4;
-						// }
+						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
+						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Conflict Resolution Failed!!!");
 
-						// jointAction.replace(spot, spot + f.length() +
-						// increase, "NoOp");
-						// System.out.println(jointAction);
-						// System.err.println("jointAction after false:
-						// "+jointAction);
 						break;
 					}
 				}
@@ -824,8 +793,7 @@ public class SearchClient {
 				for (int i = 0; i < levelRowSize; i++) {
 					for (int i2 = 0; i2 < levelColumnSize; i2++) {
 						if (matrix[i][i2] == 3) {
-							if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0
-									|| matrix[i][i2 + 1] == 0) {
+							if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0 || matrix[i][i2 + 1] == 0) {
 								for (Box b : allBoxes) {
 									if (b.position.equals(new Position(i, i2))) {
 										b.isBlocking = true;
@@ -952,11 +920,8 @@ public class SearchClient {
 				}
 			}
 		}
-
-		// Connect them
-
-		// Supernodes?
 	}
+
 }
 /*
  * TODO Andrei: update the non square maps with wall on the empty spaces -
@@ -965,3 +930,31 @@ public class SearchClient {
  * complete everithinh with walls - the annoying bug when parsing the level and
  * the agents are not in the good position in the rows
  */
+
+// conflict resolution code, might need it.
+// String f = "false"; this needs debugging because
+// false/true have different lengths and it fails for
+// [true,false]
+// int spot = response.indexOf(f);
+// int placeInIndex =0;
+// if(spot<2){
+// placeInIndex =0;
+// }
+// else if(spot>2 && spot < 10)
+// {
+// placeInIndex = 1;
+//
+// }
+//
+// int increase = 0;
+// if (jointAction.charAt(spot) == 'M') {
+// increase = 2;
+// } else {
+// increase = 4;
+// }
+
+// jointAction.replace(spot, spot + f.length() +
+// increase, "NoOp");
+// System.out.println(jointAction);
+// System.err.println("jointAction after false:
+// "+jointAction);

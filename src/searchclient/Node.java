@@ -20,6 +20,7 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
+	// public List<Agent> agents;
 
 	public boolean doNoOp = false;
 
@@ -29,6 +30,8 @@ public class Node {
 	// alphabetially sorted both lists
 	public List<Goal> goals2 = new ArrayList<>();
 	public List<Box> boxes2 = new ArrayList<>();
+
+	public List<Agent> agents = SearchClient.agents;
 
 	public List<Box> myBoxes = new ArrayList<>();
 
@@ -72,21 +75,22 @@ public class Node {
 		copy.myBoxes = this.myBoxes;
 		copy.action = this.action;
 		copy.doNoOp = this.doNoOp;
-		//copy._hash =this._hash;
+		// copy._hash =this._hash;
 		copy.g = this.g;
-
 
 		return copy;
 	}
-	
-	public void clearGoals(){
-		
+
+	public void clearGoals() {
+
 		goals2.clear();
 	}
-	public void clearBoxes(){
-		
+
+	public void clearBoxes() {
+
 		boxes2.clear();
 	}
+
 	public int g() {
 		return this.g;
 	}
@@ -357,6 +361,7 @@ public class Node {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
+		s.append("\n");
 		for (int row = 0; row < MAX_ROW; row++) {
 			if (!SearchClient.walls[row][0]) {
 				break;
@@ -377,6 +382,38 @@ public class Node {
 			s.append("\n");
 		}
 		return s.toString();
+	}
+
+	public boolean isConflict(Node node2) {
+
+		
+		
+		if (this.agentRow == node2.agentRow && this.agentCol == node2.agentCol) {
+			System.err.println("Agent conflict! woo");
+			return true;
+		}
+
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			// if agent wants to move into box the other agent pushed in his
+			// path
+
+			for (int j = 0; j < Node.MAX_COL; j++) {
+				if (this.boxes[i][j] > 0 && node2.agentRow == i && node2.agentCol == j) {
+					System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
+					System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
+					return true;
+				}
+
+				if (node2.boxes[i][j] > 0 && this.agentRow == i && this.agentCol == j) {
+					System.err.println("conflict in:" + this.toString());
+					System.err.println("conflict in:" + node2.toString());
+					return true;
+				}
+			}
+		}
+
+		System.err.println("No conflicts in this move");
+		return false;
 	}
 
 }
