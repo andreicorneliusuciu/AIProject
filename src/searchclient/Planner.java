@@ -41,7 +41,7 @@ public class Planner {
 
 		this.agent = theAgent;
 
-		System.err.println("DEGUB "+agent);
+		//System.err.println("DEGUB "+agent);
 		this.state = theAgent.initialState;
 		//this.state.printGoals();
 		

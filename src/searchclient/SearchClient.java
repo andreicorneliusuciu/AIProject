@@ -497,7 +497,7 @@ public class SearchClient {
 						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
 						copy.theAgentName = agents.get(plan.trappedAgent).name;
 						System.err.println("haha 0:  agent 0     "+a.initialState.goals2);
-						copy.clearGoals();
+						//copy.clearGoals();
 						System.err.println("haha 1:  agent 1     "+a.initialState.goals2);
 						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
 						copy.goals = agents.get(plan.trappedAgent).initialState.goals;
@@ -507,21 +507,29 @@ public class SearchClient {
 						
 						//copy.boxes = agents.get(plan.trappedAgent).initialState.boxes;
 						
-						copy.clearBoxes();
+						//copy.clearBoxes();
 						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
 						// copy.boxes2 =
 						// agents.get(plan.trappedAgent).initialState.boxes2;
 						// copy.boxes =
 						// agents.get(plan.trappedAgent).initialState.boxes;
 					
-						System.err.println("Agents meow 1" + agents);
+						System.err.println("Agent" + a+" before copy with initialstate goals: " + a.initialState.goals2);
+
 						a.initialState = updatedNode.Copy();
 	
+						System.err.println("Agent" + a+" after copy with initialstate goals: " + a.initialState.goals2);
+
+						
 						System.err.println("The copy====================> whoe " + copy);
 						// agents.get(plan.trappedAgent).initialState = copy;
 
 					} else {
+						System.err.println("Agent" + a+" for no trapped: " + a.initialState.goals2);
+
 						a.initialState =  updatedNode.Copy();
+						System.err.println("a.initialState ====================> lhoe " + a.initialState);
+
 					}
 
 					solutions.add(solution);
@@ -556,6 +564,8 @@ public class SearchClient {
 					// a.initialState = updatedNode;
 
 					a.initialState = copy.Copy();
+
+					System.err.println("a.initialState ====================> lhoe " + a.initialState);
 
 					a.isTrapped = false;
 

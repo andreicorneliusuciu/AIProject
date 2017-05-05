@@ -81,15 +81,11 @@ public class Node {
 	
 	public void clearGoals(){
 		
-		for (int i = 0; i < goals2.size(); i++) {
-			goals2.remove(i);
-		}
+		goals2.clear();
 	}
 	public void clearBoxes(){
 		
-		for (int i = 0; i < boxes2.size(); i++) {
-			boxes2.remove(i);
-		}
+		boxes2.clear();
 	}
 	public int g() {
 		return this.g;
