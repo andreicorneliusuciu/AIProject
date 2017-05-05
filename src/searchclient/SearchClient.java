@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import searchclient.Strategy.StrategyBFS;
 import searchclient.Strategy.StrategyDFS;
@@ -55,10 +57,24 @@ public class SearchClient {
 		allGoals = new ArrayList<>();
 		int maxCol = 0;
 
+		
+	
+		 
+		 boolean b = Pattern.matches("[a-zA-Z]", "aaaaab");
+		
+		
 		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
-			if (!line.startsWith("+")) { // or space
+				// or space
+			
+			if(Pattern.matches("[a-zA-Z]", line.substring(0, 1))){
+				System.err.println(line);
+		//	}
+			
+		//	if (!line.startsWith("+")) {
+				
+					
 				noOfActualRowsForTheLevel++;
 				String[] s = line.split(":");
 				String color = s[0];
@@ -119,7 +135,12 @@ public class SearchClient {
 		}
 
 		for (String l : lines) {
-			if (!l.startsWith("+")) {// && l.charAt(0) == ' ') {
+			System.err.println("bef:"+l+";");
+			if(Pattern.matches("[a-zA-Z]", l.substring(0, 1)) ||
+					l.matches("^\\s*$") ){
+				System.err.println("aft");	
+			
+		//	if (!l.startsWith("+")) {// && l.charAt(0) == ' ') {
 				// if(l.startsWith(" ")) {
 				// for (int col = 0; col < l.length(); col++) {
 				// char chr = l.charAt(col);
@@ -152,7 +173,7 @@ public class SearchClient {
 				} else {
 					map[row][col] = 0;
 				}
-
+System.err.println("Char is:"+chr+";");
 				if (chr == '+') { // Wall.
 					// this.initialState.walls[row][col] = true;
 					walls[row][col] = true;
@@ -220,7 +241,8 @@ public class SearchClient {
 									.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
-				} else if (chr == ' ') {
+				} else if (chr == ' ' || (chr+"").matches("[ \t]")) {
+					
 
 				} else {
 					System.err.println("Error, read invalid level character: " + chr);
@@ -232,6 +254,8 @@ public class SearchClient {
 		// agents.get(1).initialState.printGoals();
 
 		// System.err.println(" + Agents: " + agents);
+		System.err.println("Level is scanned correctly!!!!!!!<===================================================>");
+		
 		Collections.sort(agents);
 		System.err.println(" + Agents without updated boxes: " + agents);
 		System.err.println(" + Boxes without updates: " + boxesToColor);
