@@ -370,7 +370,7 @@ public class SearchClient {
 						done = true;
 						positions.add(g.position);
 						positions.add(b.position);
-						rescueUnit(a, positions, a.initialState);
+						rescueUnit(a, positions);
 						break;
 					}
 				}
@@ -679,7 +679,7 @@ public class SearchClient {
 		}
 	}
 
-	public static int[][] flowFill(Agent agent, Node node) {
+	public static int[][] flowFill(Agent agent, List<Box> allBoxes2) {
 		int[][] matrix = new int[levelRowSize][levelColumnSize];
 		int[][] result = new int[levelRowSize][levelColumnSize];
 
@@ -692,13 +692,11 @@ public class SearchClient {
 			}
 		}
 
-		for (int i = 0; i < Node.MAX_ROW; i++) {
-			for (int i2 = 0; i2 < Node.MAX_COL; i2++) {
-				if (node.boxes[i][i2] != '\u0000') {
-					matrix[i][i2] = boxesToColor.get(node.boxes[i][i2]).hashCode();
-					// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
-					// System.err.println(agent.color.hashCode());
-				}
+		for (int i = 0; i < allBoxes2.size(); i++) {
+			if (allBoxes2.get(i).name != '\u0000') {
+				matrix[allBoxes2.get(i).position.row][allBoxes2.get(i).position.col] = boxesToColor.get(allBoxes2.get(i).name).hashCode();
+				// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
+				// System.err.println(agent.color.hashCode());
 			}
 		}
 		// Find all boxes colors and put them into Matrix
@@ -813,14 +811,15 @@ public class SearchClient {
 		// Blockage.
 	}
 
-	public static void rescueUnit(Agent agent, ArrayList<Position> positions, Node node) {// Analyse
+	public static void rescueUnit(Agent agent, ArrayList<Position> positions) {// Analyse
 		// all
 		// the
 		// agents!
-		int[][] matrix = flowFill(agent, node);
+		int[][] matrix = flowFill(agent, allBoxes);
 		for (Position p : positions) {
 			if (matrix[p.row][p.col] != 2) {// Blockage! Oh no!
 				agent.isTrapped = true;
+				System.err.println("Agent blocking found and is: " + agent.name);
 				for (int i = 0; i < levelRowSize; i++) {
 					for (int i2 = 0; i2 < levelColumnSize; i2++) {
 						if (matrix[i][i2] == 3) {
