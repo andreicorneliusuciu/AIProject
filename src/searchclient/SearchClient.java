@@ -21,7 +21,7 @@ public class SearchClient {
 	// public List<Node> initialStates;
 	public static boolean[][] walls;
 
-	public Node uberNode;
+	public static Node uberNode;
 	// The size of the map
 	// public static int levelColSize;
 	// public static int levelRowSize;
@@ -198,7 +198,6 @@ public class SearchClient {
 						// {
 						agents.get(i).initialState.boxes[row][col] = chr;
 						agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
-						uberNode.boxes[row][col] = chr;
 						// uberNode.boxes2.add(new Box(chr,
 						// boxesToColor.get(chr), new Position(row, col)));
 						// }
@@ -210,8 +209,15 @@ public class SearchClient {
 						boxesToColor.put(Character.toUpperCase(chr), "blue");
 					}
 
+					//System.err.println("Filling allGoals " + chr);
+
 					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
 
+					//System.err.println("Filling allGoals " + allGoals);
+
+					
+					
+					
 					for (int i = 0; i < agents.size(); i++) {
 						// put the goal to the agent map just if they are the
 						// same color
@@ -232,11 +238,10 @@ public class SearchClient {
 			row++;
 		}
 
-		// fill up the central node
-		uberNode.goals2 = allGoals;
-		uberNode.boxes2 = allBoxes;
+		
 
-		System.err.println("The node uber alles: " + uberNode);
+		
+
 
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
@@ -326,7 +331,7 @@ public class SearchClient {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {  //TODO second loop, freakout
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
 		// Use stderr to print to console
@@ -337,14 +342,16 @@ public class SearchClient {
 
 		// TODO update allBoxes and allgoals
 
-		for (Agent a : agents) { // positions, check if
-			allBoxes = agents.get(a.name).initialState.boxes2;
-		}
+//		for (Agent a : agents) { // positions, check if
+			allBoxes = agents.get(0).initialState.boxes2;
+//		}
+//
+//		for (Agent a : agents) { // positions, check if
+//			allGoals = agents.get(a.name).initialState.goals2;
+//		}
 
-		for (Agent a : agents) { // positions, check if
-			allGoals = agents.get(a.name).initialState.goals2;
-		}
-
+	//	System.err.println("Agent goals goat " + agents.get(0).initialState.goals2);
+		
 		for (Goal g : allGoals)
 			for (Box b : allBoxes) {
 				{
@@ -386,6 +393,27 @@ public class SearchClient {
 			done = false;
 			positions = new ArrayList<Position>();
 		}
+		
+		
+		
+		// fill up the central node
+				uberNode.goals2 = allGoals;
+				uberNode.boxes2 = allBoxes;
+				
+				for (Goal g : uberNode.goals2) {
+
+					uberNode.goals[g.position.row][g.position.col] = g.name;
+				}
+				
+				for (Box b : uberNode.boxes2) {
+
+					uberNode.boxes[b.position.row][b.position.col] = b.name;
+				}
+				
+				System.err.println("The node uber alles: " + uberNode);
+
+				uberNode.agents = agents;
+
 		//////////////////////////////////////////
 
 		// read the input
@@ -429,6 +457,8 @@ public class SearchClient {
 			Planner plan = null;
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
+
+			System.err.println("The goals: " + allGoals);
 
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
@@ -621,6 +651,9 @@ public class SearchClient {
 
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
+								uberNode.updateUberNode(n);
+								System.err.println("The updated node uber alles: " + uberNode +n);
+
 							} else {
 								jointAction.append("NoOp,");
 							}
@@ -639,6 +672,8 @@ public class SearchClient {
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Conflict Resolution Failed!!!");
 
 						break;
+					}
+					else{
 					}
 				}
 			}

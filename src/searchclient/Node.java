@@ -61,22 +61,28 @@ public class Node {
 	}
 
 	public Node Copy() {
+		
 		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
-
+		
 		copy.parent = this.parent;
 		copy.agentRow = this.agentRow;
 		copy.agentCol = this.agentCol;
 		copy.theAgentName = this.theAgentName;
 		copy.theAgentColor = this.theAgentColor;
-		copy.boxes = this.boxes;
+		//copy.boxes = this.boxes;
 		copy.boxes2 = this.boxes2;
-		copy.goals = this.goals;
+		//copy.goals = this.goals;
 		copy.goals2 = this.goals2;
 		copy.myBoxes = this.myBoxes;
 		copy.action = this.action;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
 		copy.g = this.g;
+		for (int row = 0; row < MAX_ROW; row++) {
+			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
+			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
+			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
+		}
 
 		return copy;
 	}
@@ -438,6 +444,40 @@ public class Node {
 
 		System.err.println("No conflicts in this move");
 		return false;
+	}
+	
+	
+	public void updateUberNode(Node smallNode)
+	{
+		
+		//clear all boxes
+		this.boxes2.clear();
+		
+		for (Box b : this.boxes2) {
+
+			this.boxes[b.position.row][b.position.col] = 0;
+		}
+		
+		
+		for(Box b : smallNode.boxes2)
+		{
+			if(b.color.equals(this.theAgentColor))
+			{
+				this.boxes2.add(b);
+			}
+		}
+		
+		
+		for (Box b : this.boxes2) {
+
+		//	this.boxes[b.position.row][b.position.col] = 0;
+			this.boxes[b.position.row][b.position.col] = b.name;
+
+		}
+
+	
+		
+		
 	}
 
 }
