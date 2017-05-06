@@ -347,22 +347,22 @@ public class SearchClient {
 		// System.err.println("Agent goals goat " +
 		// agents.get(0).initialState.goals2);
 
-//		for (Goal g : allGoals)
-//			for (Box b : allBoxes) {
-//				{
-//					for (Agent a : agents) {
-//						if (a.color.equals(g.color) && !a.initialState.goals2.contains(g)) {
-//							a.initialState.goals2.add(g);
-//							a.initialState.goals[g.position.row][g.position.col] = g.name;
-//						}
-//
-//						if (a.color.equals(b.color) && !a.initialState.boxes2.contains(b)) {
-//							a.initialState.boxes2.add(b);
-//							a.initialState.boxes[b.position.row][b.position.col] = b.name;
-//						}
-//					}
-//				}
-//			}
+		// for (Goal g : allGoals)
+		// for (Box b : allBoxes) {
+		// {
+		// for (Agent a : agents) {
+		// if (a.color.equals(g.color) && !a.initialState.goals2.contains(g)) {
+		// a.initialState.goals2.add(g);
+		// a.initialState.goals[g.position.row][g.position.col] = g.name;
+		// }
+		//
+		// if (a.color.equals(b.color) && !a.initialState.boxes2.contains(b)) {
+		// a.initialState.boxes2.add(b);
+		// a.initialState.boxes[b.position.row][b.position.col] = b.name;
+		// }
+		// }
+		// }
+		// }
 
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
@@ -385,8 +385,17 @@ public class SearchClient {
 		}
 
 		// fill up the central node
-		uberNode.goals2 = allGoals;
-		uberNode.boxes2 = allBoxes;
+		//uberNode.goals2 = allGoals;
+		for(Goal g : allGoals)
+		{
+			uberNode.goals2.add(g);
+		}
+		
+		for(Box b : allBoxes)
+		{
+			uberNode.boxes2.add(b);
+		}
+		//uberNode.boxes2 = allBoxes;
 
 		for (Goal g : uberNode.goals2) {
 
@@ -398,9 +407,12 @@ public class SearchClient {
 			uberNode.boxes[b.position.row][b.position.col] = b.name;
 		}
 
-		// System.err.println("The node uber alles: " + uberNode);
+		System.err.println("The node uber alles: " + uberNode);
+		
 
 		uberNode.agents = agents;
+		
+
 
 		//////////////////////////////////////////
 
@@ -438,10 +450,8 @@ public class SearchClient {
 			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
-		
 		// check if goal is reached
-		
-		
+
 		while (true) {
 
 			// TODO solve second agent second loop being a piece of manure
@@ -449,7 +459,6 @@ public class SearchClient {
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
-			
 			System.err.println("The goals: " + allGoals);
 
 			boolean isGoalState = true;
@@ -469,7 +478,6 @@ public class SearchClient {
 
 			System.err.println("Initializing planner for with initial state: /n" + agents);
 
-
 			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 
 			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -479,16 +487,13 @@ public class SearchClient {
 
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
-					
-					
+
 					plan = new Planner(agents.get(a.name));
 
-					
-					
 					solution = plan.findSolution();
-					
+
 					updatedNode = solution.getLast().Copy();
-					System.err.println("Boxes to updated node: " +updatedNode.boxes2);
+					System.err.println("Boxes to updated node: " + updatedNode.boxes2);
 
 					updatedNode.parent = null;
 
@@ -508,14 +513,13 @@ public class SearchClient {
 						updatedNode.goals[g.position.row][g.position.col] = g.name;
 					}
 
-					
 					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
 
-						System.err.println("Boxes to closestbox: " +copy.boxes2);
+						System.err.println("Boxes to closestbox: " + copy.boxes2);
 
 						copy = updatedNode.Copy();
 						copy.parent = null;
-						
+
 						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
 						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
 						copy.theAgentName = agents.get(plan.trappedAgent).name;
@@ -526,19 +530,15 @@ public class SearchClient {
 						copy.action = agents.get(plan.trappedAgent).initialState.action;
 						copy.boxes2.clear();
 						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
-						System.err.println("Boxes to closestbox: " +copy.boxes2);
+						System.err.println("Boxes to closestbox: " + copy.boxes2);
 
-						
+
 						a.initialState = updatedNode.Copy();
-						System.err.println("Copy after: "+copy);
-						
-
-
+						System.err.println("Copy after: " + copy);
 
 					} else {
 						a.initialState = updatedNode.Copy();
 					}
-
 					solutions.add(solution);
 				} else if (a.isTrapped && !a.initialState.isGoalState()) { // if
 																			// agent
@@ -546,7 +546,8 @@ public class SearchClient {
 
 					LinkedList<Node> tempList = new LinkedList<Node>();
 					Node tempInitialState = a.initialState.Copy();
-					//System.err.println("InitialState for trapped agent " + a.name + " with initialState " + a.initialState);
+					// System.err.println("InitialState for trapped agent " +
+					// a.name + " with initialState " + a.initialState);
 					tempInitialState.doNoOp = true; // append noop in
 													// joinedaction
 					tempList.add(tempInitialState);
@@ -568,6 +569,7 @@ public class SearchClient {
 					a.isTrapped = false;
 
 				}
+				System.err.println("Uberboxes before update3: "+uberNode.boxes2);
 				// else if(a.initialState.isGoalState()) //if you finish your
 				// goals
 				// {
@@ -603,6 +605,7 @@ public class SearchClient {
 					}
 				}
 
+				System.err.println("Uberboxes before update 4: "+uberNode.boxes2);
 				// TODO: empty the same string builder object
 				for (int i = 0; i < maxSol; i++) {
 
@@ -659,9 +662,11 @@ public class SearchClient {
 
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
+
+								System.err.println("Uberboxes before update: "+uberNode.boxes2);
+
 								uberNode.updateUberNode(n);
-								// System.err.println("The updated node uber
-								// alles: " + uberNode +n);
+								System.err.println("The updated node uber alles: " + uberNode + n);
 
 							} else {
 								jointAction.append("NoOp,");

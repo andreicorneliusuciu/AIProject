@@ -447,26 +447,32 @@ public class Node {
 	}
 	
 	
-	public void updateUberNode(Node smallNode)
+	public void updateUberNode(Node theSmallNode)
 	{
+		//System.err.println("lululuul0"+theSmallNode.boxes2);
+		Node smallNode = theSmallNode.Copy(); //TODO this has no boxes2, look into it sucka
+		//System.err.println("lululuul1"+theSmallNode.boxes2);
 		
-		//clear all boxes
-		this.boxes2.clear();
-		
+		System.err.println("Uberboxes : "+this.boxes2);
 		for (Box b : this.boxes2) {
 
 			this.boxes[b.position.row][b.position.col] = 0;
 		}
 		
-		
+		this.boxes2.clear();
+		System.err.println("Uberboxes after clear: "+this.boxes2);
+
+		System.err.println("lululuul"+smallNode.boxes2);
 		for(Box b : smallNode.boxes2)
 		{
 			if(b.color.equals(this.theAgentColor))
 			{
+				
 				this.boxes2.add(b);
 			}
 		}
-		
+		System.err.println("Uberboxes after refill: "+this.boxes2);
+
 		
 		for (Box b : this.boxes2) {
 
