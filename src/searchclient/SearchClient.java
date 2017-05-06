@@ -588,36 +588,36 @@ public class SearchClient {
 
 							// check if conflict on same node with the other
 							// agents
-							for (Agent agent : agents) {
-								if (agent.name != j) {
-									System.err.println("the two possible conflciting nodes:/n/n" + solutions.get(j).get(i) + solutions.get(agent.name).get(i) + "/n");
-									if (!n.doNoOp && !solutions.get(agent.name).get(i).doNoOp) {
-										if (n.isConflict(solutions.get(agent.name).get(i))) {
-											// conflict
-											System.err.println("i am in" + agents);
-											
-											agents.get(j).initialState = solutions.get(j).get(i - 1);
-											agents.get(j).initialState.parent = null;
-											System.err.println("i am shrek " + agents);
-											
-											for(int o = i; o<= maxSol; o++)
-											{
-												Node tnode = solutions.get(j).get(i-1);
-												tnode.doNoOp=true;
-												tnode.parent = null;
-												solutions.get(j).set(o,tnode);
-											}
-											//n.doNoOp = true;
-											//make everything for one of the two agents NoOp
-											break;
-										}
-
-										else {
-											//do sth? maybe?
-										}
-									}
-								}
-							}
+//							for (Agent agent : agents) {
+//								if (agent.name != j) {
+//									System.err.println("the two possible conflciting nodes:/n/n" + solutions.get(j).get(i) + solutions.get(agent.name).get(i) + "/n");
+//									if (!n.doNoOp && !solutions.get(agent.name).get(i).doNoOp) {
+//										if (n.isConflict(solutions.get(agent.name).get(i))) {
+//											// conflict
+//											System.err.println("i am in" + agents);
+//											
+//											agents.get(j).initialState = solutions.get(j).get(i - 1);
+//											agents.get(j).initialState.parent = null;
+//											System.err.println("i am shrek " + agents);
+//											
+//											for(int o = i; o<= maxSol; o++)
+//											{
+//												Node tnode = solutions.get(j).get(i-1);
+//												tnode.doNoOp=true;
+//												tnode.parent = null;
+//												solutions.get(j).set(o,tnode);
+//											}
+//											//n.doNoOp = true;
+//											//make everything for one of the two agents NoOp
+//											break;
+//										}
+//
+//										else {
+//											//do sth? maybe?
+//										}
+//									}
+//								}
+//							}
 
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");

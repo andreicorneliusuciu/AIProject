@@ -393,21 +393,45 @@ public class Node {
 			return true;
 		}
 
+		
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			// if agent wants to move into box the other agent pushed in his
 			// path
 
 			for (int j = 0; j < Node.MAX_COL; j++) {
-				if (this.boxes[i][j] > 0 && node2.agentRow == i && node2.agentCol == j) {
-					System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
-					System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
-					return true;
+				if (this.boxes[i][j] > 0 && node2.agentRow == i && node2.agentCol == j ) {
+					
+					for(Box b : this.boxes2)
+					{
+						if(b.name == this.boxes[i][j] && b.color.equals(node2.theAgentColor))
+						{   
+							
+							break;
+						}else{
+							
+							System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
+							System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
+							return true;
+						}
+							
+					}
+					
 				}
 
 				if (node2.boxes[i][j] > 0 && this.agentRow == i && this.agentCol == j) {
-					System.err.println("conflict in:" + this.toString());
-					System.err.println("conflict in:" + node2.toString());
-					return true;
+					for(Box b : node2.boxes2)
+					{
+						if(b.name == node2.boxes[i][j] && b.color.equals(this.theAgentColor))
+						{   
+							break;
+						}else{
+							
+							System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
+							System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
+							return true;
+						}
+							
+					}
 				}
 			}
 		}
