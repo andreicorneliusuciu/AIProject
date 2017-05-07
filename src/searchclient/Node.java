@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,13 +25,13 @@ public class Node {
 	public String theAgentColor;
 	
 	public boolean doNoOp = false;
-
+	static Goal gAux;
 
 	public char[][] boxes;
 	public char[][] goals;
 
 	// alphabetially sorted both lists
-	public List<Goal> goals2 = new ArrayList<>();
+	public Queue<Goal> goals2 = new PriorityQueue<>(gAux);
 	public List<Box> boxes2 = new ArrayList<>();
 	
 	//This should be computed only once
@@ -266,7 +268,7 @@ public class Node {
 
 		// aici
 		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
+			//System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
 			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}

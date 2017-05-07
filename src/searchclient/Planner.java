@@ -175,7 +175,7 @@ public class Planner {
 			// break;
 			// }
 			// name it a random goal name of those the agent has
-			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.get(0).name;
+			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.peek().name; //was got(0)
 		}
 		//System.err.println("Goal made in: " + shortestPos);
 

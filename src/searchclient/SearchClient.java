@@ -234,6 +234,9 @@ public class SearchClient {
 			}
 			row++;
 		}
+		
+		char[][] mapForAgentOne = new char[levelRowSize][levelColumnSize];
+		
 
 		System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
@@ -247,6 +250,9 @@ public class SearchClient {
 			System.err.println("For agent " + i + ":");
 			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
 			System.err.println("&&&& Goals2 = " + agents.get(i).initialState.goals2);
+			for(Box b:agents.get(i).initialState.myBoxesFinal) {
+				
+			}
 			System.err.println(" --------------------- ");
 		}
 //		for (int i = 0 ; i < agents.size(); i++) {
@@ -272,8 +278,8 @@ public class SearchClient {
 		System.err.println("\n ------------------------------------");
 		System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
 		
-		for(int i1 = 0; i1 <  levelRowSize-2; i1++) {
-			for (int j = 0; j < levelColumnSize-2; j++) {
+		for(int i1 = 0; i1 <  levelRowSize; i1++) {
+			for (int j = 0; j < levelColumnSize; j++) {
 				System.err.print(mapWithoutBorders[i1][j]);
 			}
 			System.err.println("");
@@ -291,7 +297,8 @@ public class SearchClient {
 //		DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
 //				new Position(7,0)));
 		//Test Independent goals
-		
+		distancesComputer.getShortestPath(new Position(1,1), new Position(5,26));
+		//System.err.println("Yes "  + DistancesComputer.getDistanceBetween2Positions(new Position(2,25),new Position(4,26)));
 	}
 
 	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
@@ -716,6 +723,7 @@ public class SearchClient {
 		for (int i = 0; i < agents.size(); i++) {
 			try {
 				solution = client.Search(strategies.get(i), SearchClient.agents.get(i).initialState);
+				System.err.println("initial command " + solution.get(0).action);
 				solutions.add(solution);
 			} catch (Exception ex) {
 				System.err.println("Problems for agent " + i + " when solving the level");

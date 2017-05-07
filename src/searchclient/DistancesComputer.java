@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,18 +68,28 @@ public class DistancesComputer {
 //	}
 	
 	public static int getDistanceBetween2Positions(Position p1, Position p2) {
+		//check for the wall
 		int dist = Math.abs(map[p2.row][p2.col] - map[p1.row][p1.col]);
 //		if(dist != 0)
 			return dist;
 	//	else return Integer.MAX_VALUE;
 	}
 	
+	public int getDirection(Position p1, Position p2) {
+		int dist = map[p2.row][p2.col] - map[p1.row][p1.col];
+		if(dist > 0) 
+			//I have to move either on the right or down on the map
+			return 1;
+		//I have to move either on the left or up on the map
+		else return 2;
+	}
+	
 	public void printMap(Position start, Position end) {
 		System.err.println("\n ------------------------------------");
 		System.err.println("###### THE Distance for [" + start.row + ", " + start.col+ "] :");
 		
-		for(int i1 = 0; i1 <  levelRowSize; i1++) {
-			for (int j = 0; j < levelColSize; j++) {
+		for(int i1 = 1; i1 <=  levelRowSize; i1++) {
+			for (int j = 1; j <= levelColSize; j++) {
 				if(map[i1][j] == -1) {
 					System.err.print("+"+" ");
 				} else if(i1 == start.row && j == start.col) {
@@ -103,19 +114,7 @@ public class DistancesComputer {
 		int y = cell.col;
 		if(map[x][y] == -1)
 			return result;
-//		
-//		if (x - 1 < 0) {
-//			x = 1;
-//		} else if(x + 1 > levelRowSize) {
-//			x = levelRowSize - 1;
-//		} else if(y - 1 < 0) {
-//			y = 1;
-//		} else if(y + 1 > levelColSize) {
-//			y = levelColSize - 1;
-//		} 
-		
-//		System.err.println("Index:");
-		//System.err.println("For Cell (" + x + ", " + y + ") Negigh are:");
+
 		for(int i = x - 1; i <= x + 1; i++) {
 			for(int j = y - 1; j <= y + 1; j++) {
 				try {
@@ -133,5 +132,101 @@ public class DistancesComputer {
 		}
 		
 		return result;
+	}
+	
+	public List<Position> getShortestPath(Position from, Position to) {
+		List<Position> path = new LinkedList<>();
+		Position initial = from;
+		
+		System.err.println("Dist = " + getDistanceBetween2Positions(from, to));
+		//if I have to go from left to right
+		while(!from.equals(to)) {
+			if(getDirection(from, to) == 1) {
+				if(getDistanceBetween2Positions(from, to) > 0) {
+	//				if(map[from.row][from.col] == -1) {
+	//					continue;
+	//				}
+					Position p = getNeighbourRight(from);
+					System.err.println("From = " + from + " -- Neigh = " + p);
+					path.add(p);
+					from = p;
+				} else
+					break;
+			} else {
+				if(getDistanceBetween2Positions(from, to) > 0) {
+	//				if(map[from.row][from.col] == -1) {
+	//					continue;
+	//				}
+					Position p = getNeighbourLeft(from);
+					System.err.println("From = " + from + " -- Neigh = " + p);
+					path.add(p);
+					from = p;
+				} else
+					break;				
+			}
+		}
+		
+		
+		//path.add(0, initial);
+		System.err.println("Shtortst path between " + initial + " to " + to + " is " + path);
+		return path;
+	}
+	
+	public Position getNeighbourRight(Position cell) {
+		
+		int x = cell.row;
+		int y = cell.col;
+		int finalX = 0;
+		int finalY = 0;
+		int shortest = Integer.MIN_VALUE;
+		
+		
+		for(int i = x - 1; i <= x + 1; i++) {
+			for(int j = y - 1; j <= y + 1; j++) {
+				if(!isInTheCorners(x, y, i, j) && map[i][j] != -1) {
+					//go to right
+					if(shortest < Math.max(map[x][y], map[i][j])) {
+						shortest = Math.max(map[x][y], map[i][j]);
+						finalX = i;
+						finalY = j;
+					}
+				}
+			}
+		}
+		
+		//if(finalX != 0 && finalY != 0)  {
+			
+			return new Position(finalX, finalY);
+		
+		//else return null;
+	}
+	
+public Position getNeighbourLeft(Position cell) {
+		
+		int x = cell.row;
+		int y = cell.col;
+		int finalX = 0;
+		int finalY = 0;
+		int shortest = Integer.MAX_VALUE;
+		
+		
+		for(int i = x - 1; i <= x + 1; i++) {
+			for(int j = y - 1; j <= y + 1; j++) {
+				if(!isInTheCorners(x, y, i, j) && map[i][j] != -1) {
+					//go to right
+					if(shortest > Math.min(map[x][y], map[i][j])) {
+						shortest = Math.min(map[x][y], map[i][j]);
+						finalX = i;
+						finalY = j;
+					}
+				}
+			}
+		}
+		
+		//if(finalX != 0 && finalY != 0)  {
+			
+			return new Position(finalX, finalY);
+		
+		//else return null;
 	}
 }

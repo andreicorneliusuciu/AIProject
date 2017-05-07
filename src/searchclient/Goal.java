@@ -1,6 +1,8 @@
 package searchclient;
 
-public class Goal implements Comparable<Goal> {
+import java.util.Comparator;
+
+public class Goal implements Comparable<Goal>,Comparator<Goal> {
 	public Character name;
 	public String color;
 	public Position position;
@@ -71,6 +73,12 @@ public class Goal implements Comparable<Goal> {
 		} else if (!position.equals(other.position))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compare(Goal o1, Goal o2) {
+		// TODO Auto-generated method stub
+		return o1.compareTo(o2);
 	}
 	
 	

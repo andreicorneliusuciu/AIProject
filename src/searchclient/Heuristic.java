@@ -2,6 +2,7 @@ package searchclient;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
@@ -16,6 +17,8 @@ public abstract class Heuristic implements Comparator<Node> {
 	// positions of the boxes
 	public List<Goal> goals;
 	public List<Box> boxes;
+	int debug = 2;
+	int interationDebug = 4;
 
 	// list of storage positions to be updated in FindStorage() during
 	// preprocessing
@@ -24,7 +27,7 @@ public abstract class Heuristic implements Comparator<Node> {
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
 		// TODO: I guess I need to make a list of positions in the Node class
-		goals = initialState.goals2;
+		//goals = initialState.goals2;
 		boxes = initialState.boxes2;
 
 		// TODO: preprocessing methods that do:
@@ -156,18 +159,46 @@ public abstract class Heuristic implements Comparator<Node> {
 		// }
 		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
 		//System.err.println("[H] h func, goals 2 = " + n.goals2);
+//		System.err.println("The alphabetically ordered boxes: " + boxesOrderedAlphabetically);
+//		System.err.println();
 		int i = 0;
-		for(Box b:boxesOrderedAlphabetically) {
-			//	ADD dist			box						the goal
-			Position goal = n.goals2.get(i).position;
-//			goal.row = goal.row - 1;
-//			goal.col = goal.col - 1;
-//			b.position.row--;
-//			b.position.col--;
+//		for(Box b:boxesOrderedAlphabetically) {
+//			//	ADD dist			box						the goal
+//			Position goal = n.goals2.;//get(i).position;
+////			goal.row = goal.row - 1;
+////			goal.col = goal.col - 1;
+////			b.position.row--;
+////			b.position.col--;
+//			result += DistancesComputer.
+//					getDistanceBetween2Positions(b.position, goal);//here???
+//			i++;
+//			while(debug > 1) {
+//				System.err.println("[H #"+ b.name + " + ] Dist from " + b.position + " to goal " + goal + " is " + result);
+//				debug--;
+//			}
+//		}
+		Iterator<Goal> it1 = n.goals2.iterator();
+		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
+
+		while (it1.hasNext() && it2.hasNext()) {
+			Box b = it2.next();
+			Goal g = it1.next();
 			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, goal);//here???
-			i++;
+					getDistanceBetween2Positions(b.position, g.position);//here???
+			
+//			while(debug > 1 && interationDebug > 0) {
+//				System.err.println("[H BOX#"+ b.name + " + ] Dist from " + b.position + " to goal " + g.position + " is " + result);
+//				System.err.println("Size is " + boxesOrderedAlphabetically.size());
+//				debug--;
+//				interationDebug--;
+//				if(debug == 1) {
+//					debug = 2;
+//					break;
+//				}
+//			}
 		}
+		
+		
 		//System.err.println("[H] Heuristic result = " + result);
 		return result;
 	}
