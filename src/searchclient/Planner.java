@@ -353,16 +353,9 @@ public class Planner {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-			// System.err.println("Leafn" + leafNode);
 
 			if (leafNode.isGoalState()) {
-				//LinkedList<Node> theSolution = leafNode.extractPlan();
-				// System.err.println("Returns" + theSolution);
-
-				// for(Node n: theSolution)
-				// {
-				// n.goals = state.goals;
-				// }
+			
 				System.err.println("ExtractingPlan: " + leafNode.extractPlan());
 
 				return leafNode.extractPlan();
