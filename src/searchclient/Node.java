@@ -11,16 +11,16 @@ import java.util.Random;
 import searchclient.Command.Type;
 
 public class Node {
-	private static final Random RND = new Random(1);
-	
-	
-	//janus is a piece of shit///
+	//WALL SNAKE METHOD
 	public ArrayList<Position> tempWalls;
 	public ArrayList<ArrayList<Position>> blockedPositions;
 	public int blockedPositionsID = 0;
 	public ArrayList<Integer> priorAgentIDs;
+	//WALL SNAKE METHOD
 	
-	///
+	private static final Random RND = new Random(1);
+	
+
 
 	public static int MAX_ROW;
 	public static int MAX_COL;
@@ -54,34 +54,8 @@ public class Node {
 
 	private int _hash = 0;
 
-	
-	public Node(Node parent, int maxRow, int maxCol, ArrayList<ArrayList<Position>> blockedPositions, int blockedPositionsID) {
-		this.blockedPositionsID = blockedPositionsID;
-		this.blockedPositions = blockedPositions;
-		if(this.blockedPositions.size()>blockedPositionsID){
-			this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
-		} //Else, the other agent finished his plan.
-		this.priorAgentIDs = new ArrayList<Integer>();
-		
-		
-		this.parent = parent;
 
-		MAX_ROW = maxRow;
-		MAX_COL = maxCol;
-		boxes = new char[MAX_ROW][MAX_COL];
-		goals = new char[MAX_ROW][MAX_COL];
-		if (parent == null) {
-			this.g = 0;
-		} else {
-			this.g = parent.g() + 1;
-		}
-	}
-	
-	
-	public void assignPriorAgents(ArrayList<Integer> priorAgents){
-		this.priorAgentIDs = priorAgents;
-	}
-	
+
 	public void assignBlocked(ArrayList<ArrayList<Position>> positions){
 		blockedPositions = positions;
 		if(this.blockedPositions.size() > blockedPositionsID){
@@ -132,6 +106,36 @@ public class Node {
 			}
 		}
 	}
+	
+	public void assignPriorAgents(ArrayList<Integer> priorAgents){
+		this.priorAgentIDs = priorAgents;
+	}
+	
+	public Node(Node parent, int maxRow, int maxCol, ArrayList<ArrayList<Position>> blockedPositions, int blockedPositionsID) {
+		this.blockedPositionsID = blockedPositionsID;
+		this.blockedPositions = blockedPositions;
+		if(this.blockedPositions.size()>blockedPositionsID){
+			this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
+		} //Else, the other agent finished his plan.
+		this.priorAgentIDs = new ArrayList<Integer>();
+		
+		
+		this.parent = parent;
+
+		MAX_ROW = maxRow;
+		MAX_COL = maxCol;
+		boxes = new char[MAX_ROW][MAX_COL];
+		goals = new char[MAX_ROW][MAX_COL];
+		if (parent == null) {
+			this.g = 0;
+		} else {
+			this.g = parent.g() + 1;
+		}
+	}
+	
+	
+
+	
 	
 	
 	public Node Copy() {
@@ -353,8 +357,6 @@ public class Node {
 	}
 
 
-	
-	
 	private Node ChildNode() {
 		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositions, blockedPositionsID+1);
 		//System.err.println("This is the thing maaaan| " +copy.blockedPositionsID);
@@ -372,11 +374,21 @@ public class Node {
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
 			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}
+		for(int j = 0; j<SearchClient.levelRowSize; j++){
+			for(int j2 = 0; j2<SearchClient.levelColumnSize; j2++){
+				if(copy.boxes[j][j2] == '*'){
+					copy.boxes[j][j2] = ' ';
+				}
+			}
+		}
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
+
 		copy.goals2 = this.goals2;
 		copy.boxes2 = this.boxes2;
+
+
 		if(copy.blockedPositions.size() > blockedPositionsID){
 			for(Position p : copy.blockedPositions.get(blockedPositionsID)){
 				copy.boxes[p.row][p.col] = '*';//TODO: Set '*' to be an imaginary color
