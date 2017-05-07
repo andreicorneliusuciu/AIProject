@@ -61,19 +61,19 @@ public class Node {
 	}
 
 	public Node Copy() {
-		
+
 		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
-		
+
 		copy.parent = this.parent;
 		copy.agentRow = this.agentRow;
 		copy.agentCol = this.agentCol;
 		copy.theAgentName = this.theAgentName;
 		copy.theAgentColor = this.theAgentColor;
-		//copy.boxes = this.boxes;
-		copy.boxes2 = this.boxes2;
-		//copy.goals = this.goals;
-		copy.goals2 = this.goals2;
-		copy.myBoxes = this.myBoxes;
+		// copy.boxes = this.boxes;
+		copy.boxes2 = new ArrayList(this.boxes2);
+		// copy.goals = this.goals;
+		copy.goals2 = new ArrayList(this.goals2);
+		copy.myBoxes = new ArrayList(this.myBoxes);
 		copy.action = this.action;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
@@ -117,8 +117,6 @@ public class Node {
 		}
 		return true;
 	}
-
-
 
 	public ArrayList<Node> getExpandedNodes() {
 		// Box theBox = null;
@@ -197,16 +195,22 @@ public class Node {
 						n.agentCol = newAgentCol;
 
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						
-//						for(Box b : n.boxes2)
-//						{
-//							if(b.position.row==newAgentRow && b.position.col == newAgentCol)
-//							{
-//								b.position = new Position(newBoxRow,newBoxCol);
-//								
-//							}
-//						}
-						
+
+						// Update boxes2 in childnode
+						for (Box b : this.boxes2) {
+
+							if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
+
+								for (Box childbox : n.boxes2) {
+									if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
+
+										childbox.position.row = newBoxRow;
+										childbox.position.col = newBoxCol;
+									}
+								}
+							}
+
+						}
 
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
@@ -228,10 +232,8 @@ public class Node {
 						if (b.name.equals(this.boxes[boxRow][boxCol])) {
 							boxColor = b.color;
 
-						
 						}
 					}
-				
 
 					if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
 
@@ -247,16 +249,21 @@ public class Node {
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
 
-						
-						//update boxes2
-//						for(Box b : n.boxes2)
-//						{
-//							if(b.position.row==boxRow && b.position.col == boxCol)
-//							{
-//								b.position = new Position(this.agentRow,this.agentCol);
-//								
-//							}
-//						}
+						for (Box b : this.boxes2) {
+
+							if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
+
+								for (Box childbox : n.boxes2) {
+									if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
+
+										childbox.position.row = agentRow;
+										childbox.position.col = agentCol;
+
+									}
+								}
+							}
+
+						}
 						expandedNodes.add(n);
 
 					}
@@ -389,51 +396,44 @@ public class Node {
 
 	public boolean isConflict(Node node2) {
 
-		
-		
 		if (this.agentRow == node2.agentRow && this.agentCol == node2.agentCol) {
 			System.err.println("Agent conflict! woo");
 			return true;
 		}
 
-		
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			// if agent wants to move into box the other agent pushed in his
 			// path
 
 			for (int j = 0; j < Node.MAX_COL; j++) {
-				if (this.boxes[i][j] > 0 && node2.agentRow == i && node2.agentCol == j ) {
-					
-					for(Box b : this.boxes2)
-					{
-						if(b.name == this.boxes[i][j] && b.color.equals(node2.theAgentColor))
-						{   
-							
+				if (this.boxes[i][j] > 0 && node2.agentRow == i && node2.agentCol == j) {
+
+					for (Box b : this.boxes2) {
+						if (b.name == this.boxes[i][j] && b.color.equals(node2.theAgentColor)) {
+
 							break;
-						}else{
-							
+						} else {
+
 							System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
 							System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
 							return true;
 						}
-							
+
 					}
-					
+
 				}
 
 				if (node2.boxes[i][j] > 0 && this.agentRow == i && this.agentCol == j) {
-					for(Box b : node2.boxes2)
-					{
-						if(b.name == node2.boxes[i][j] && b.color.equals(this.theAgentColor))
-						{   
+					for (Box b : node2.boxes2) {
+						if (b.name == node2.boxes[i][j] && b.color.equals(this.theAgentColor)) {
 							break;
-						}else{
-							
+						} else {
+
 							System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
 							System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
 							return true;
 						}
-							
+
 					}
 				}
 			}
@@ -442,46 +442,77 @@ public class Node {
 		System.err.println("No conflicts in this move");
 		return false;
 	}
-	
-	
-	public void updateUberNode(Node theSmallNode) //update the boxes of the same color as the smallNode in uberNode
+
+	public void updateUberNode(Node theSmallNode) // update the boxes of the
+													// same color as the
+													// smallNode in uberNode
 	{
 
-		//we have to update the boxes2 locations!!! check if they a re updated
-		//cannot update those, use boxes[][] instead
-		
-		Node smallNode = theSmallNode.Copy(); 
-		System.err.println("CompareNode: "+smallNode);
-		System.err.println("CompareNode boxes: "+smallNode.boxes2);		
-		
-		
-		System.err.println("UberNode : "+this.toString());
-		
+		// we have to update the boxes2 locations!!! check if they a re updated
+		// cannot update those, use boxes[][] instead
+
+		Node smallNode = theSmallNode.Copy();
+		System.err.println("CompareNode: " + smallNode);
+		System.err.println("CompareNode boxes: " + smallNode.boxes2);
+
+		System.err.println("UberNode : " + this.toString());
+
 		for (Box b : smallNode.boxes2) {
 
-			//erase the same colored boxes from the old boxes[][] version
-			if(b.color.equals(smallNode.theAgentColor))
-			{
-				
+			// erase the same colored boxes from the old boxes[][] version
+			if (b.color.equals(smallNode.theAgentColor)) {
+
 				this.boxes[b.position.row][b.position.col] = 0;
 			}
-			
-		}		
-		
-		//put back the boxes in the new state. Cannot use boxes2
-		for(Box b : smallNode.boxes2)
-		{
-			if(b.color.equals(smallNode.theAgentColor))
-			{
-				//this.boxes2.add(b);
+
+		}
+
+		// put back the boxes in the new state. Cannot use boxes2
+		for (Box b : smallNode.boxes2) {
+			if (b.color.equals(smallNode.theAgentColor)) {
+				// this.boxes2.add(b);
 				this.boxes[b.position.row][b.position.col] = b.name;
 			}
 		}
-		
-		System.err.println("Uberboxes after refill: "+this.boxes2);
 
-		System.err.println("Ubernode after refill: "+this.toString());
-		
+		System.err.println("Uberboxes after refill: " + this.boxes2);
+
+		System.err.println("Ubernode after refill: " + this.toString());
+
+	}
+
+	public Node makeInitialState(Agent agent) {
+
+		System.err.println("The uberNode to create an InitialState for agent " + agent + " :" + this.toString());
+
+		Node newInitialState = this.Copy();
+		Node oldInitialState = agent.initialState.Copy();
+
+		newInitialState.parent = null;
+		newInitialState.agentRow = agent.position.row; // agent must have
+														// updated position
+		newInitialState.agentCol = agent.position.col;
+
+		newInitialState.goals2.clear();
+
+		// erase goals
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			for (int j = 0; j < Node.MAX_COL; j++) {
+				newInitialState.goals[i][j] = 0;
+			}
+		}
+
+		for (Goal g : this.goals2) {
+			System.err.println("goal color of ubernode : " + g.color + " agent color of agent: " + oldInitialState.theAgentColor);
+
+			if (g.color.equals(oldInitialState.theAgentColor)) {
+				newInitialState.goals2.add(g);
+				newInitialState.goals[g.position.row][g.position.col] = g.name;
+			}
+		}
+
+		System.err.println("The ready InitialState for agent " + agent + " :" + newInitialState);
+		return newInitialState;
 	}
 
 }

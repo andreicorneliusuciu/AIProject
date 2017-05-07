@@ -382,7 +382,9 @@ public class SearchClient {
 				break;
 			}
 
-			System.err.println("Initializing planner for with initial state: /n" + agents);
+			
+			
+			System.err.println("Initializing agents with initial state: /n" + agents);
 
 			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 
@@ -390,128 +392,125 @@ public class SearchClient {
 			for (Agent a : agents) {
 				//
 
-				///
-				plan = new Planner(agents.get(a.name)); // remove only these
-														// when uncommenting
-				solution = plan.findSolution();
-				solutions.add(solution);
-				///
-
-				// if (!a.isTrapped && !a.initialState.isGoalState()) {
-				//
-				// // System.err.println("Initializing planner for " + a.name +
-				// // "with initial state: /n" + a.initialState);
-				//
-				// plan = new Planner(agents.get(a.name));
-				//
+				// ///
+				// plan = new Planner(agents.get(a.name)); // remove only these
+				// // when uncommenting
 				// solution = plan.findSolution();
-				//
-				// updatedNode = solution.getLast().Copy();
-				// System.err.println("Boxes to updated node: " +
-				// updatedNode.boxes2);
-				//
-				// updatedNode.parent = null;
-				//
-				// // System.err.println("=================>>>>plan: \n" +
-				// // solution);
-				//
-				// // put the goals back
-				// for (int i = 0; i < Node.MAX_ROW; i++)
-				// for (int j = 0; j < Node.MAX_COL; j++) {
-				// if (updatedNode.goals[i][j] != 0) {
-				// updatedNode.goals[i][j] = 0;
-				// }
-				// }
-				//
-				// for (Goal g : updatedNode.goals2) {
-				//
-				// updatedNode.goals[g.position.row][g.position.col] = g.name;
-				// }
-				//
-				// if (plan.plantoPrint.contains(plan.getFreeAgent())) {
-				//
-				// System.err.println("Boxes to closestbox: " + copy.boxes2);
-				//
-				// copy = updatedNode.Copy();
-				// copy.parent = null;
-				//
-				// copy.agentRow =
-				// agents.get(plan.trappedAgent).initialState.agentRow;
-				// copy.agentCol =
-				// agents.get(plan.trappedAgent).initialState.agentCol;
-				// copy.theAgentName = agents.get(plan.trappedAgent).name;
-				// copy.goals2.clear();
-				// copy.goals2 =
-				// agents.get(plan.trappedAgent).initialState.goals2;
-				// copy.goals =
-				// agents.get(plan.trappedAgent).initialState.goals.clone();
-				// copy.theAgentColor =
-				// agents.get(plan.trappedAgent).initialState.theAgentColor;
-				// copy.action =
-				// agents.get(plan.trappedAgent).initialState.action;
-				// copy.boxes2.clear();
-				// copy.boxes2 =
-				// agents.get(plan.trappedAgent).initialState.boxes2;
-				// System.err.println("Boxes to closestbox: " + copy.boxes2);
-				//
-				//
-				// a.initialState = updatedNode.Copy();
-				// System.err.println("Copy after: " + copy);
-				//
-				// } else {
-				// a.initialState = updatedNode.Copy();
-				// }
 				// solutions.add(solution);
-				// } else if (a.isTrapped && !a.initialState.isGoalState()) { //
-				// if
-				// // agent
-				// // trapped
-				//
+				// ///
+
+				if (!a.isTrapped && !a.initialState.isGoalState()) {
+
+					// System.err.println("Initializing planner for " + a.name +
+					// "with initial state: /n" + a.initialState);
+
+					plan = new Planner(agents.get(a.name));
+
+					solution = plan.findSolution();
+
+					updatedNode = solution.getLast().Copy();
+					//System.err.println("Boxes to updated node: " + updatedNode.boxes2);
+
+					updatedNode.parent = null;
+
+					// System.err.println("=================>>>>plan: \n" +
+					// solution);
+
+					// put the goals back
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (updatedNode.goals[i][j] != 0) {
+								updatedNode.goals[i][j] = 0;
+							}
+						}
+
+					for (Goal g : updatedNode.goals2) {
+
+						updatedNode.goals[g.position.row][g.position.col] = g.name;
+					}
+
+					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
+
+					//	System.err.println("Boxes to closestbox: " + copy.boxes2);
+
+						copy = updatedNode.Copy();
+						copy.parent = null;
+
+						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
+						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
+						copy.theAgentName = agents.get(plan.trappedAgent).name;
+						copy.goals2.clear();
+						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
+						copy.goals = agents.get(plan.trappedAgent).initialState.goals.clone();
+						copy.theAgentColor = agents.get(plan.trappedAgent).initialState.theAgentColor;
+						copy.action = agents.get(plan.trappedAgent).initialState.action;
+						copy.boxes2.clear();
+						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
+						//System.err.println("Boxes to closestbox: " + copy.boxes2);
+
+						a.initialState = updatedNode.Copy();
+					//	System.err.println("Copy after: " + copy);
+
+					} else {
+						a.initialState = updatedNode.Copy();
+					}
+					solutions.add(solution);
+				} else if (a.isTrapped && !a.initialState.isGoalState()) { //
+					// if
+					// agent
+					// trapped
+
+					LinkedList<Node> tempList = new LinkedList<Node>();
+					Node tempInitialState = a.initialState.Copy();
+					// System.err.println("InitialState for trapped agent " +
+					// a.name + " with initialState " + a.initialState);
+					tempInitialState.doNoOp = true; // append noop in
+					// joinedaction
+					tempList.add(tempInitialState);
+					solutions.add(tempList);
+
+					for (int i = 0; i < Node.MAX_ROW; i++)
+						for (int j = 0; j < Node.MAX_COL; j++) {
+							if (a.initialState.goals[i][j] != 0) {
+								a.initialState.goals[i][j] = 0;
+							}
+						}
+
+					for (Goal g : a.initialState.goals2) {
+
+						a.initialState.goals[g.position.row][g.position.col] = g.name;
+					}
+					a.initialState = copy.Copy();
+					System.err.println("Initialstate of agent: "+a.initialState);
+					a.isTrapped = false;
+
+				}
+				else if(a.initialState.isGoalState())
+				{
+					
+					Node tnode = a.initialState.Copy();
+					tnode.doNoOp = true;
+					tnode.parent = null;
+					List<Node> tlist = new ArrayList<Node>();
+					tlist.add(tnode);
+					solutions.add(tlist);
+				}
+				//System.err.println("Uberboxes before update3:" + uberNode.boxes2);
+				// else if(a.initialState.isGoalState()) //if you finish your
+				// goals
+				// {
+				// // System.err.println(
+				// // "Agent: " + a + " is trapped, shit. Reseting plan.
+				// Remember to update agent.initialState");
 				// LinkedList<Node> tempList = new LinkedList<Node>();
-				// Node tempInitialState = a.initialState.Copy();
-				// // System.err.println("InitialState for trapped agent " +
-				// // a.name + " with initialState " + a.initialState);
-				// tempInitialState.doNoOp = true; // append noop in
-				// // joinedaction
+				// Node tempInitialState = a.initialState;
+				// tempInitialState.doNoOp = true;
 				// tempList.add(tempInitialState);
 				// solutions.add(tempList);
-				//
-				// for (int i = 0; i < Node.MAX_ROW; i++)
-				// for (int j = 0; j < Node.MAX_COL; j++) {
-				// if (a.initialState.goals[i][j] != 0) {
-				// a.initialState.goals[i][j] = 0;
-				// }
-				// }
-				//
-				// for (Goal g : a.initialState.goals2) {
-				//
-				// a.initialState.goals[g.position.row][g.position.col] =
-				// g.name;
-				// }
-				// a.initialState = copy.Copy();
-				// System.err.println("a.initialState ====================> lhoe
-				// " + a.initialState);
 				// a.isTrapped = false;
-				//
 				// }
-				// System.err.println("Uberboxes before update3:
-				// "+uberNode.boxes2);
-				// // else if(a.initialState.isGoalState()) //if you finish your
-				// // goals
-				// // {
-				// // // System.err.println(
-				// // // "Agent: " + a + " is trapped, shit. Reseting plan.
-				// // Remember to update agent.initialState");
-				// // LinkedList<Node> tempList = new LinkedList<Node>();
-				// // Node tempInitialState = a.initialState;
-				// // tempInitialState.doNoOp = true;
-				// // tempList.add(tempInitialState);
-				// // solutions.add(tempList);
-				// // a.isTrapped = false;
-				// // }
-				// // System.err.println("Agents meow0 " + agents);
-				//
-				//
+				// System.err.println("Agents meow0 " + agents);
+
 			}
 
 			if (solutions.isEmpty()) {
@@ -532,7 +531,6 @@ public class SearchClient {
 					}
 				}
 
-				System.err.println("Uberboxes before update 4: " + uberNode.boxes2);
 				// TODO: empty the same string builder object
 				for (int i = 0; i < maxSol; i++) {
 
@@ -548,16 +546,18 @@ public class SearchClient {
 
 							n = solutions.get(j).get(i);
 
-
-							
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
-								System.err.println("Uberboxes before update: " + uberNode.boxes2);
+								//System.err.println("Solution boxes: " + n.boxes2);
 
-								
-								uberNode.updateUberNode(n);
-								System.err.println("The updated node uber alles: " + uberNode + n);
+								//System.err.println("Uberboxes before update: " + uberNode.boxes2);
+
+								// uberNode.updateUberNode(n);
+								// agents.get(0).initialState =
+								// uberNode.makeInitialState(agents.get(0));
+								// System.err.println("The updated uberboxes: "
+								// + uberNode.boxes2);
 
 							} else {
 								jointAction.append("NoOp,");
@@ -579,6 +579,8 @@ public class SearchClient {
 
 						break;
 					} else {
+						
+						System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 					}
 				}
 			}
