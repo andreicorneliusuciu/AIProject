@@ -118,19 +118,7 @@ public class Node {
 		return true;
 	}
 
-	// public boolean isGoalState(Node goalState) {
-	// for (int row = 1; row < MAX_ROW - 1; row++) {
-	// for (int col = 1; col < MAX_COL - 1; col++) {
-	// char g = goalState.goals[row][col];
-	// char b = Character.toLowerCase(goalState.boxes[row][col]);
-	// if (g > 0 && b != g) {
-	// return false;
-	// }
-	// }
-	// }
-	// return true;
-	//
-	// }
+
 
 	public ArrayList<Node> getExpandedNodes() {
 		// Box theBox = null;
@@ -209,12 +197,17 @@ public class Node {
 						n.agentCol = newAgentCol;
 
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
+						
+//						for(Box b : n.boxes2)
+//						{
+//							if(b.position.row==newAgentRow && b.position.col == newAgentCol)
+//							{
+//								b.position = new Position(newBoxRow,newBoxCol);
+//								
+//							}
+//						}
+						
 
-						// here determine the box iondex and set it. The boxes2
-						// needs to be sorted
-						// n.boxes2.set(arg0, arg1);
-						// TODO: this 0 is not ok here. needs to be the agent's
-						// number
 						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
 
@@ -235,15 +228,10 @@ public class Node {
 						if (b.name.equals(this.boxes[boxRow][boxCol])) {
 							boxColor = b.color;
 
-							// //////System.err.println("ITIASS HAPPENING
-							// pull");
+						
 						}
 					}
-					// //////System.err.println(boxColor+" <- boxColor,
-					// agentColor-->"+theAgentColor);
-					// "+theAgentColor);
-					// //////System.err.println("Pull!!! Box color: "+boxColor+"
-					// agentColoragentColor-->"+theAgentName+theAgentColor);
+				
 
 					if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
 
@@ -259,7 +247,16 @@ public class Node {
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
 
-						// //////System.err.println("Pull \n" + n);
+						
+						//update boxes2
+//						for(Box b : n.boxes2)
+//						{
+//							if(b.position.row==boxRow && b.position.col == boxCol)
+//							{
+//								b.position = new Position(this.agentRow,this.agentCol);
+//								
+//							}
+//						}
 						expandedNodes.add(n);
 
 					}
@@ -447,42 +444,43 @@ public class Node {
 	}
 	
 	
-	public void updateUberNode(Node theSmallNode)
+	public void updateUberNode(Node theSmallNode) //update the boxes of the same color as the smallNode in uberNode
 	{
-		//System.err.println("lululuul0"+theSmallNode.boxes2);
-		Node smallNode = theSmallNode.Copy(); //TODO this has no boxes2, look into it sucka
-		//System.err.println("lululuul1"+theSmallNode.boxes2);
-		
-		System.err.println("Uberboxes : "+this.boxes2);
-		for (Box b : this.boxes2) {
 
-			this.boxes[b.position.row][b.position.col] = 0;
-		}
+		//we have to update the boxes2 locations!!! check if they a re updated
+		//cannot update those, use boxes[][] instead
 		
-		this.boxes2.clear();
-		System.err.println("Uberboxes after clear: "+this.boxes2);
+		Node smallNode = theSmallNode.Copy(); 
+		System.err.println("CompareNode: "+smallNode);
+		System.err.println("CompareNode boxes: "+smallNode.boxes2);		
+		
+		
+		System.err.println("UberNode : "+this.toString());
+		
+		for (Box b : smallNode.boxes2) {
 
-		System.err.println("lululuul"+smallNode.boxes2);
-		for(Box b : smallNode.boxes2)
-		{
-			if(b.color.equals(this.theAgentColor))
+			//erase the same colored boxes from the old boxes[][] version
+			if(b.color.equals(smallNode.theAgentColor))
 			{
 				
-				this.boxes2.add(b);
+				this.boxes[b.position.row][b.position.col] = 0;
+			}
+			
+		}		
+		
+		//put back the boxes in the new state. Cannot use boxes2
+		for(Box b : smallNode.boxes2)
+		{
+			if(b.color.equals(smallNode.theAgentColor))
+			{
+				//this.boxes2.add(b);
+				this.boxes[b.position.row][b.position.col] = b.name;
 			}
 		}
+		
 		System.err.println("Uberboxes after refill: "+this.boxes2);
 
-		
-		for (Box b : this.boxes2) {
-
-		//	this.boxes[b.position.row][b.position.col] = 0;
-			this.boxes[b.position.row][b.position.col] = b.name;
-
-		}
-
-	
-		
+		System.err.println("Ubernode after refill: "+this.toString());
 		
 	}
 

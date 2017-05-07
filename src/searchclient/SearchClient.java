@@ -121,28 +121,7 @@ public class SearchClient {
 		uberNode = new Node(null, levelRowSize, levelColumnSize);
 
 		for (String l : lines) {
-			if (!l.startsWith("+")) {// && l.charAt(0) == ' ') {
-				// if(l.startsWith(" ")) {
-				// for (int col = 0; col < l.length(); col++) {
-				// char chr = l.charAt(col);
-				//
-				// //if we have spaces or actual wall, we fill it with "walls"
-				// if(chr == ' ') {
-				// map[row][col] = -1;
-				// } else if(chr == '+') {
-				// map[row][col] = -1;
-				// walls[row][col] = true;
-				// }else {
-				// map[row][col] = 0;
-				// }
-				// }
-				// row++;
-				// } else if(l.endsWith(" ")) { //fill with walls on the right
-				// part of the level
-				//
-				// } else
-				// continue;
-				// }
+			if (!l.startsWith("+")) {
 				continue;
 			}
 			for (int col = 0; col < l.length(); col++) {
@@ -237,6 +216,7 @@ public class SearchClient {
 
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
+
 		System.err.println(" + Agents without updated boxes: " + agents);
 		System.err.println(" + Boxes without updates: " + boxesToColor);
 		// TODO Andrei: sort the allGoals list alphabetically
@@ -279,50 +259,6 @@ public class SearchClient {
 		// new Position(7,0)));
 	}
 
-	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
-		System.err.format("Search starting with strategy %s.\n", strategy.toString());
-		strategy.addToFrontier(initialNode);
-
-		int iterations = 0;
-		while (true) {
-			if (iterations == 1000) {
-				// System.err.println(strategy.searchStatus());
-				iterations = 0;
-			}
-
-			if (strategy.frontierIsEmpty()) {
-
-				LinkedList<Node> noOpList = new LinkedList<Node>();
-				// initialNode.doNoOp = true;
-				noOpList.add(initialNode);
-				System.err.println("The frontier is empty");
-				return noOpList;
-
-			}
-
-			Node leafNode = strategy.getAndRemoveLeaf();
-			// System.err.println("Leafn" + leafNode + leafNode.parent);
-
-			if (leafNode.isGoalState()) {
-				// System.err.println("Returns" + leafNode.extractPlan());
-				return leafNode.extractPlan();
-			}
-
-			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
-															// nodes is shuffled
-															// randomly; see
-															// Node.java.
-				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
-					// System.err.println("Adding to frontier:
-					// "+n.theAgentName+" "+n);
-					strategy.addToFrontier(n);
-				}
-			}
-			iterations++;
-		}
-	}
-
 	public static void main(String[] args) throws Exception { // TODO second
 																// loop,
 																// freakout
@@ -338,31 +274,6 @@ public class SearchClient {
 
 		// for (Agent a : agents) { // positions, check if
 		allBoxes = agents.get(0).initialState.boxes2;
-		// }
-		//
-		// for (Agent a : agents) { // positions, check if
-		// allGoals = agents.get(a.name).initialState.goals2;
-		// }
-
-		// System.err.println("Agent goals goat " +
-		// agents.get(0).initialState.goals2);
-
-		// for (Goal g : allGoals)
-		// for (Box b : allBoxes) {
-		// {
-		// for (Agent a : agents) {
-		// if (a.color.equals(g.color) && !a.initialState.goals2.contains(g)) {
-		// a.initialState.goals2.add(g);
-		// a.initialState.goals[g.position.row][g.position.col] = g.name;
-		// }
-		//
-		// if (a.color.equals(b.color) && !a.initialState.boxes2.contains(b)) {
-		// a.initialState.boxes2.add(b);
-		// a.initialState.boxes[b.position.row][b.position.col] = b.name;
-		// }
-		// }
-		// }
-		// }
 
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
@@ -385,17 +296,15 @@ public class SearchClient {
 		}
 
 		// fill up the central node
-		//uberNode.goals2 = allGoals;
-		for(Goal g : allGoals)
-		{
+		// uberNode.goals2 = allGoals;
+		for (Goal g : allGoals) {
 			uberNode.goals2.add(g);
 		}
-		
-		for(Box b : allBoxes)
-		{
+
+		for (Box b : allBoxes) {
 			uberNode.boxes2.add(b);
 		}
-		//uberNode.boxes2 = allBoxes;
+		// uberNode.boxes2 = allBoxes;
 
 		for (Goal g : uberNode.goals2) {
 
@@ -408,11 +317,8 @@ public class SearchClient {
 		}
 
 		System.err.println("The node uber alles: " + uberNode);
-		
 
 		uberNode.agents = agents;
-		
-
 
 		//////////////////////////////////////////
 
@@ -482,109 +388,130 @@ public class SearchClient {
 
 			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
+				//
 
-				if (!a.isTrapped && !a.initialState.isGoalState()) {
+				///
+				plan = new Planner(agents.get(a.name)); // remove only these
+														// when uncommenting
+				solution = plan.findSolution();
+				solutions.add(solution);
+				///
 
-					// System.err.println("Initializing planner for " + a.name +
-					// "with initial state: /n" + a.initialState);
-
-					plan = new Planner(agents.get(a.name));
-
-					solution = plan.findSolution();
-
-					updatedNode = solution.getLast().Copy();
-					System.err.println("Boxes to updated node: " + updatedNode.boxes2);
-
-					updatedNode.parent = null;
-
-					// System.err.println("=================>>>>plan: \n" +
-					// solution);
-
-					// put the goals back
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (updatedNode.goals[i][j] != 0) {
-								updatedNode.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : updatedNode.goals2) {
-
-						updatedNode.goals[g.position.row][g.position.col] = g.name;
-					}
-
-					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
-
-						System.err.println("Boxes to closestbox: " + copy.boxes2);
-
-						copy = updatedNode.Copy();
-						copy.parent = null;
-
-						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
-						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
-						copy.theAgentName = agents.get(plan.trappedAgent).name;
-						copy.goals2.clear();
-						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
-						copy.goals = agents.get(plan.trappedAgent).initialState.goals.clone();
-						copy.theAgentColor = agents.get(plan.trappedAgent).initialState.theAgentColor;
-						copy.action = agents.get(plan.trappedAgent).initialState.action;
-						copy.boxes2.clear();
-						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
-						System.err.println("Boxes to closestbox: " + copy.boxes2);
-
-
-						a.initialState = updatedNode.Copy();
-						System.err.println("Copy after: " + copy);
-
-					} else {
-						a.initialState = updatedNode.Copy();
-					}
-					solutions.add(solution);
-				} else if (a.isTrapped && !a.initialState.isGoalState()) { // if
-																			// agent
-																			// trapped
-
-					LinkedList<Node> tempList = new LinkedList<Node>();
-					Node tempInitialState = a.initialState.Copy();
-					// System.err.println("InitialState for trapped agent " +
-					// a.name + " with initialState " + a.initialState);
-					tempInitialState.doNoOp = true; // append noop in
-													// joinedaction
-					tempList.add(tempInitialState);
-					solutions.add(tempList);
-
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (a.initialState.goals[i][j] != 0) {
-								a.initialState.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : a.initialState.goals2) {
-
-						a.initialState.goals[g.position.row][g.position.col] = g.name;
-					}
-					a.initialState = copy.Copy();
-					System.err.println("a.initialState ====================> lhoe " + a.initialState);
-					a.isTrapped = false;
-
-				}
-				System.err.println("Uberboxes before update3: "+uberNode.boxes2);
-				// else if(a.initialState.isGoalState()) //if you finish your
-				// goals
-				// {
-				// // System.err.println(
-				// // "Agent: " + a + " is trapped, shit. Reseting plan.
-				// Remember to update agent.initialState");
+				// if (!a.isTrapped && !a.initialState.isGoalState()) {
+				//
+				// // System.err.println("Initializing planner for " + a.name +
+				// // "with initial state: /n" + a.initialState);
+				//
+				// plan = new Planner(agents.get(a.name));
+				//
+				// solution = plan.findSolution();
+				//
+				// updatedNode = solution.getLast().Copy();
+				// System.err.println("Boxes to updated node: " +
+				// updatedNode.boxes2);
+				//
+				// updatedNode.parent = null;
+				//
+				// // System.err.println("=================>>>>plan: \n" +
+				// // solution);
+				//
+				// // put the goals back
+				// for (int i = 0; i < Node.MAX_ROW; i++)
+				// for (int j = 0; j < Node.MAX_COL; j++) {
+				// if (updatedNode.goals[i][j] != 0) {
+				// updatedNode.goals[i][j] = 0;
+				// }
+				// }
+				//
+				// for (Goal g : updatedNode.goals2) {
+				//
+				// updatedNode.goals[g.position.row][g.position.col] = g.name;
+				// }
+				//
+				// if (plan.plantoPrint.contains(plan.getFreeAgent())) {
+				//
+				// System.err.println("Boxes to closestbox: " + copy.boxes2);
+				//
+				// copy = updatedNode.Copy();
+				// copy.parent = null;
+				//
+				// copy.agentRow =
+				// agents.get(plan.trappedAgent).initialState.agentRow;
+				// copy.agentCol =
+				// agents.get(plan.trappedAgent).initialState.agentCol;
+				// copy.theAgentName = agents.get(plan.trappedAgent).name;
+				// copy.goals2.clear();
+				// copy.goals2 =
+				// agents.get(plan.trappedAgent).initialState.goals2;
+				// copy.goals =
+				// agents.get(plan.trappedAgent).initialState.goals.clone();
+				// copy.theAgentColor =
+				// agents.get(plan.trappedAgent).initialState.theAgentColor;
+				// copy.action =
+				// agents.get(plan.trappedAgent).initialState.action;
+				// copy.boxes2.clear();
+				// copy.boxes2 =
+				// agents.get(plan.trappedAgent).initialState.boxes2;
+				// System.err.println("Boxes to closestbox: " + copy.boxes2);
+				//
+				//
+				// a.initialState = updatedNode.Copy();
+				// System.err.println("Copy after: " + copy);
+				//
+				// } else {
+				// a.initialState = updatedNode.Copy();
+				// }
+				// solutions.add(solution);
+				// } else if (a.isTrapped && !a.initialState.isGoalState()) { //
+				// if
+				// // agent
+				// // trapped
+				//
 				// LinkedList<Node> tempList = new LinkedList<Node>();
-				// Node tempInitialState = a.initialState;
-				// tempInitialState.doNoOp = true;
+				// Node tempInitialState = a.initialState.Copy();
+				// // System.err.println("InitialState for trapped agent " +
+				// // a.name + " with initialState " + a.initialState);
+				// tempInitialState.doNoOp = true; // append noop in
+				// // joinedaction
 				// tempList.add(tempInitialState);
 				// solutions.add(tempList);
-				// a.isTrapped = false;
+				//
+				// for (int i = 0; i < Node.MAX_ROW; i++)
+				// for (int j = 0; j < Node.MAX_COL; j++) {
+				// if (a.initialState.goals[i][j] != 0) {
+				// a.initialState.goals[i][j] = 0;
 				// }
-				// System.err.println("Agents meow0 " + agents);
-
+				// }
+				//
+				// for (Goal g : a.initialState.goals2) {
+				//
+				// a.initialState.goals[g.position.row][g.position.col] =
+				// g.name;
+				// }
+				// a.initialState = copy.Copy();
+				// System.err.println("a.initialState ====================> lhoe
+				// " + a.initialState);
+				// a.isTrapped = false;
+				//
+				// }
+				// System.err.println("Uberboxes before update3:
+				// "+uberNode.boxes2);
+				// // else if(a.initialState.isGoalState()) //if you finish your
+				// // goals
+				// // {
+				// // // System.err.println(
+				// // // "Agent: " + a + " is trapped, shit. Reseting plan.
+				// // Remember to update agent.initialState");
+				// // LinkedList<Node> tempList = new LinkedList<Node>();
+				// // Node tempInitialState = a.initialState;
+				// // tempInitialState.doNoOp = true;
+				// // tempList.add(tempInitialState);
+				// // solutions.add(tempList);
+				// // a.isTrapped = false;
+				// // }
+				// // System.err.println("Agents meow0 " + agents);
+				//
+				//
 			}
 
 			if (solutions.isEmpty()) {
@@ -605,7 +532,7 @@ public class SearchClient {
 					}
 				}
 
-				System.err.println("Uberboxes before update 4: "+uberNode.boxes2);
+				System.err.println("Uberboxes before update 4: " + uberNode.boxes2);
 				// TODO: empty the same string builder object
 				for (int i = 0; i < maxSol; i++) {
 
@@ -621,50 +548,14 @@ public class SearchClient {
 
 							n = solutions.get(j).get(i);
 
-							// check if conflict on same node with the other
-							// agents
-							// for (Agent agent : agents) {
-							// if (agent.name != j) {
-							// System.err.println("the two possible conflciting
-							// nodes:/n/n" + solutions.get(j).get(i) +
-							// solutions.get(agent.name).get(i) + "/n");
-							// if (!n.doNoOp &&
-							// !solutions.get(agent.name).get(i).doNoOp) {
-							// if
-							// (n.isConflict(solutions.get(agent.name).get(i)))
-							// {
-							// // conflict
-							// System.err.println("i am in" + agents);
-							//
-							// agents.get(j).initialState =
-							// solutions.get(j).get(i - 1);
-							// agents.get(j).initialState.parent = null;
-							// System.err.println("i am shrek " + agents);
-							//
-							// for(int o = i; o<= maxSol; o++)
-							// {
-							// Node tnode = solutions.get(j).get(i-1);
-							// tnode.doNoOp=true;
-							// tnode.parent = null;
-							// solutions.get(j).set(o,tnode);
-							// }
-							// //n.doNoOp = true;
-							// //make everything for one of the two agents NoOp
-							// break;
-							// }
-							//
-							// else {
-							// //do sth? maybe?
-							// }
-							// }
-							// }
-							// }
 
+							
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
-								System.err.println("Uberboxes before update: "+uberNode.boxes2);
+								System.err.println("Uberboxes before update: " + uberNode.boxes2);
 
+								
 								uberNode.updateUberNode(n);
 								System.err.println("The updated node uber alles: " + uberNode + n);
 
@@ -674,6 +565,7 @@ public class SearchClient {
 						} catch (IndexOutOfBoundsException e) {
 							jointAction.append("NoOp,");
 						}
+
 					}
 					// replace the last comma with ']'
 					jointAction.setCharAt(jointAction.length() - 1, ']');
@@ -1006,3 +898,43 @@ public class SearchClient {
 // System.out.println(jointAction);
 // System.err.println("jointAction after false:
 // "+jointAction);
+
+// in try code, maybe usefull
+// check if conflict on same node with the other
+// agents
+// for (Agent agent : agents) {
+// if (agent.name != j) {
+// System.err.println("the two possible conflciting
+// nodes:/n/n" + solutions.get(j).get(i) +
+// solutions.get(agent.name).get(i) + "/n");
+// if (!n.doNoOp &&
+// !solutions.get(agent.name).get(i).doNoOp) {
+// if
+// (n.isConflict(solutions.get(agent.name).get(i)))
+// {
+// // conflict
+// System.err.println("i am in" + agents);
+//
+// agents.get(j).initialState =
+// solutions.get(j).get(i - 1);
+// agents.get(j).initialState.parent = null;
+// System.err.println("i am shrek " + agents);
+//
+// for(int o = i; o<= maxSol; o++)
+// {
+// Node tnode = solutions.get(j).get(i-1);
+// tnode.doNoOp=true;
+// tnode.parent = null;
+// solutions.get(j).set(o,tnode);
+// }
+// //n.doNoOp = true;
+// //make everything for one of the two agents NoOp
+// break;
+// }
+//
+// else {
+// //do sth? maybe?
+// }
+// }
+// }
+// }
