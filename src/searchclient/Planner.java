@@ -38,8 +38,11 @@ public class Planner {
 		// //system.err.println("FindStorage for");
 		// System.err.println(theAgent.initialState);
 
-		positions = Heuristic.findStorage(theAgent.initialState);
-		Heuristic.storageSpace = positions;
+		this.agent = theAgent;
+		this.state = theAgent.initialState;
+		
+		
+		
 		//system.err.println(positions.toString());
 
 
@@ -50,6 +53,7 @@ public class Planner {
 
 		Node thePlan = findHighestPlan(this.agent, this.state); // returns node with goals properly set
 
+		System.err.println();
 		Strategy strategy = new StrategyBFS();
 
 		strategy.clearFrontier();
@@ -246,6 +250,7 @@ public class Planner {
 
 	private Node findHighestPlan(Agent theAgent, Node currentState) {
 
+		//System.err.println("debugshit"+currentState);
 		Node thisCurrentState = currentState.Copy();
 
 		// use that if needed, clean if not. Clean the below error too.

@@ -114,9 +114,9 @@ public class Node {
 	public Node(Node parent, int maxRow, int maxCol, ArrayList<ArrayList<Position>> blockedPositions, int blockedPositionsID) {
 		this.blockedPositionsID = blockedPositionsID;
 		this.blockedPositions = blockedPositions;
-		if(this.blockedPositions.size()>blockedPositionsID){
-			this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
-		} //Else, the other agent finished his plan.
+//		if(this.blockedPositions.size()>blockedPositionsID){
+//			this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
+//		} //Else, the other agent finished his plan.
 		this.priorAgentIDs = new ArrayList<Integer>();
 		
 		
