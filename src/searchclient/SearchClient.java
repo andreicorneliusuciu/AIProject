@@ -260,7 +260,7 @@ public class SearchClient {
 	}
 
 	public static void main(String[] args) throws Exception { // TODO second
-																// loop,
+																	// loop,
 																// freakout
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
@@ -360,7 +360,6 @@ public class SearchClient {
 
 		while (true) {
 
-			// TODO solve second agent second loop being a piece of manure
 			Planner plan = null;
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
@@ -382,8 +381,6 @@ public class SearchClient {
 				break;
 			}
 
-			
-			
 			System.err.println("Initializing agents with initial state: /n" + agents);
 
 			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -431,7 +428,7 @@ public class SearchClient {
 
 					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
 
-					//	System.err.println("Boxes to closestbox: " + copy.boxes2);
+						//	System.err.println("Boxes to closestbox: " + copy.boxes2);
 
 						copy = updatedNode.Copy();
 						copy.parent = null;
@@ -449,7 +446,7 @@ public class SearchClient {
 						//System.err.println("Boxes to closestbox: " + copy.boxes2);
 
 						a.initialState = updatedNode.Copy();
-					//	System.err.println("Copy after: " + copy);
+						//	System.err.println("Copy after: " + copy);
 
 					} else {
 						a.initialState = updatedNode.Copy();
@@ -481,13 +478,11 @@ public class SearchClient {
 						a.initialState.goals[g.position.row][g.position.col] = g.name;
 					}
 					a.initialState = copy.Copy();
-					System.err.println("Initialstate of agent: "+a.initialState);
+					System.err.println("Initialstate of agent: " + a.initialState);
 					a.isTrapped = false;
 
-				}
-				else if(a.initialState.isGoalState())
-				{
-					
+				} else if (a.initialState.isGoalState()) {
+
 					Node tnode = a.initialState.Copy();
 					tnode.doNoOp = true;
 					tnode.parent = null;
@@ -549,15 +544,8 @@ public class SearchClient {
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
-								//System.err.println("Solution boxes: " + n.boxes2);
-
-								//System.err.println("Uberboxes before update: " + uberNode.boxes2);
-
-								// uberNode.updateUberNode(n);
-								// agents.get(0).initialState =
-								// uberNode.makeInitialState(agents.get(0));
-								// System.err.println("The updated uberboxes: "
-								// + uberNode.boxes2);
+								//simply state the last state as the agents initialState
+								agents.get(j).initialState = n;
 
 							} else {
 								jointAction.append("NoOp,");
@@ -574,32 +562,41 @@ public class SearchClient {
 					System.err.println("===== " + jointAction.toString() + " ====");
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
-						
-						Node finalNode = new Node(null,Node.MAX_ROW,Node.MAX_COL);
-						
-						for(Agent a : agents)
-						{
-							a.initialState = finalNode;
+
+						//Node finalNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+
+						//reset initialstates to previous node before conflict
+						for (Agent a : agents) {
+							if (a.initialState.parent != null) {
+								a.initialState = a.initialState.parent;
+							}else{
+							
+							//keep same? do something maybe?
+							}
 						}
+						//update everyones initialStates to the relevant for them current state
+						uberNode.updateUberNode(agents);
 						
+						System.err.println("FINAL agents: "+agents);
+						System.err.println("FINAL uberNode: "+uberNode);
+
+
 						//TODO: replan! simple conflict resoltuion. To be used if snake fails
-						
+
 						//return to previous state in solutions for both agents
-						
 						//update freeagents, set their values properly
-						//use ubernode generated above
-						
-						
-						
+						//use ubernode
+
 						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
 
 						break;
 					} else {
-						
-						System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
+
 					}
+
 				}
+				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 			}
 
 			// initialize and reset variables

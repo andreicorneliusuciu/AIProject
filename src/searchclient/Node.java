@@ -443,76 +443,79 @@ public class Node {
 		return false;
 	}
 
-	public void updateUberNode(Node theSmallNode) // update the boxes of the
-													// same color as the
-													// smallNode in uberNode
+	public void updateUberNode(List<Agent> agents) // update the boxes of the same color as the smallNode in uberNode
 	{
-
+		List<Agent> tempAgents = new ArrayList<Agent>(agents);
 		// we have to update the boxes2 locations!!! check if they a re updated
 		// cannot update those, use boxes[][] instead
 
-		Node smallNode = theSmallNode.Copy();
-		System.err.println("CompareNode: " + smallNode);
-		System.err.println("CompareNode boxes: " + smallNode.boxes2);
+		//TODO update boxes2 based on last nodes of all agents and moves that are stored in their initialState
 
-		System.err.println("UberNode : " + this.toString());
-
-		for (Box b : smallNode.boxes2) {
-
-			// erase the same colored boxes from the old boxes[][] version
-			if (b.color.equals(smallNode.theAgentColor)) {
-
-				this.boxes[b.position.row][b.position.col] = 0;
+		//clear boxes[][]
+		this.boxes2.clear();
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			for (int j = 0; j < Node.MAX_COL; j++) {
+				this.boxes[i][j] = 0;
 			}
-
 		}
 
-		// put back the boxes in the new state. Cannot use boxes2
-		for (Box b : smallNode.boxes2) {
-			if (b.color.equals(smallNode.theAgentColor)) {
-				// this.boxes2.add(b);
-				this.boxes[b.position.row][b.position.col] = b.name;
+		//readd the boxes for all agents, add only the boxes of their own color
+		for (Agent agent : tempAgents) {
+			for (int i = 0; i < Node.MAX_ROW; i++) {
+				for (int j = 0; j < Node.MAX_COL; j++) {
+					if (agent.initialState.boxes[i][j] >= 'A' && agent.initialState.boxes[i][j] <= 'Z') {
+						if (agent.color.equals(SearchClient.boxesToColor.get(this.boxes[i][j]))) {
+							System.err.println("Box added for agent " + agent);
+							this.boxes2.add(new Box(this.boxes[i][j], SearchClient.boxesToColor.get(this.boxes[i][j]), new Position(i, j)));
+							this.boxes[i][j] = agent.initialState.boxes[i][j];
+						}
+					}
+
+				}
 			}
+		}
+
+		//now update the states of the agents
+
+		for (Agent a : agents) {
+
+			Node newInitialState = this.Copy();
+
+			newInitialState.parent = null;
+			newInitialState.agentRow = a.initialState.agentRow; // agent must have
+			// updated position
+			newInitialState.agentCol = a.initialState.agentCol;
+
+			// erase goals2
+			newInitialState.goals2.clear();
+
+			// erase goals
+			for (int i = 0; i < Node.MAX_ROW; i++) {
+				for (int j = 0; j < Node.MAX_COL; j++) {
+					newInitialState.goals[i][j] = 0;
+				}
+			}
+
+			for (Goal g : this.goals2) {
+				System.err.println("goal color of ubernode : " + g.color + " agent color of agent: " + a.color);
+
+				if (g.color.equals(a.color)) {
+					newInitialState.goals2.add(g);
+					newInitialState.goals[g.position.row][g.position.col] = g.name;
+				}
+			}
+
 		}
 
 		System.err.println("Uberboxes after refill: " + this.boxes2);
 
 		System.err.println("Ubernode after refill: " + this.toString());
 
-	}
+		System.err.println("Agents after refill: " + agents);
+		System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
-	public Node makeInitialState(Agent agent) {
 
-		System.err.println("The uberNode to create an InitialState for agent " + agent + " :" + this.toString());
-
-		Node newInitialState = this.Copy();
-		Node oldInitialState = agent.initialState.Copy();
-
-		newInitialState.parent = null;
-		newInitialState.agentRow = agent.position.row; // agent must have
-														// updated position
-		newInitialState.agentCol = agent.position.col;
-
-		newInitialState.goals2.clear();
-
-		// erase goals
-		for (int i = 0; i < Node.MAX_ROW; i++) {
-			for (int j = 0; j < Node.MAX_COL; j++) {
-				newInitialState.goals[i][j] = 0;
-			}
-		}
-
-		for (Goal g : this.goals2) {
-			System.err.println("goal color of ubernode : " + g.color + " agent color of agent: " + oldInitialState.theAgentColor);
-
-			if (g.color.equals(oldInitialState.theAgentColor)) {
-				newInitialState.goals2.add(g);
-				newInitialState.goals[g.position.row][g.position.col] = g.name;
-			}
-		}
-
-		System.err.println("The ready InitialState for agent " + agent + " :" + newInitialState);
-		return newInitialState;
+		
 	}
 
 }
