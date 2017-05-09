@@ -292,115 +292,20 @@ public class SearchClient {
 	}
 
 	public static void main(String[] args) throws Exception {
-		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 		
-		// Use stderr to print to console
-		System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 		
-		// Read level and create the initial state of the problem
-		SearchClient client = new SearchClient(serverMessages);
+		System.out.println("[Move(E)]");
+		System.out.println("[Move(E)]");
+		System.out.println("[Move(E)]");
+		System.out.println("[Push(E,E)]");
+		System.out.println("[Move(E)]");
+		System.out.println("[Move(E)]");
+		System.out.println("[Move(E)]");
+		System.out.println("[Push(E,E)]");
 		
-		Strategy strategy;
 
-		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-			case "-astar":
-				strategy = new StrategyBestFirst(new AStar(client.initialStates.get(0)));
-				break;
-			case "-wastar":
-				// You're welcome to test WA* out with different values, but for
-				// the report you must at least indicate benchmarks for W = 5.
-				strategy = new StrategyBestFirst(new WeightedAStar(client.initialStates.get(0), 5));
-				break;
-			case "-greedy":
-				strategy = new StrategyBestFirst(new Greedy(client.initialStates.get(0)));
-				break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
-		} else {
-			strategy = new StrategyBFS();
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-		}
-
-		LinkedList<Node> solution;
 		
-		//List containing all the solutions for every agent
-		//TODO: make astar work here. a loop with the switch-case
-		List<List<Node>> solutions = new ArrayList<>();
-			
-		for(int i = 0; i < agents.size(); i++) {
-			try {
-				solution = client.Search(new StrategyBFS(), client.initialStates.get(i));
-				//add the partial solution to the list of total solutions
-				solutions.add(solution);
-					
-				System.err.println("Found solution for agent " + i + " of size " + solution.size());			
-			} catch (Exception ex) {
-				//System.err.println("Maximum memory usage exceeded.");
-				System.err.println("Problems for agent " + i + " when solving the level");
-				solutions = null;
-			}	
-		}
-	
-
-		if (solutions == null) {
-			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
-			
-			System.exit(0);
-			
-		} else {
-			System.err.println("\nSummary for " + strategy.toString());
-//			System.err.println("Found solution of length " + solutions.size());
-			System.err.println(strategy.searchStatus());
-			//Multi-agent commands
-			
-			int maxSol = 0;
-			int m;
-			for (int i = 0; i < solutions.size(); i++) {
-				m = solutions.get(i).size();
-				if (m > maxSol) {
-					maxSol = m;
-				}
-			}
-			
-			//TODO: empty the same string builder object
-			for(int i = 0; i < maxSol; i++) {
-			
-				StringBuilder jointAction = new StringBuilder();
-				
-				jointAction.append('[');
-				for(int j = 0; j < solutions.size(); j++) {
-					Node n = null;
-					try {
-						n = solutions.get(j).get(i);
-						jointAction.append(n.action.toString() + ",");
-					} catch(IndexOutOfBoundsException e) {
-						jointAction.append("NoOp,");
-					}
-				}
-				//replace the last comma with ']'
-				jointAction.setCharAt(jointAction.length() - 1, ']');
-				System.out.println(jointAction.toString());
-				System.err.println("===== " + jointAction.toString() + " ====");
-				String response = serverMessages.readLine();
-				if (response.contains("false")) {
-					System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
-					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
-					break;
-				}
-			}
-		}
+		
 	}
 }
 /*
