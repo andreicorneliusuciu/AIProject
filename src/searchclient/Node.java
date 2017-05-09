@@ -176,6 +176,7 @@ public class Node {
 					}
 				}
 
+				System.err.println("ZEBUG: "+theAgentColor);
 				if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
 					// //////System.err.println("yes it is");
 
@@ -443,15 +444,20 @@ public class Node {
 		return false;
 	}
 
-	public void updateUberNode(List<Agent> agents) // update the boxes of the same color as the smallNode in uberNode
+	public void updateUberNode(List<Agent> agents) // update the boxes of the
+													// same color as the
+													// smallNode in uberNode
 	{
-		List<Agent> tempAgents = new ArrayList<Agent>(agents);
+		System.err.println("Updating UberNode and agents initiated");
+		// List<Agent> tempAgents = agents;
+		System.err.println("Agents before initialized: " + agents);
+
 		// we have to update the boxes2 locations!!! check if they a re updated
 		// cannot update those, use boxes[][] instead
 
-		//TODO update boxes2 based on last nodes of all agents and moves that are stored in their initialState
+		// TODO update boxes2 based on last nodes of all agents and moves that
+		// are stored in their initialState
 
-		//clear boxes[][]
 		this.boxes2.clear();
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = 0; j < Node.MAX_COL; j++) {
@@ -459,14 +465,15 @@ public class Node {
 			}
 		}
 
-		//readd the boxes for all agents, add only the boxes of their own color
-		for (Agent agent : tempAgents) {
+		// readd the boxes for all agents, add only the boxes of their own color
+		for (Agent agent : agents) {
 			for (int i = 0; i < Node.MAX_ROW; i++) {
 				for (int j = 0; j < Node.MAX_COL; j++) {
 					if (agent.initialState.boxes[i][j] >= 'A' && agent.initialState.boxes[i][j] <= 'Z') {
-						if (agent.color.equals(SearchClient.boxesToColor.get(this.boxes[i][j]))) {
-							System.err.println("Box added for agent " + agent);
-							this.boxes2.add(new Box(this.boxes[i][j], SearchClient.boxesToColor.get(this.boxes[i][j]), new Position(i, j)));
+
+						if (agent.color.equals(SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]))) {
+
+							this.boxes2.add(new Box(agent.initialState.boxes[i][j], SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]), new Position(i, j)));
 							this.boxes[i][j] = agent.initialState.boxes[i][j];
 						}
 					}
@@ -475,19 +482,22 @@ public class Node {
 			}
 		}
 
-		//now update the states of the agents
+		// now update the states of the agents
 
 		for (Agent a : agents) {
 
 			Node newInitialState = this.Copy();
 
 			newInitialState.parent = null;
-			newInitialState.agentRow = a.initialState.agentRow; // agent must have
-			// updated position
+			newInitialState.agentRow = a.initialState.agentRow; // agent must
 			newInitialState.agentCol = a.initialState.agentCol;
+			newInitialState.theAgentColor = a.initialState.theAgentColor;
 
 			// erase goals2
 			newInitialState.goals2.clear();
+			newInitialState.theAgentName = a.name;
+			newInitialState.doNoOp = false;
+			
 
 			// erase goals
 			for (int i = 0; i < Node.MAX_ROW; i++) {
@@ -497,13 +507,13 @@ public class Node {
 			}
 
 			for (Goal g : this.goals2) {
-				System.err.println("goal color of ubernode : " + g.color + " agent color of agent: " + a.color);
 
 				if (g.color.equals(a.color)) {
 					newInitialState.goals2.add(g);
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
 				}
 			}
+			a.initialState = newInitialState;
 
 		}
 
@@ -514,8 +524,6 @@ public class Node {
 		System.err.println("Agents after refill: " + agents);
 		System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
-
-		
 	}
 
 }

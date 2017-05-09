@@ -260,7 +260,7 @@ public class SearchClient {
 	}
 
 	public static void main(String[] args) throws Exception { // TODO second
-																	// loop,
+																// loop,
 																// freakout
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
@@ -383,18 +383,10 @@ public class SearchClient {
 
 			System.err.println("Initializing agents with initial state: /n" + agents);
 
-			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+		//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 
-			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+		//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
-				//
-
-				// ///
-				// plan = new Planner(agents.get(a.name)); // remove only these
-				// // when uncommenting
-				// solution = plan.findSolution();
-				// solutions.add(solution);
-				// ///
 
 				if (!a.isTrapped && !a.initialState.isGoalState()) {
 
@@ -405,52 +397,63 @@ public class SearchClient {
 
 					solution = plan.findSolution();
 
-					updatedNode = solution.getLast().Copy();
-					//System.err.println("Boxes to updated node: " + updatedNode.boxes2);
-
-					updatedNode.parent = null;
+					// updatedNode = solution.getLast().Copy();
+					// //System.err.println("Boxes to updated node: " +
+					// updatedNode.boxes2);
+					//
+					// updatedNode.parent = null;
 
 					// System.err.println("=================>>>>plan: \n" +
 					// solution);
 
 					// put the goals back
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (updatedNode.goals[i][j] != 0) {
-								updatedNode.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : updatedNode.goals2) {
-
-						updatedNode.goals[g.position.row][g.position.col] = g.name;
-					}
-
-					if (plan.plantoPrint.contains(plan.getFreeAgent())) {
-
-						//	System.err.println("Boxes to closestbox: " + copy.boxes2);
-
-						copy = updatedNode.Copy();
-						copy.parent = null;
-
-						copy.agentRow = agents.get(plan.trappedAgent).initialState.agentRow;
-						copy.agentCol = agents.get(plan.trappedAgent).initialState.agentCol;
-						copy.theAgentName = agents.get(plan.trappedAgent).name;
-						copy.goals2.clear();
-						copy.goals2 = agents.get(plan.trappedAgent).initialState.goals2;
-						copy.goals = agents.get(plan.trappedAgent).initialState.goals.clone();
-						copy.theAgentColor = agents.get(plan.trappedAgent).initialState.theAgentColor;
-						copy.action = agents.get(plan.trappedAgent).initialState.action;
-						copy.boxes2.clear();
-						copy.boxes2 = agents.get(plan.trappedAgent).initialState.boxes2;
-						//System.err.println("Boxes to closestbox: " + copy.boxes2);
-
-						a.initialState = updatedNode.Copy();
-						//	System.err.println("Copy after: " + copy);
-
-					} else {
-						a.initialState = updatedNode.Copy();
-					}
+					// for (int i = 0; i < Node.MAX_ROW; i++)
+					// for (int j = 0; j < Node.MAX_COL; j++) {
+					// if (updatedNode.goals[i][j] != 0) {
+					// updatedNode.goals[i][j] = 0;
+					// }
+					// }
+					//
+					// for (Goal g : updatedNode.goals2) {
+					//
+					// updatedNode.goals[g.position.row][g.position.col] =
+					// g.name;
+					// }
+					//
+					// if (plan.plantoPrint.contains(plan.getFreeAgent())) {
+					//
+					// // System.err.println("Boxes to closestbox: " +
+					// copy.boxes2);
+					//
+					//// copy = updatedNode.Copy();
+					//// copy.parent = null;
+					////
+					//// copy.agentRow =
+					// agents.get(plan.trappedAgent).initialState.agentRow;
+					//// copy.agentCol =
+					// agents.get(plan.trappedAgent).initialState.agentCol;
+					//// copy.theAgentName = agents.get(plan.trappedAgent).name;
+					//// copy.goals2.clear();
+					//// copy.goals2 =
+					// agents.get(plan.trappedAgent).initialState.goals2;
+					//// copy.goals =
+					// agents.get(plan.trappedAgent).initialState.goals.clone();
+					//// copy.theAgentColor =
+					// agents.get(plan.trappedAgent).initialState.theAgentColor;
+					//// copy.action =
+					// agents.get(plan.trappedAgent).initialState.action;
+					//// copy.boxes2.clear();
+					//// copy.boxes2 =
+					// agents.get(plan.trappedAgent).initialState.boxes2;
+					// //System.err.println("Boxes to closestbox: " +
+					// copy.boxes2);
+					//
+					// a.initialState = updatedNode.Copy();
+					// // System.err.println("Copy after: " + copy);
+					//
+					// } else {
+					// a.initialState = updatedNode.Copy();
+					// }
 					solutions.add(solution);
 				} else if (a.isTrapped && !a.initialState.isGoalState()) { //
 					// if
@@ -466,19 +469,21 @@ public class SearchClient {
 					tempList.add(tempInitialState);
 					solutions.add(tempList);
 
-					for (int i = 0; i < Node.MAX_ROW; i++)
-						for (int j = 0; j < Node.MAX_COL; j++) {
-							if (a.initialState.goals[i][j] != 0) {
-								a.initialState.goals[i][j] = 0;
-							}
-						}
-
-					for (Goal g : a.initialState.goals2) {
-
-						a.initialState.goals[g.position.row][g.position.col] = g.name;
-					}
-					a.initialState = copy.Copy();
-					System.err.println("Initialstate of agent: " + a.initialState);
+					// for (int i = 0; i < Node.MAX_ROW; i++)
+					// for (int j = 0; j < Node.MAX_COL; j++) {
+					// if (a.initialState.goals[i][j] != 0) {
+					// a.initialState.goals[i][j] = 0;
+					// }
+					// }
+					//
+					// for (Goal g : a.initialState.goals2) {
+					//
+					// a.initialState.goals[g.position.row][g.position.col] =
+					// g.name;
+					// }
+					// a.initialState = copy.Copy();
+					// System.err.println("Initialstate of agent: " +
+					// a.initialState);
 					a.isTrapped = false;
 
 				} else if (a.initialState.isGoalState()) {
@@ -490,7 +495,8 @@ public class SearchClient {
 					tlist.add(tnode);
 					solutions.add(tlist);
 				}
-				//System.err.println("Uberboxes before update3:" + uberNode.boxes2);
+				// System.err.println("Uberboxes before update3:" +
+				// uberNode.boxes2);
 				// else if(a.initialState.isGoalState()) //if you finish your
 				// goals
 				// {
@@ -544,11 +550,15 @@ public class SearchClient {
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
-								//simply state the last state as the agents initialState
+								// simply state the last state as the agents
+								// initialState
 								agents.get(j).initialState = n;
+								uberNode.updateUberNode(agents);
 
 							} else {
 								jointAction.append("NoOp,");
+								agents.get(j).initialState = n;
+
 							}
 						} catch (IndexOutOfBoundsException e) {
 							jointAction.append("NoOp,");
@@ -563,29 +573,29 @@ public class SearchClient {
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
 
-						//Node finalNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
-
-						//reset initialstates to previous node before conflict
+						// reset initialstates to previous node before conflict
 						for (Agent a : agents) {
 							if (a.initialState.parent != null) {
+								System.err.println("Update agent " + a);
 								a.initialState = a.initialState.parent;
-							}else{
-							
-							//keep same? do something maybe?
+
+							} else {
+
+								System.err.println("InitialState parent was null for agent " + a);
+
+								// keep same? do something maybe?
 							}
 						}
-						//update everyones initialStates to the relevant for them current state
+						// update everyones initialStates to the relevant for
+						// them current state
 						uberNode.updateUberNode(agents);
-						
-						System.err.println("FINAL agents: "+agents);
-						System.err.println("FINAL uberNode: "+uberNode);
 
+						// TODO: replan! simple conflict resoltuion. To be used
+						// if snake fails
 
-						//TODO: replan! simple conflict resoltuion. To be used if snake fails
-
-						//return to previous state in solutions for both agents
-						//update freeagents, set their values properly
-						//use ubernode
+						// return to previous state in solutions for both agents
+						// update freeagents, set their values properly
+						// use ubernode
 
 						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
@@ -597,6 +607,9 @@ public class SearchClient {
 
 				}
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
+				System.err.println("FINAL agents: " + agents);
+				System.err.println("FINAL uberNode: " + uberNode);
+				System.err.println("Replanning initiated with above agents");
 			}
 
 			// initialize and reset variables
