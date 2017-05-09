@@ -574,8 +574,25 @@ public class SearchClient {
 					System.err.println("===== " + jointAction.toString() + " ====");
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
+						
+						Node finalNode = new Node(null,Node.MAX_ROW,Node.MAX_COL);
+						
+						for(Agent a : agents)
+						{
+							a.initialState = finalNode;
+						}
+						
+						//TODO: replan! simple conflict resoltuion. To be used if snake fails
+						
+						//return to previous state in solutions for both agents
+						
+						//update freeagents, set their values properly
+						//use ubernode generated above
+						
+						
+						
 						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
-						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Conflict Resolution Failed!!!");
+						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
 
 						break;
 					} else {
