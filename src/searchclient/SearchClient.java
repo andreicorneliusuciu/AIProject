@@ -68,8 +68,7 @@ public class SearchClient {
 		allGoals = new ArrayList<>();
 		int maxCol = 0;
 
-		boxesToColor.put('*', "cellphone");
-		boxesToColor.put('-', "cedsllphone");
+		boxesToColor.put('*', "cellphone");//TODO
 		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
@@ -939,8 +938,10 @@ public class SearchClient {
 				agents.get(i).initialState.assignBlocked(blockedPositions);
 				agents.get(i).initialState.assignPriorAgents(priorAgents);
 				priorAgents.add(i);
+				
 				solution = client.Search(new StrategyBFS(), SearchClient.agents.get(i).initialState);
 				solutions.add(solution);
+				
 				//TODO: Turn plans into arraylistarraylistposition
 				ArrayList<Position> twall = new ArrayList<Position>();
 				twall.add(new Position(agents.get(i).initialState.agentRow,agents.get(i).initialState.agentCol));
