@@ -4,6 +4,7 @@ public class Goal {
 	public Character name;
 	public String color;
 	public Position position;
+	public boolean priorityGiven = false;
 	public boolean isSatisfied = false;
 	public Integer priority = 10; //lower for more priority
 	
