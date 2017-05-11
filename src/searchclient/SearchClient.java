@@ -221,8 +221,8 @@ public class SearchClient {
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
 
-		System.err.println(" + Agents without updated boxes: " + agents);
-		System.err.println(" + Boxes without updates: " + boxesToColor);
+		System.err.println(" + Agents : " + agents);
+		System.err.println(" + Boxes : " + boxesToColor);
 		// TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
@@ -320,7 +320,7 @@ public class SearchClient {
 			uberNode.boxes[b.position.row][b.position.col] = b.name;
 		}
 
-		System.err.println("The node uber alles: " + uberNode);
+		//System.err.println("The node uber alles: " + uberNode);
 
 		uberNode.agents = agents;
 
@@ -457,7 +457,6 @@ public class SearchClient {
 
 					jointAction.append('[');
 					// if (!solutions.isEmpty()) {
-
 					// for every agent
 					for (int j = 0; j < solutions.size(); j++) {
 						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -465,27 +464,24 @@ public class SearchClient {
 
 							n = solutions.get(j).get(i);
 
-							if (!n.doNoOp) {
+							if(!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
 								// simply state the last state as the agents
 								// initialState
-								
+
 								agents.get(j).initialState = n;
 								uberNode.updateUberNode(agents);
-																
-								
+
 								//agent here is not trapped this round
-								
 
 							} else {
-								
+
 								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
 								uberNode.updateUberNode(agents);
 
 								//agent here is trapped this  round
-								
 
 							}
 						} catch (IndexOutOfBoundsException e) {
@@ -504,7 +500,7 @@ public class SearchClient {
 						// reset initialstates to previous node before conflict
 						for (Agent a : agents) {
 							if (a.initialState.parent != null) {
-								System.err.println("Update agent " + a);
+								//System.err.println("Update agent " + a);
 								a.initialState = a.initialState.parent;
 
 							} else {

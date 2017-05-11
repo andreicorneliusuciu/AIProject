@@ -448,6 +448,7 @@ public class Node {
 													// same color as the
 													// smallNode in uberNode
 	{
+
 		System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
 		System.err.println("Agents before initialized: " + agents);
@@ -465,23 +466,46 @@ public class Node {
 			}
 		}
 
-		// readd the boxes for all agents, add only the boxes of their own color
-		for (Agent agent : agents) {
-			for (int i = 0; i < Node.MAX_ROW; i++) {
-				for (int j = 0; j < Node.MAX_COL; j++) {
-					if (agent.initialState.boxes[i][j] >= 'A' && agent.initialState.boxes[i][j] <= 'Z') {
+		//handling two same colored agents
+		List<String> colors = new ArrayList<String>();
+		List<Agent> dublicateColorAgents = new ArrayList<Agent>();
 
-						if (agent.color.equals(SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]))) {
+		for (Agent a : agents) {
+			if (colors.contains(a.color)) {
+				dublicateColorAgents.add(a);
 
-							this.boxes2.add(new Box(agent.initialState.boxes[i][j], SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]), new Position(i, j)));
-							this.boxes[i][j] = agent.initialState.boxes[i][j];
-						}
-					}
+			} else {
 
-				}
+				colors.add(a.color);
 			}
 		}
 
+		
+		
+		// read the boxes for all agents, add only the boxes of their own color
+		for (Agent agent : agents) {
+			if (!dublicateColorAgents.contains(agent)) {  //BIG problem when agents have the same color
+				
+				// fix this for many agents of same color
+				//TODO
+				for (int i = 0; i < Node.MAX_ROW; i++) {
+					for (int j = 0; j < Node.MAX_COL; j++) {
+						if (agent.initialState.boxes[i][j] >= 'A' && agent.initialState.boxes[i][j] <= 'Z') {
+
+							//same colored agents have problems, add requirement to be next to the box for it to get added
+
+							if (agent.color.equals(SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]))) {
+
+								this.boxes2.add(new Box(agent.initialState.boxes[i][j], SearchClient.boxesToColor.get(agent.initialState.boxes[i][j]), new Position(i, j)));
+								this.boxes[i][j] = agent.initialState.boxes[i][j];
+
+							}
+						}
+
+					}
+				}
+			}
+		}
 		// now update the states of the agents
 
 		for (Agent a : agents) {
@@ -497,7 +521,6 @@ public class Node {
 			newInitialState.goals2.clear();
 			newInitialState.theAgentName = a.name;
 			newInitialState.doNoOp = false;
-			
 
 			// erase goals
 			for (int i = 0; i < Node.MAX_ROW; i++) {

@@ -13,17 +13,6 @@ public class Goal {
 		this.position = position;
 	}
 	
-	public void lowerPriority(int i)
-	{
-		if(priority-i>0)
-		{
-			priority-=i;
-		}
-		else
-		{
-			priority =0;
-		}
-	}
 
 	@Override
 	public String toString() {
