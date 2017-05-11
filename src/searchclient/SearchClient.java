@@ -35,7 +35,7 @@ public class SearchClient {
 	public static List<Goal> allGoals;
 	// List with all the boxes.
 	public static List<Box> allBoxes;
-	
+
 	public static ArrayList<SuperNode> superNodes;
 
 	// Key = Color, Value = List of Box numbers
@@ -326,9 +326,6 @@ public class SearchClient {
 
 		//////////////////////////////////////////
 
-		for (Agent a : agents) {
-			System.err.println(a.initialState.toString());
-		}
 		// read the input
 		Strategy strategy;
 
@@ -373,6 +370,8 @@ public class SearchClient {
 
 			System.err.println("The goals: " + allGoals);
 
+			//update boxes status in all agents
+
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
 				if (!g.isSatisfied) {
@@ -401,10 +400,12 @@ public class SearchClient {
 					// "with initial state: /n" + a.initialState);
 
 					plan = new Planner(agents.get(a.name));
-
+					//if plan is not trapped
 					solution = plan.findSolution();
 					solutions.add(solution);
-				} else if (a.isTrapped && !a.initialState.isGoalState()) { //
+					//if plan is trapped, break out of if statement
+				}
+				if (a.isTrapped && !a.initialState.isGoalState()) { //
 					// if
 					// agent
 					// trapped
@@ -417,7 +418,7 @@ public class SearchClient {
 					// joinedaction
 					tempList.add(tempInitialState);
 					solutions.add(tempList);
-					
+
 					a.isTrapped = false;
 
 				} else if (a.initialState.isGoalState()) {
@@ -469,12 +470,23 @@ public class SearchClient {
 
 								// simply state the last state as the agents
 								// initialState
+
+								agents.get(j).initialState = n;
+								
+								uberNode.updateUberNode(agents);
+								
+								
+								//agent here is not trapped this round
+								
+
+							} else {
+								
+								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
 								uberNode.updateUberNode(agents);
 
-							} else {
-								jointAction.append("NoOp,");
-								agents.get(j).initialState = n;
+								//agent here is trapped this  round
+								
 
 							}
 						} catch (IndexOutOfBoundsException e) {
@@ -523,6 +535,11 @@ public class SearchClient {
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
+				//				System.err.println("Resetting trapped boxes");
+				//				for (Box b : allBoxes) {
+				//					b.isBlocking = false;
+				//				}
+
 			}
 
 			// initialize and reset variables
@@ -709,27 +726,26 @@ public class SearchClient {
 			map[g.position.row][g.position.col].type = 2; // Goal
 		}
 
-		
 		// Link up cells
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize; i2++) {
 				if (map[i][i2].type >= 1) {
-					if(i+1<levelRowSize){
+					if (i + 1 < levelRowSize) {
 						if (map[i + 1][i2].type >= 1) {// + is south, right?
 							map[i][i2].south = true;
 						}
 					}
-					if(i-1>=0){
+					if (i - 1 >= 0) {
 						if (map[i - 1][i2].type >= 1) {
 							map[i][i2].north = true;
 						}
 					}
-					if(i2+1<levelColumnSize){
+					if (i2 + 1 < levelColumnSize) {
 						if (map[i][i2 + 1].type >= 1) {
 							map[i][i2].east = true;
 						}
 					}
-					if(i2-1>=0){
+					if (i2 - 1 >= 0) {
 						if (map[i][i2 - 1].type >= 1) {
 							map[i][i2].west = true;
 						}
@@ -741,13 +757,13 @@ public class SearchClient {
 		// Create row objects
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
-			for (int i2 = 0; i2 < levelColumnSize; ) {
+			for (int i2 = 0; i2 < levelColumnSize;) {
 				if (map[i][i2].type == 1) {
 					boolean connected = true;
 					Line row = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						if(i2<levelColumnSize){
+						if (i2 < levelColumnSize) {
 							if (map[i][i2].type == 1) {
 								map[i][i2].rowID = rows.size();
 								positions.add(map[i][i2].position);
@@ -777,7 +793,7 @@ public class SearchClient {
 					row.positions = positions;
 					rows.add(row);
 				}
-				if(map[i][i2].type == 0){
+				if (map[i][i2].type == 0) {
 					i2++;
 				}
 			}
@@ -786,7 +802,7 @@ public class SearchClient {
 		// Create col objects
 		ArrayList<Line> cols = new ArrayList<Line>();
 		for (int i = 0; i < levelColumnSize; i++) {
-			for (int i2 = 0; i2 < levelRowSize; ) {
+			for (int i2 = 0; i2 < levelRowSize;) {
 				if (map[i2][i].type == 1) {//White
 					boolean connected = true;
 					Line col = new Line();
@@ -820,106 +836,101 @@ public class SearchClient {
 					col.positions = positions;
 					cols.add(col);
 				}
-				if(map[i2][i].type == 0){
+				if (map[i2][i].type == 0) {
 					i2++;
 				}
 			}
 		}
 		// Connect them
-		for(int i = 1; i<levelRowSize; i++){
-			for(int i2 = 1; i2<levelColumnSize; i2++){
+		for (int i = 1; i < levelRowSize; i++) {
+			for (int i2 = 1; i2 < levelColumnSize; i2++) {
 				int curRow = map[i][i2].rowID;
 				int curCol = map[i][i2].colID;
-				if(map[i][i2].east){
-					int nextRow = map[i][i2+1].rowID;
-					int nextCol = map[i][i2+1].colID;
-					
-					if(nextRow != curRow && nextRow>=0){
+				if (map[i][i2].east) {
+					int nextRow = map[i][i2 + 1].rowID;
+					int nextCol = map[i][i2 + 1].colID;
+
+					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).east.add(nextRow);
 					}
-					if(nextCol != curCol && nextCol>=0){
+					if (nextCol != curCol && nextCol >= 0) {
 						cols.get(curCol).east.add(nextCol);
 					}
 				}
-				if(map[i][i2].north){
-					int nextRow = map[i-1][i2].rowID;
-					int nextCol = map[i-1][i2].colID;
-					
-					if(nextRow != curRow && nextRow>=0){
+				if (map[i][i2].north) {
+					int nextRow = map[i - 1][i2].rowID;
+					int nextCol = map[i - 1][i2].colID;
+
+					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).north.add(nextRow);
 					}
-					if(nextCol != curCol && nextCol>=0){
+					if (nextCol != curCol && nextCol >= 0) {
 						cols.get(curCol).north.add(nextCol);
 					}
 				}
-				if(map[i][i2].west){
-					int nextRow = map[i][i2-1].rowID;
-					int nextCol = map[i][i2-1].colID;
-					
-					if(nextRow != curRow && nextRow>=0){
+				if (map[i][i2].west) {
+					int nextRow = map[i][i2 - 1].rowID;
+					int nextCol = map[i][i2 - 1].colID;
+
+					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).west.add(nextRow);
 					}
-					if(nextCol != curCol && nextCol>=0){
+					if (nextCol != curCol && nextCol >= 0) {
 						cols.get(curCol).west.add(nextCol);
 					}
 				}
-				if(map[i][i2].south){
-					int nextRow = map[i+1][i2].rowID;
-					int nextCol = map[i+1][i2].colID;
-					
-					if(nextRow != curRow && nextRow>=0){
+				if (map[i][i2].south) {
+					int nextRow = map[i + 1][i2].rowID;
+					int nextCol = map[i + 1][i2].colID;
+
+					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).south.add(nextRow);
 					}
-					if(nextCol != curCol && nextCol>=0){
+					if (nextCol != curCol && nextCol >= 0) {
 						cols.get(curCol).south.add(nextCol);
 					}
 				}
 			}
 		}
-		
+
 		//TEST
 		String debug = "";
-		for(int i = 0; i<rows.size(); i++){
+		for (int i = 0; i < rows.size(); i++) {
 			debug += "East: !" + rows.get(i).east.isEmpty() + "\n";
 			debug += "West: !" + rows.get(i).west.isEmpty() + "\n";
 			debug += "North: !" + rows.get(i).north.isEmpty() + "\n";
 			debug += "South: !" + rows.get(i).south.isEmpty() + "\n";
-			for(Position p : rows.get(i).positions){
+			for (Position p : rows.get(i).positions) {
 				debug += p.toString();
 			}
 			debug += "\n";
 		}
-		
+
 		String debug2 = "";
-		for(int i = 0; i<levelRowSize; i++){
-			for(int i2 = 0; i2<levelColumnSize; i2++){
+		for (int i = 0; i < levelRowSize; i++) {
+			for (int i2 = 0; i2 < levelColumnSize; i2++) {
 				debug2 += map[i][i2].rowID;
 			}
 			debug2 += "\n";
 		}
 		String printout = "";
-		for(Line l : rows){
+		for (Line l : rows) {
 			printout += l.goalLine + "\n";
 		}
 		//System.err.println(debug);
-		
+
 		//Draw virtual line
-		/*ArrayList<Position> deadEnds = new ArrayList<Position>();
-		boolean done = false;
-		while(!done){
-			int curSize = deadEnds.size();
-			for(Line l : rows){
-				int connectionCount = 0;
-				if(l.east.size()>0){
-					connectionCtoun
-				}
-			}
-		}*/
-		
+		/*
+		 * ArrayList<Position> deadEnds = new ArrayList<Position>(); boolean
+		 * done = false; while(!done){ int curSize = deadEnds.size(); for(Line l
+		 * : rows){ int connectionCount = 0; if(l.east.size()>0){
+		 * connectionCtoun } } }
+		 */
+
 		//Prioritize cells based on dead ends
 		boolean done = true;
-		while(!done){
-			for(Goal g : allGoals){
+		while (!done) {
+			for (Goal g : allGoals) {
 				//If g isn't a dead end...
 				//And all neighbors are walls and dead ends except one
 				//This is a dead end. Priority should be lower than innermost dead end.
@@ -927,8 +938,8 @@ public class SearchClient {
 		}
 		// Supernode setup
 		int superID = 0;
-		for(int i = 0; i<rows.size(); i++){
-			if(!rows.get(i).isInSuperNode){
+		for (int i = 0; i < rows.size(); i++) {
+			if (!rows.get(i).isInSuperNode) {
 				//Make new supernode
 				boolean localDone = false;
 				Set<Line> superLines = new HashSet<Line>();
@@ -940,27 +951,27 @@ public class SearchClient {
 				Set<Integer> south = new HashSet<Integer>();
 				Set<Integer> north = new HashSet<Integer>();
 				boolean goal = false;
-				while(!localDone){
+				while (!localDone) {
 					Set<Line> superLinesTemp = new HashSet<Line>();
 					int curSize = superLines.size();
-					for(Line l : superLines){
+					for (Line l : superLines) {
 						superLinesTemp.add(l);
 					}
 
 					Iterator<Line> it = superLines.iterator();
 					while (it.hasNext()) {
 						Line l = it.next();
-						if(l.goalLine){
+						if (l.goalLine) {
 							goal = true;
 						}
-						for(int id : l.east){
+						for (int id : l.east) {
 							east.add(id);
 						}
-						for(int id : l.west){
+						for (int id : l.west) {
 							west.add(id);
 						}
-						for(int id : l.south){
-							if(rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine){//If they're both goals or not goals
+						for (int id : l.south) {
+							if (rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine) {//If they're both goals or not goals
 								superLinesTemp.add(rows.get(id));
 								rows.get(id).isInSuperNode = true;
 								rows.get(id).superNodeID = superID;
@@ -968,8 +979,8 @@ public class SearchClient {
 								south.add(id);
 							}
 						}
-						for(int id : l.north){
-							if(rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine){//If they're both goals or not goals
+						for (int id : l.north) {
+							if (rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine) {//If they're both goals or not goals
 								superLinesTemp.add(rows.get(id));
 								rows.get(id).isInSuperNode = true;
 								rows.get(id).superNodeID = superID;
@@ -980,7 +991,7 @@ public class SearchClient {
 					}
 					superLines = superLinesTemp;
 
-					if(superLines.size() == curSize){
+					if (superLines.size() == curSize) {
 						//System.err.println(superLines.size() + " = " + curSize + " = " + superLinesTemp.size());
 						localDone = true;
 					}
@@ -998,34 +1009,34 @@ public class SearchClient {
 			}
 		}
 		//Connect the supernodes
-		for(SuperNode sn : superNodes){
-			for(Integer id : sn.east){
+		for (SuperNode sn : superNodes) {
+			for (Integer id : sn.east) {
 				sn.connectedID.add(rows.get(id).superNodeID);
 			}
-			for(Integer id : sn.west){
+			for (Integer id : sn.west) {
 				sn.connectedID.add(rows.get(id).superNodeID);
 			}
-			for(Integer id : sn.south){
+			for (Integer id : sn.south) {
 				sn.connectedID.add(rows.get(id).superNodeID);
 			}
-			for(Integer id : sn.north){
+			for (Integer id : sn.north) {
 				sn.connectedID.add(rows.get(id).superNodeID);
 			}
 		}
 		//If a goal supernode is ONLY connected to ONE superNode, absorb it into that superNode.
 		Iterator<SuperNode> it = superNodes.iterator();
-//		for(SuperNode sn : superNodes){
-//			if(sn.connectedID.size() == 1 && sn.goalSuperNode){
-//				for(Integer id : sn.connectedID){
-//					superNodes.get(id).internalGoalNodes.add(sn);
-//				}
-//			}
-//		}
-		
+		//		for(SuperNode sn : superNodes){
+		//			if(sn.connectedID.size() == 1 && sn.goalSuperNode){
+		//				for(Integer id : sn.connectedID){
+		//					superNodes.get(id).internalGoalNodes.add(sn);
+		//				}
+		//			}
+		//		}
+
 		while (it.hasNext()) {
 			SuperNode sn = it.next();
-			if(sn.connectedID.size() == 1 && sn.goalSuperNode){
-				for(Integer id : sn.connectedID){
+			if (sn.connectedID.size() == 1 && sn.goalSuperNode) {
+				for (Integer id : sn.connectedID) {
 					superNodes.get(id).internalGoalNodes.add(sn);
 					sn.absorbed = true;
 					//System.err.println("It gets here! WOO!");
@@ -1033,7 +1044,7 @@ public class SearchClient {
 			}
 			//System.err.println(sn.connectedID.size());
 		}
-		
+
 		//Those who have absorbed false have LOWER priority than those who have absorbed true.
 	}
 
