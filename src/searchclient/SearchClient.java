@@ -372,8 +372,8 @@ public class SearchClient {
 				for(Goal g : allGoals){
 					g.priority = mapOfCell[g.position.row][g.position.col].priority;
 					print += "["+g.priority + "]\n";
-					System.err.println(print);
 				}
+				System.err.println(print);
 				break;
 			}
 		}
