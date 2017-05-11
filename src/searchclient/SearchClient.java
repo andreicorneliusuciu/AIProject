@@ -470,11 +470,10 @@ public class SearchClient {
 
 								// simply state the last state as the agents
 								// initialState
-
+								
 								agents.get(j).initialState = n;
-								
 								uberNode.updateUberNode(agents);
-								
+																
 								
 								//agent here is not trapped this round
 								
@@ -535,10 +534,10 @@ public class SearchClient {
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
-				//				System.err.println("Resetting trapped boxes");
-				//				for (Box b : allBoxes) {
-				//					b.isBlocking = false;
-				//				}
+				//								System.err.println("Resetting trapped boxes");
+				//								for (Box b : allBoxes) {
+				//									b.isBlocking = false;
+				//								}
 
 			}
 
