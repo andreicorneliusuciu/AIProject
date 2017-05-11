@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import searchclient.Strategy.StrategyBFS;
 import searchclient.Strategy.StrategyDFS;
@@ -59,7 +60,7 @@ public class SearchClient {
 		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
-			if (!line.startsWith("+")) { // or space
+			if (Pattern.matches("[a-zA-Z]", line.substring(0, 1))) {
 				noOfActualRowsForTheLevel++;
 				String[] s = line.split(":");
 				String color = s[0];
@@ -121,7 +122,7 @@ public class SearchClient {
 		uberNode = new Node(null, levelRowSize, levelColumnSize);
 
 		for (String l : lines) {
-			if (!l.startsWith("+")) {
+			if (Pattern.matches("[a-zA-Z]", l.substring(0, 1)) || l.matches("^\\s*$")) {
 				continue;
 			}
 			for (int col = 0; col < l.length(); col++) {
@@ -260,7 +261,7 @@ public class SearchClient {
 	}
 
 	public static void main(String[] args) throws Exception { // TODO second
-																// loop,
+																	// loop,
 																// freakout
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
@@ -322,6 +323,9 @@ public class SearchClient {
 
 		//////////////////////////////////////////
 
+		for (Agent a : agents) {
+			System.err.println(a.initialState.toString());
+		}
 		// read the input
 		Strategy strategy;
 
@@ -383,9 +387,9 @@ public class SearchClient {
 
 			System.err.println("Initializing agents with initial state: /n" + agents);
 
-		//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 
-		//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+			//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
 				if (!a.isTrapped && !a.initialState.isGoalState()) {

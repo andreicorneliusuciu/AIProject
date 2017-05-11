@@ -176,7 +176,7 @@ public class Node {
 					}
 				}
 
-				System.err.println("ZEBUG: "+theAgentColor);
+				//System.err.println("ZEBUG: "+theAgentColor);
 				if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
 					// //////System.err.println("yes it is");
 
