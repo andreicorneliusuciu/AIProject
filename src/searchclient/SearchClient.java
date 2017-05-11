@@ -503,7 +503,7 @@ public class SearchClient {
 						// TODO: Turn plans into arraylistarraylistposition
 						ArrayList<Position> twall = new ArrayList<Position>();
 						twall.add(new Position(agents.get(a.name).initialState.agentRow, agents.get(a.name).initialState.agentCol));
-						if (a.name == 0) {
+						if (solutions.size() == 1) {
 							blockedPositions.add(twall);
 						} else {
 							blockedPositions.get(0).add(twall.get(0));

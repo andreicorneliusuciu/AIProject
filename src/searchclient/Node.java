@@ -79,9 +79,11 @@ public class Node {
 			}
 		} else {
 			// TODO: We've passed last case
-			for (List<Node> n : SearchClient.solutions) {
-				Position derpp = new Position(n.get(n.size() - 1).agentRow, n.get(n.size() - 1).agentCol);
-				this.boxes[derpp.row][derpp.col] = '*';
+			if(SearchClient.solutions != null){
+				for (List<Node> n : SearchClient.solutions) {
+					Position derpp = new Position(n.get(n.size() - 1).agentRow, n.get(n.size() - 1).agentCol);
+					this.boxes[derpp.row][derpp.col] = '*';
+				}
 			}
 		}
 
