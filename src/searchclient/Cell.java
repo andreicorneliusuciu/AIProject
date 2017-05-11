@@ -12,6 +12,9 @@ public class Cell {
 	public Position cellPostition;
 	Position position;
 	int type; //0 = wall, 1 = Free, 2 = goal. To be swapped out with enum?
+	int rowID = -1;
+	int colID = -1;
+	int priority = 0;
 	boolean north = false;
 	boolean east = false;
 	boolean west = false;
