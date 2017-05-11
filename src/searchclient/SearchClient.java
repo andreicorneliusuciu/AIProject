@@ -265,18 +265,62 @@ public class SearchClient {
 		// new Position(7,0)));
 	}
 
-	public static void goalPriority(){
+	public static boolean patternA(Cell c){
+		//Find pattern where goal is surrounded by three walls
+		int wallCount = 0;
+		int priorityAdd = 0;
+		if(!c.east){
+			wallCount++;
+		} else if(mapOfCell[c.position.row][c.position.col+1].prioritySet) {
+			if(mapOfCell[c.position.row][c.position.col+1].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row][c.position.col+1].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.west){
+			wallCount++;
+		} else if(mapOfCell[c.position.row][c.position.col-1].prioritySet) {
+			if(mapOfCell[c.position.row][c.position.col-1].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row][c.position.col-1].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.south){
+			wallCount++;
+		} else if(mapOfCell[c.position.row+1][c.position.col].prioritySet) {
+			if(mapOfCell[c.position.row+1][c.position.col].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row+1][c.position.col].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.north){
+			wallCount++;
+		} else if(mapOfCell[c.position.row-1][c.position.col].prioritySet) {
+			if(mapOfCell[c.position.row-1][c.position.col].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row-1][c.position.col].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(wallCount>2 && !c.prioritySet){
+			mapOfCell[c.position.row][c.position.col].prioritySet = true;
+			mapOfCell[c.position.row][c.position.col].priority += priorityAdd;
+			mapOfCell[c.position.row][c.position.col].addPriority = priorityAdd;
+			System.err.println("Found corner! " + priorityAdd);
+			return true;
+		}
+		return false;
+	}
+	
+	public static void goalPriority(){//TODO
 		for(SuperNode sn : superNodes){
 			if(sn.goalSuperNode){//Setup baseline priority. High is low, low is high.
 				for(Line l : sn.memberLines){
 					for(Position p : l.positions){
 						for(Goal g : allGoals){
-							if(g.position.equals(p)){
-								if(sn.absorbed){
-									g.priority = 0;
-								} else {
-									g.priority = 100;
-								}
+							if(sn.absorbed){
+								mapOfCell[p.row][p.col].priority = 0;
+							} else {
+								mapOfCell[p.row][p.col].priority = 100;
 							}
 						}
 					}
@@ -284,29 +328,55 @@ public class SearchClient {
 			}
 		}
 		//If bugs occur, try commenting out everything after this line.
-		/*boolean done = false;
+		boolean done = false;
+		int totalFound = 0;
+		int baseline = 0;
+		int state = 0;
 		while(!done){
-			int state = 0;
+			int curFound = new Integer(totalFound);
 			for(SuperNode sn : superNodes){
 				if(sn.goalSuperNode){
 					for(Line l : sn.memberLines){
 						for(Position p : l.positions){
-							for(Goal g : allGoals){
-								//Start pattern analysis.
+							if(state == 0){
+								if(patternA(mapOfCell[p.row][p.col])){
+									curFound++;
+								}
+							} else if(state==1){
+								if(!mapOfCell[p.row][p.col].prioritySet){
+									mapOfCell[p.row][p.col].priority += baseline;
+									mapOfCell[p.row][p.col].prioritySet = true;
+									curFound++;
+								}
 							}
-							
 						}
 					}
 				}
 			}
-			
 			done = true;
 			for(Goal g : allGoals){
 				if(!g.priorityGiven){
 					done = false;
 				}
 			}
-		}*/
+			System.err.println(curFound + " " + totalFound);
+			if(curFound==totalFound){
+				state++;
+				baseline = curFound+state;
+				totalFound = curFound;
+			} else {
+				totalFound = curFound;
+			}
+			if(state>1){
+				String print = "";
+				for(Goal g : allGoals){
+					g.priority = mapOfCell[g.position.row][g.position.col].priority;
+					print += "["+g.priority + "]\n";
+					System.err.println(print);
+				}
+				break;
+			}
+		}
 	}
 	
 	public static void main(String[] args) throws Exception { // TODO second
