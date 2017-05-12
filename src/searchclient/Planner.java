@@ -25,6 +25,8 @@ public class Planner {
 	// public LinkedList<Node> solution = new LinkedList<Node>();
 	public int trappedAgent;
 
+	public boolean shufflePlan = false;
+
 	private static enum Type {
 		MoveBoxToGoal, StoreBox, FreeAgent
 	};
@@ -123,15 +125,23 @@ public class Planner {
 
 			}
 		}
-
 		// Object plantoString;
 		System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
-
-		/// System.err.println(" ");
-		//			for (Node na : plan)
-		//			System.err.println("Plan selected: " + na.toString());
+		//TODO expand to consider other plans
+		
+		if(shufflePlan)
+		{
+			
+			return MoveToRandomNearbyCell();
+		}
+		else{	
 		return plan.get(0);
+		}
+	}
 
+	private Node MoveToRandomNearbyCell() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public LinkedList<Node> implementHighPlan(Node aInitialNode, Strategy strategy) {
@@ -146,6 +156,7 @@ public class Planner {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
 		// strategy.clearFrontier();
 		//System.err.println("Is frontier empty: " + strategy.frontierIsEmpty());
+		strategy.clearFrontier();
 		strategy.addToFrontier(initialNode);
 
 		int iterations = 0;
@@ -284,11 +295,6 @@ public class Planner {
 
 			}
 		}
-
-		// not sure
-		// agent.initialState = newState;
-		// SearchClient.agents.get(agent.name).initialState = newState;
-
 		return newState;
 	}
 

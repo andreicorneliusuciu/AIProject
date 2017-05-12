@@ -268,62 +268,56 @@ public class SearchClient {
 		// new Position(7,0)));
 	}
 
-	
-	
-public List<Strategy> getStrategies(String str) {
-		
+	public List<Strategy> getStrategies(String str) {
+
 		List<Strategy> strategies = new ArrayList<>(agents.size());
-		
-		
+
 		switch (str.toLowerCase()) {
-			case "-bfs":
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyBFS());
-				break;
-			case "-dfs":
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyDFS());
-				System.err.println("DFS Strategy.");
-				break;
-			case "-astar":
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyBestFirst(new AStar(agents.get(i).initialState)));
-				System.err.println("A* Strategy.");
-				break;
-			case "-wastar":
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyBestFirst(new WeightedAStar(agents.get(i).initialState, 5)));
-				System.err.println("WA* Strategy.");
-				break;
-			case "-greedy":
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyBestFirst(new Greedy(agents.get(i).initialState)));
-				System.err.println("Greedy Best First Strategy.");
-				break;
-			default:
-				for (int i = 0; i < agents.size(); i++)
-					strategies.add(new StrategyBFS());
-				System.err.println(
-						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-				break;
+		case "-bfs":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
+			break;
+		case "-dfs":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyDFS());
+			System.err.println("DFS Strategy.");
+			break;
+		case "-astar":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new AStar(agents.get(i).initialState)));
+			System.err.println("A* Strategy.");
+			break;
+		case "-wastar":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new WeightedAStar(agents.get(i).initialState, 5)));
+			System.err.println("WA* Strategy.");
+			break;
+		case "-greedy":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new Greedy(agents.get(i).initialState)));
+			System.err.println("Greedy Best First Strategy.");
+			break;
+		default:
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			break;
 		}
-		
-		
+
 		return strategies;
 	}
-	
-	
-private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
-	int i = 0;
-	for(Strategy s: strategiesSearchResults) {
-		System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
-		System.err.println(s.searchStatus() + "\n");
-		i++;
+
+	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+		int i = 0;
+		for (Strategy s : strategiesSearchResults) {
+			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+			System.err.println(s.searchStatus() + "\n");
+			i++;
+		}
 	}
-}
-	
-	
-	
+
+	public static int noOpCount = 0;
+
 	public static void main(String[] args) throws Exception { // TODO second
 																	// loop,
 																// freakout
@@ -387,23 +381,23 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 
 		//////////////////////////////////////////
 
-//GET THE STRATEGY
+		//GET THE STRATEGY
 		List<Strategy> strategies = null;
-		
+
 		if (args.length > 0) {
 			strategies = client.getStrategies(args[0]);
 		} else {
 			strategies = new ArrayList<>(agents.size());
 			for (int i = 0; i < agents.size(); i++)
 				strategies.add(new StrategyBFS());
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
 		while (true) {
 
-			Planner plan = null;
 			
+			Planner plan = null;
+
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
@@ -469,6 +463,11 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 					tlist.add(tnode);
 					solutions.add(tlist);
 				}
+				else if(noOpCount>10)
+				{
+					//TODO change the plan
+				}
+				
 				agentIndex++;
 			}
 
@@ -492,7 +491,6 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 					}
 				}
 
-				
 				// TODO: empty the same string builder object
 				for (int i = 0; i < maxSol; i++) {
 
@@ -507,7 +505,7 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 
 							n = solutions.get(j).get(i);
 
-							if(!n.doNoOp) {
+							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
 
 								// simply state the last state as the agents
@@ -516,13 +514,17 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 								agents.get(j).initialState = n;
 								uberNode.updateUberNode(agents);
 
+
 								//agent here is not trapped this round
 
 							} else {
 
+								noOpCount++;
+
 								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
 								uberNode.updateUberNode(agents);
+
 
 								//agent here is trapped this  round
 
@@ -553,9 +555,9 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 								// keep same? do something maybe?
 							}
 						}
+
 						// update everyones initialStates to the relevant for
 						// them current state
-						uberNode.updateUberNode(agents);
 
 						// TODO: replan! simple conflict resoltuion. To be used
 						// if snake fails
@@ -563,12 +565,43 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
 
+						noOpCount++;
+						uberNode.updateUberNode(agents);
+
 						break;
 					} else {
 
+						noOpCount = 0;
 					}
-
 				}
+				uberNode.updateUberNode(agents);
+
+				allBoxes = agents.get(0).initialState.boxes2;
+
+				//recalculate agent freedom
+				boolean done2 = false;
+				ArrayList<Position> positions2 = new ArrayList<Position>();
+				for (Agent a : agents) {
+					for (Box b : allBoxes) {
+						for (Goal g : a.initialState.goals2) {
+							if (g.color == b.color) {
+								done2 = true;
+								positions2.add(g.position);
+								positions2.add(b.position);
+								rescueUnit(a, positions2);
+								break;
+							}
+						}
+						if (done2)
+							break;
+					}
+					done2 = false;
+					positions2 = new ArrayList<Position>();
+				}
+
+				
+				
+				
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
@@ -740,6 +773,8 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 						}
 					}
 				}
+			}else{
+				agent.isTrapped = false;
 			}
 		}
 	}

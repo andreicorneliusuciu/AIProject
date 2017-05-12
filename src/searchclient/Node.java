@@ -546,12 +546,12 @@ public class Node {
 
 		}
 
-		System.err.println("Uberboxes after refill: " + this.boxes2);
+		//System.err.println("Uberboxes after refill: " + this.boxes2);
 
 		System.err.println("Ubernode after refill: " + this.toString());
 
 		System.err.println("Agents after refill: " + agents);
-		System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
+		//System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
 	}
 
