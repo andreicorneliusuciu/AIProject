@@ -307,14 +307,14 @@ public class SearchClient {
 		return strategies;
 	}
 
-	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
-		int i = 0;
-		for (Strategy s : strategiesSearchResults) {
-			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
-			System.err.println(s.searchStatus() + "\n");
-			i++;
-		}
-	}
+//	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+//		int i = 0;
+//		for (Strategy s : strategiesSearchResults) {
+//			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+//			System.err.println(s.searchStatus() + "\n");
+//			i++;
+//		}
+//	}
 
 	public static int noOpCount = 0;
 
@@ -395,7 +395,6 @@ public class SearchClient {
 
 		while (true) {
 
-			
 			Planner plan = null;
 
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
@@ -453,21 +452,21 @@ public class SearchClient {
 					solutions.add(tempList);
 
 					a.isTrapped = false;
-
-				} else if (a.initialState.isGoalState()) {
-
-					Node tnode = a.initialState.Copy();
-					tnode.doNoOp = true;
-					tnode.parent = null;
-					List<Node> tlist = new ArrayList<Node>();
-					tlist.add(tnode);
-					solutions.add(tlist);
 				}
-				else if(noOpCount>10)
-				{
+								 else if (a.initialState.isGoalState()) {
+				
+									Node tnode = a.initialState.Copy();
+									tnode.doNoOp = true;
+									tnode.parent = null;
+									tnode.action = null;
+									List<Node> tlist = new ArrayList<Node>();
+									tlist.add(tnode);
+									solutions.add(tlist);
+								}
+				else if (noOpCount > 10) {
 					//TODO change the plan
 				}
-				
+
 				agentIndex++;
 			}
 
@@ -480,7 +479,7 @@ public class SearchClient {
 			} else {
 				System.err.println("Found solution of max length " + solutions.size());
 
-				printSearchStatus(strategies, solutions);
+			//	printSearchStatus(strategies, solutions);
 
 				int maxSol = 0;
 				int m1;
@@ -512,8 +511,7 @@ public class SearchClient {
 								// initialState
 
 								agents.get(j).initialState = n;
-								uberNode.updateUberNode(agents);
-
+								//	uberNode.updateUberNode(agents);
 
 								//agent here is not trapped this round
 
@@ -523,14 +521,23 @@ public class SearchClient {
 
 								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
-								uberNode.updateUberNode(agents);
-
+								//uberNode.updateUberNode(agents);
 
 								//agent here is trapped this  round
 
 							}
 						} catch (IndexOutOfBoundsException e) {
 							jointAction.append("NoOp,");
+							//make a dummy initialstate for consistency
+							
+							//System.err.println("memeow size for agent: "+agents.get(j).name+" : "+solutions.get(j).size());
+							Node atempInitialState = solutions.get(j).get(solutions.get(j).size()-1).Copy();
+							atempInitialState.parent = solutions.get(j).get(solutions.get(j).size()-1);
+							//atempInitialState.doNoOp = true; // append noop in
+							//System.err.println("Agent :" +agents.get(j).name+" got initialState due to noop exception :"+atempInitialState);
+							agents.get(j).initialState=atempInitialState;
+							//solutions.get(j).add(atempInitialState);
+							
 						}
 
 					}
@@ -539,15 +546,15 @@ public class SearchClient {
 
 					System.out.println(jointAction.toString());
 					System.err.println("===== " + jointAction.toString() + " ====");
+					System.err.println("ZeAgents now are: /n"+agents);
+
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
 
 						// reset initialstates to previous node before conflict
 						for (Agent a : agents) {
 							if (a.initialState.parent != null) {
-								//System.err.println("Update agent " + a);
 								a.initialState = a.initialState.parent;
-
 							} else {
 
 								System.err.println("InitialState parent was null for agent " + a);
@@ -566,7 +573,7 @@ public class SearchClient {
 						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
 
 						noOpCount++;
-						uberNode.updateUberNode(agents);
+						//uberNode.updateUberNode(agents);
 
 						break;
 					} else {
@@ -599,9 +606,6 @@ public class SearchClient {
 					positions2 = new ArrayList<Position>();
 				}
 
-				
-				
-				
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
@@ -773,7 +777,7 @@ public class SearchClient {
 						}
 					}
 				}
-			}else{
+			} else {
 				agent.isTrapped = false;
 			}
 		}

@@ -128,14 +128,13 @@ public class Planner {
 		// Object plantoString;
 		System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
 		//TODO expand to consider other plans
-		
-		if(shufflePlan)
-		{
-			
+
+		if (shufflePlan) {
+
 			return MoveToRandomNearbyCell();
-		}
-		else{	
-		return plan.get(0);
+		} else {
+
+			return plan.get(0);
 		}
 	}
 
@@ -229,7 +228,15 @@ public class Planner {
 
 		}
 
-		char[][] newGoalState = newState.goals;
+		//char[][] newGoalState = newState.goals;
+		char[][] newGoalState = new char[Node.MAX_ROW][node.MAX_COL];//node.goals;
+
+		for (int row = 0; row < Node.MAX_ROW; row++) {
+			for (int col = 0; col < Node.MAX_COL; col++) {
+				newGoalState[row][col] = newState.goals[row][col];
+
+			}
+		}
 
 		for (int i = 0; i < Node.MAX_ROW; i++)
 			for (int j = 0; j < Node.MAX_COL; j++) {

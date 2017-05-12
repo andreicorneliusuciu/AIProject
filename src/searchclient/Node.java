@@ -457,7 +457,7 @@ public class Node {
 
 		System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
-		System.err.println("Agents before initialized: " + agents);
+		//System.err.println("Agents before initialized: " + agents);
 
 		// we have to update the boxes2 locations!!! check if they a re updated
 		// cannot update those, use boxes[][] instead
