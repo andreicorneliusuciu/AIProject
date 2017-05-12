@@ -12,42 +12,35 @@ import java.util.Set;
 public class DistancesComputer {
 	
 	public static int[][] map;
-	//public static Set<Cell> allDistancesBetweenCells = new HashSet<>();
+	public static Set<Cell> allDistancesBetweenCells = new HashSet<>();
 	public static final int levelRowSize = SearchClient.levelRowSize-2;
 	public static final int levelColSize = SearchClient.levelColumnSize-2;
 	public Set<Position> visitated = new HashSet<>();
 
 	public DistancesComputer(int[][] map) {
-		this.map = map;
+		DistancesComputer.map = map;
 	}
 	
 	public void computeDistanceBetweenTwoPoints(Position start, Position end) {
+		
 		ArrayDeque<Position> queue = new ArrayDeque<>();
 		queue.add(start);
 		visitated.add(start);		
 		while(!queue.isEmpty()) {
 			
 			Position p = queue.remove();
-			//if(!p.equals(end)) {
-				List<Position> expandedCells = getExpandedCells(p);
+			List<Position> expandedCells = getExpandedCells(p);
 				
-				
-				for(Position neigh:expandedCells) {
-					//if it is not a wall
-					if(map[neigh.row][neigh.col] != -1) {
-						if(!isInTheCorners(p.row, p.col, neigh.row, neigh.col)){
-//							map[neigh.row][neigh.col] = map[p.row][p.col] + 2;
-//						else
-							map[neigh.row][neigh.col] = map[p.row][p.col] + 1;
+			for(Position neigh:expandedCells) {
+				//if it is not a wall
+				if(map[neigh.row][neigh.col] != -1) {
+					if(!isInTheCorners(p.row, p.col, neigh.row, neigh.col)){
+						map[neigh.row][neigh.col] = map[p.row][p.col] + 1;
 						queue.add(neigh);
 						visitated.add(neigh);
-						}
 					}
 				}
-//			} else {
-//				printMap(start, end);
-//				return;
-//			}
+			}
 		}
 		printMap(start, end);
 	}
@@ -58,14 +51,14 @@ public class DistancesComputer {
 		else return false;
 	}
 	
-//	public void computeAllDistances(Position start, Position end) {
-//		computeDistanceBetweenTwoPoints(start, end);
-//		
+	public void computeAllDistances(Position start, Position end) {
+		computeDistanceBetweenTwoPoints(start, end);
+		
 //		Map<Position, Integer> otherCellsDistance = new HashMap<>();
 //		otherCellsDistance.put(new Position(0,0), 10);
 //		Cell cell = new Cell(cellPostition, otherCellsDistance);
 //		allDistancesBetweenCells.add(cell);
-//	}
+	}
 	
 	public static int getDistanceBetween2Positions(Position p1, Position p2) {
 		//check for the wall
@@ -91,14 +84,16 @@ public class DistancesComputer {
 		for(int i1 = 1; i1 <=  levelRowSize; i1++) {
 			for (int j = 1; j <= levelColSize; j++) {
 				if(map[i1][j] == -1) {
-					System.err.print("+"+" ");
+					System.err.print("+"+"  ");
 				} else if(i1 == start.row && j == start.col) {
-					System.err.print("S" + " ");
+					System.err.print("S" + "  ");
 				} else if(i1 == end.row && j == end.col) {
 					
 					System.err.print("E" + " ");
 				} else {
-					System.err.print(map[i1][j] + " ");
+					if(map[i1][j] <= 9)
+						System.err.print(map[i1][j] + "  ");
+					else System.err.print(map[i1][j] + " ");
 				}
 			}
 			System.err.println("");

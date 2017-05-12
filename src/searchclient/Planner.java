@@ -26,7 +26,7 @@ public class Planner {
 	public int trappedAgent;
 
 	private static enum Type {
-		MoveBoxToGoal, StoreBox, FreeAgent
+		MoveBoxToGoal, StoreBox, FreeAgent, MoveToBox
 	};
 
 	public Planner(Agent theAgent) {
@@ -53,7 +53,7 @@ public class Planner {
 		LinkedList<Node> solution = new LinkedList<Node>();
 
 		Node thePlan = findHighestPlan(this.agent, this.state); // returns node with goals properly set
-
+		System.err.println("The plan: " + thePlan);
 		//TODO feed this to the second level of the hierarchical planner
 		//decide if we need to cut the distance in half due to a large statespace and implement MoveToGoal
 		//every action in the highest part of the planner uses this to cut distances
@@ -116,10 +116,14 @@ public class Planner {
 
 			if (!g.isSatisfied && g.color.equals(theAgent.color)) {
 
-				//	aBox = findClosestBox(theAgent, thisCurrentState, g);
+				//	aBox = findClosestBox(theAgent, thisCurrentState, g); 
 
 				plan.add(MoveBoxToGoal(thisCurrentState, g));
+				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 				plantoPrint.add(Type.MoveBoxToGoal);
+				
+				//Andrei CODE: Devide the plan HERE
+				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 
 			}
 		}
@@ -130,6 +134,7 @@ public class Planner {
 		/// //System.err.println(" ");
 		//			for (Node na : plan)
 		//			//System.err.println("Plan selected: " + na.toString());
+		System.err.println("Highest plan for the agent " + agent.name + " is " + plantoPrint);
 		return plan.get(0);
 
 	}
@@ -166,12 +171,13 @@ public class Planner {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-
+			
 			if (leafNode.isGoalState()) {
 
 				////System.err.println("ExtractingPlan: " + leafNode.extractPlan());
 
 				return leafNode.extractPlan();
+				
 			}
 
 			strategy.addToExplored(leafNode);
@@ -188,6 +194,31 @@ public class Planner {
 			iterations++;
 		}
 
+	}
+	
+	private Node MoveToBox(Node node, Goal goal) {
+		// make a goal state i n an actual goal so it can be achieved
+
+		Node updateGoalState = node.Copy();
+
+//		for (int i = 0; i < Node.MAX_ROW; i++) {
+//			for (int j = 0; j < Node.MAX_COL; j++) {
+//				if ('a' <= updateGoalState.goals[i][j] && updateGoalState.goals[i][j] <= 'z') {
+//					updateGoalState.goals[i][j] = ' ';
+//				}
+//			}
+//		}	
+//		
+//		//the goal position we want to end up in is coded as a '&'
+//		updateGoalState.goals[goal.position.row][goal.position.col] = '&';
+		updateGoalState.goals2 = new ArrayList<>();
+		updateGoalState.isMove = true;
+		updateGoalState.goals2.add(new Goal('&', "none", goal.position));
+		System.err.println("AGENT " + node.theAgentName + " Has: --");
+		System.err.println(updateGoalState);
+		System.err.println("The goal is " + updateGoalState.goals2 + " ^^^ and ^^^ is move is " + updateGoalState.isMove); 
+		
+		return updateGoalState;
 	}
 
 	private Node MoveBoxToGoal(Node node, Goal goal) {
@@ -391,7 +422,7 @@ public class Planner {
 		}
 
 		if (box == null)
-			//System.err.println("No blocking Box found");
+			System.err.println("No blocking Box found");
 
 		return box;
 	}
@@ -420,7 +451,7 @@ public class Planner {
 		}
 
 		if (box == null)
-			//System.err.println("No Box found for agent " + agent);
+			System.err.println("No Box found for agent " + agent);
 
 		////System.err.println("Box found at "+box);
 		return box;

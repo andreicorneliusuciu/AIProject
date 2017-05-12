@@ -1,17 +1,14 @@
 package searchclient;
 
-// <<<<<<< PlanningImplementation
-// public class Cell {
-// 	
-// =======
+import java.util.HashMap;
 import java.util.Map;
 
 public class Cell {
 	
 	//the position of the cell
 	public Position cellPostition;
-	Position position;
-	int type; //0 = wall, 1 = Free, 2 = goal. To be swapped out with enum?
+	public Position position;
+	public int type; //0 = wall, 1 = Free, 2 = goal. To be swapped out with enum?
 	int rowID = -1;
 	int colID = -1;
 	int priority = 0;
@@ -19,6 +16,7 @@ public class Cell {
 	boolean east = false;
 	boolean west = false;
 	boolean south = false;
+	public Map<Position, Integer> distancesToAllOtherCells = new HashMap<Position, Integer>();
 	
 	/*Contains all the other cells and the distance to the current cell(the field above).
 	 *  For instance if you want the distance from (0, 0) to (5, 10):
@@ -26,10 +24,10 @@ public class Cell {
 	 */
 	public Map<Position, Integer> otherCellsDistance;
 
-	public Cell(Position cellPostition, Map<Position, Integer> otherCellsDistance) {
+	public Cell(Position cellPostition, Map<Position, Integer> distancesToAllOtherCells) {
 		
 		this.cellPostition = cellPostition;
-		this.otherCellsDistance = otherCellsDistance;
+		this.otherCellsDistance = distancesToAllOtherCells;
 	}
 	
 	public Cell(int row, int col){

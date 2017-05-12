@@ -226,10 +226,10 @@ public class SearchClient {
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
 
-		System.err.println(" + Agents : " + agents);
-		System.err.println(" + Boxes : " + boxesToColor);
+		//System.err.println(" + Agents : " + agents);
+		//System.err.println(" + Boxes : " + boxesToColor);
 		// TODO Andrei: sort the allGoals list alphabetically
-		System.err.println(" + Goals: " + allGoals);
+		//System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
 
 		// for (int i = 0 ; i < agents.size(); i++) {
@@ -238,29 +238,17 @@ public class SearchClient {
 		// System.err.println("\n $ Goals: " + n.goals2 + " Boxes: " +n.boxes2);
 		// }
 
-		int[][] mapWithoutBorders = new int[levelRowSize - 2][levelColumnSize - 2];
-		for (int i1 = 1; i1 < levelRowSize - 1; i1++) {
-			for (int j1 = 1; j1 < levelColumnSize - 1; j1++) {
-				mapWithoutBorders[i1 - 1][j1 - 1] = map[i1][j1];
+		int[][] mapForAllDistances = new int[levelRowSize][levelColumnSize];
+		for (int i1 = 0; i1 < levelRowSize ; i1++) {
+			for (int j1 = 0; j1 < levelColumnSize; j1++) {
+				mapForAllDistances[i1][j1] = map[i1][j1];
 			}
 		}
 
-		// System.err.println("\n ------------------------------------");
-		// System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
-		//
-		// for (int i1 = 0; i1 < levelRowSize - 2; i1++) {
-		// for (int j = 0; j < levelColumnSize - 2; j++) {
-		// System.err.print(mapWithoutBorders[i1][j]);
-		// }
-		// System.err.println("");
-		// }
-
-		// System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
-
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
-		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
-		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0, 0), new Position(levelRowSize - 3, levelColumnSize - 3));
+		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
+		distancesComputer.computeDistanceBetweenTwoPoints(new Position(1, 16), new Position(levelRowSize - 2, levelColumnSize - 2));
 
 		// Test distances function
 		// System.err.println("Distance between (5,0) and (7,0) = " +
@@ -407,7 +395,7 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
-			System.err.println("The goals: " + allGoals);
+			//System.err.println("The goals: " + allGoals);
 
 			//update boxes status in all agents
 
@@ -426,7 +414,7 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 				break;
 			}
 
-			System.err.println("Initializing agents with initial state: /n" + agents);
+			//System.err.println("Initializing agents with initial state: /n" + agents);
 
 			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			int agentIndex = 0;
@@ -481,7 +469,7 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 			} else {
 				System.err.println("Found solution of max length " + solutions.size());
 
-				printSearchStatus(strategies, solutions);
+				//printSearchStatus(strategies, solutions);
 
 				int maxSol = 0;
 				int m1;
@@ -548,7 +536,7 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 
 							} else {
 
-								System.err.println("InitialState parent was null for agent " + a);
+								//System.err.println("InitialState parent was null for agent " + a);
 
 								// keep same? do something maybe?
 							}
@@ -570,9 +558,9 @@ private static void printSearchStatus(List<Strategy> strategiesSearchResults, Li
 
 				}
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
-				System.err.println("FINAL agents: " + agents);
-				System.err.println("FINAL uberNode: " + uberNode);
-				System.err.println("Replanning initiated with above agents");
+//				System.err.println("FINAL agents: " + agents);
+//				System.err.println("FINAL uberNode: " + uberNode);
+//				System.err.println("Replanning initiated with above agents");
 				//								System.err.println("Resetting trapped boxes");
 				//								for (Box b : allBoxes) {
 				//									b.isBlocking = false;
