@@ -1,6 +1,7 @@
 package searchclient;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -14,7 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import searchclient.Heuristic.AStar;
+import searchclient.Heuristic.Greedy;
+import searchclient.Heuristic.WeightedAStar;
 import searchclient.Strategy.StrategyBFS;
+import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
@@ -263,6 +268,62 @@ public class SearchClient {
 		// new Position(7,0)));
 	}
 
+	
+	
+public List<Strategy> getStrategies(String str) {
+		
+		List<Strategy> strategies = new ArrayList<>(agents.size());
+		
+		
+		switch (str.toLowerCase()) {
+			case "-bfs":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBFS());
+				break;
+			case "-dfs":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyDFS());
+				System.err.println("DFS Strategy.");
+				break;
+			case "-astar":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new AStar(agents.get(i).initialState)));
+				System.err.println("A* Strategy.");
+				break;
+			case "-wastar":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new WeightedAStar(agents.get(i).initialState, 5)));
+				System.err.println("WA* Strategy.");
+				break;
+			case "-greedy":
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBestFirst(new Greedy(agents.get(i).initialState)));
+				System.err.println("Greedy Best First Strategy.");
+				break;
+			default:
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBFS());
+				System.err.println(
+						"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+				break;
+		}
+		
+		
+		return strategies;
+	}
+	
+	
+private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+	int i = 0;
+	for(Strategy s: strategiesSearchResults) {
+		System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+		System.err.println(s.searchStatus() + "\n");
+		i++;
+	}
+}
+	
+	
+	
 	public static void main(String[] args) throws Exception { // TODO second
 																	// loop,
 																// freakout
@@ -326,45 +387,23 @@ public class SearchClient {
 
 		//////////////////////////////////////////
 
-		// read the input
-		Strategy strategy;
-
+//GET THE STRATEGY
+		List<Strategy> strategies = null;
+		
 		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-			// case "-astar":
-			// strategy = new StrategyBestFirst(new
-			// AStar(client.initialStates.get(0)));
-			// break;
-			// case "-wastar":
-			// // You're welcome to test WA* out with different values, but for
-			// // the report you must at least indicate benchmarks for W = 5.
-			// strategy = new StrategyBestFirst(new
-			// WeightedAStar(client.initialStates.get(0), 5));
-			// break;
-			// case "-greedy":
-			// strategy = new StrategyBestFirst(new
-			// Greedy(client.initialStates.get(0)));
-			// break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
+			strategies = client.getStrategies(args[0]);
 		} else {
-			strategy = new StrategyBFS();
-			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			strategies = new ArrayList<>(agents.size());
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
+			System.err.println(
+					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
-
-		// check if goal is reached
 
 		while (true) {
 
 			Planner plan = null;
+			
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
@@ -390,7 +429,7 @@ public class SearchClient {
 			System.err.println("Initializing agents with initial state: /n" + agents);
 
 			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
-
+			int agentIndex = 0;
 			//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
@@ -401,7 +440,7 @@ public class SearchClient {
 
 					plan = new Planner(agents.get(a.name));
 					//if plan is not trapped
-					solution = plan.findSolution();
+					solution = plan.findSolution(strategies.get(agentIndex));
 					solutions.add(solution);
 					//if plan is trapped, break out of if statement
 				}
@@ -430,16 +469,19 @@ public class SearchClient {
 					tlist.add(tnode);
 					solutions.add(tlist);
 				}
+				agentIndex++;
 			}
 
 			if (solutions.isEmpty()) {
-				System.err.println(strategy.searchStatus());
+				//System.err.println(strategy.searchStatus());
 				System.err.println("Unable to solve level.");
 
 				System.exit(0);
 
 			} else {
 				System.err.println("Found solution of max length " + solutions.size());
+
+				printSearchStatus(strategies, solutions);
 
 				int maxSol = 0;
 				int m1;
@@ -450,6 +492,7 @@ public class SearchClient {
 					}
 				}
 
+				
 				// TODO: empty the same string builder object
 				for (int i = 0; i < maxSol; i++) {
 

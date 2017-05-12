@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import searchclient.Command.Type;
 
@@ -20,6 +22,9 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
+	public Set<Box> myBoxesFinal = new TreeSet<>();
+
+
 	// public List<Agent> agents;
 
 	public boolean doNoOp = false;
@@ -299,6 +304,7 @@ public class Node {
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
 		copy.goals2 = this.goals2;
+		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.boxes2 = this.boxes2;
 		// //////System.err.println("copy:::::"+copy.myBoxes);
 

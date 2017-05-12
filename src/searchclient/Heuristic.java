@@ -2,7 +2,9 @@ package searchclient;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.List;
 import java.lang.Math;
 
@@ -144,17 +146,40 @@ public abstract class Heuristic implements Comparator<Node> {
 	////////////////////
 
 	public int h(Node n) {
-		// Manhattan distance Math.abs(x1-x0) + Math.abs(y1-y0);
-
 		int result = 0;
-		// Manhattan distance between box and its specific goal a -> A, b -> B
-		// etc.
-		// for(int i = 0; i < Node.ARRAY_LENGHT; i++) {
-		// result += Math.abs(n.boxes2.get(i).row - goals.get(i).row) +
-		// Math.abs(n.boxes2.get(i).col - goals.get(i).col);
-		// }
+		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
+		int i = 0;
 
+		Iterator<Goal> it1 = n.goals2.iterator();
+		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
+
+		while (it1.hasNext() && it2.hasNext()) {
+			Box b = it2.next();
+			Goal g = it1.next();
+			result += DistancesComputer.
+					getDistanceBetween2Positions(b.position, g.position);//here???
+
+			result += DistancesComputer.
+					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
+		}
+		
+		//System.err.println("[H] Heuristic result = " + result);
 		return result;
+	}
+	
+	public Set<Box> getBoxesPosition(Node n) {
+		Set<Box> boxesPosition = new TreeSet<>();
+		for(int i = 0; i <  DistancesComputer.levelRowSize; i++) {
+			for(int j = 0; j < DistancesComputer.levelColSize; j++) {
+				
+				if('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
+					boxesPosition.add(
+							new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
+				}			
+			}		
+		}
+		
+		return boxesPosition;
 	}
 
 	public abstract int f(Node n);
