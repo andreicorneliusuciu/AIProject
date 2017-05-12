@@ -551,10 +551,18 @@ public class SearchClient {
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
 
+						String[] serverResponse = formattedServerResponse(response);
+						
 						// reset initialstates to previous node before conflict
-						for (Agent a : agents) {
+						for (Agent a : agents) { //TODO rollback only the one 
 							if (a.initialState.parent != null) {
+								System.err.println("Agent "+a+" to which the server responded with : "+serverResponse[a.name]);
+								if(serverResponse[a.name].equals("false"))
+								{
+									System.err.println("Agent "+a+" to which the server responded with..false? ==> : "+serverResponse[a.name]);
+
 								a.initialState = a.initialState.parent;
+								}
 							} else {
 
 								System.err.println("InitialState parent was null for agent " + a);
@@ -622,6 +630,39 @@ public class SearchClient {
 		}
 	}
 
+	
+	
+public static String[] formattedServerResponse(String s){
+		
+		
+		String[] split = s.split(",");
+		
+		split[0] = split[0].substring(1);
+		
+		split[split.length-1] = split[split.length-1].substring(1, split[split.length-1].length()-1);
+
+		for(int i=0; i< split.length;i++){
+			
+			split[i] = split[i].trim();
+			
+		}
+		
+		
+		return split;
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static int[][] flowFill(Agent agent, List<Box> allBoxes2) {
 		int[][] matrix = new int[levelRowSize][levelColumnSize];
 		int[][] result = new int[levelRowSize][levelColumnSize];
