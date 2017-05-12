@@ -17,7 +17,11 @@ public abstract class Strategy {
 		this.explored = new HashSet<Node>();
 		this.startTime = System.currentTimeMillis();
 	}
-
+	
+	public boolean removeFromExplored(Node n) {
+		return this.explored.remove(n);
+	}
+	
 	public void addToExplored(Node n) {
 		this.explored.add(n);
 	}

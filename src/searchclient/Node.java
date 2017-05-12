@@ -23,6 +23,7 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
+	public int level = 0;
 	
 	public boolean doNoOp = false;
 	static Goal gAux;
@@ -48,6 +49,8 @@ public class Node {
 	private int g;
 
 	private int _hash = 0;
+
+	public int expandedNodeId = 0;
 
 	public Node(Node parent, int maxRow, int maxCol) {
 		//boxes
@@ -101,158 +104,335 @@ public class Node {
 
 	}
 
-	public ArrayList<Node> getExpandedNodes() {
+	public ArrayList<Node> getExpandedNodes(List<List<Node>> previousSolutions) {
 		// Box theBox = null;
-
-		for (Box b : boxes2) {
-			if (b.color.equals(theAgentColor)) {
-				myBoxes.add(b);
+		
+		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length); 
+		//the first agent
+		if(previousSolutions == null) {
+			for (Box b : boxes2) {
+				if (b.color.equals(theAgentColor)) {
+					myBoxes.add(b);
+				}
 			}
-		}
 
-		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length); // TODO
-																					// this
-																					// adds
-																					// node
-																					// without
-																					// agent
-																					// in
-																					// it.
-																					// Check
-																					// solved,
-																					// its
-																					// because
-																					// agent
-																					// is
-																					// on
-																					// goal
-		for (Command c : Command.EVERY) {
-			// Determine applicability of action
-			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
-			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+			
+			for (Command c : Command.EVERY) {
+				// Determine applicability of action
+				int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
+				int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
-			String boxColor = "";
+				String boxColor = "";
 
-			if (c.actionType == Type.Move) {
-				// Check if there's a wall or box on the cell to which the agent
-				// is moving
-				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					Node n = this.ChildNode();
-					////// System.err.println("Move!!! by: "+theAgentName);
-
-					n.action = c;
-					n.agentRow = newAgentRow;
-					n.agentCol = newAgentCol;
-					expandedNodes.add(n);
-					// //////System.err.println("Move \n" + n);
-					// //////System.err.println("ITIASS HAPPENING move");
-
-				}
-			} else if (c.actionType == Type.Push) {
-
-				//////// System.err.println("MyBoxes: "+myBoxes);
-				for (Box b : myBoxes) {
-
-					if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
-						boxColor = b.color;
-						// //////System.err.println("ITIASS HAPPENING pull");
-					}
-				}
-
-				if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
-					// //////System.err.println("yes it is");
-
-					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
-					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
-					// .. and that new cell of box is free.
-
-					if (this.cellIsFree(newBoxRow, newBoxCol)) {
-
+				if (c.actionType == Type.Move) {
+					// Check if there's a wall or box on the cell to which the agent
+					// is moving
+					
+					if (this.cellIsFree(newAgentRow, newAgentCol)) {
+						
 						Node n = this.ChildNode();
-
-						// System.err.println("Push!!!" +
-						// boxes[newAgentRow][newAgentCol]+": "+boxColor+" by:
-						// "+theAgentName+": "+theAgentColor);
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-
-						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						//Update the new position of the box
-						//n.boxes2.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), new Position(newBoxRow, newBoxCol));
-						//here determine the box iondex and set it. The boxes2 needs to be sorted
-						//n.boxes2.set(arg0, arg1);
-						//TODO: this 0 is not ok here. needs to be the agent's number
 						
-						//get the box I want to move from the specific index
-//						System.err.println(n.boxes[newBoxRow][newBoxCol] - 'A');
-//						Box b = n.myBoxes.get(n.boxes[newBoxRow][newBoxCol] - 'A');
-//						//update its position in the same index
-//						b.position.row = newBoxRow;
-//						b.position.col = newBoxCol;
-//						n.myBoxes.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), b);
-						n.boxes[newAgentRow][newAgentCol] = 0;
 						expandedNodes.add(n);
 
-					}
-
-				}
-			} else if (c.actionType == Type.Pull) {
-				// Cell is free where agent is going
-
-				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
-					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
-					// .. and there's a box in "dir2" of the agent
-
+					} 
+					
+				} else if (c.actionType == Type.Push) {
 					for (Box b : myBoxes) {
-						// //////System.err.println("Box: "+b+" nameOfCharBox:
-						// "+this.boxes[boxRow][boxCol]);
-						if (b.name.equals(this.boxes[boxRow][boxCol])) {
-							boxColor = b.color;
 
-							// //////System.err.println("ITIASS HAPPENING
-							// pull");
+						if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
+							boxColor = b.color;
 						}
 					}
-					// //////System.err.println(boxColor+" <- boxColor,
-					// agentColor-->"+theAgentColor);
-					// "+theAgentColor);
-					// //////System.err.println("Pull!!! Box color: "+boxColor+"
-					// agentColoragentColor-->"+theAgentName+theAgentColor);
 
-					if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
+					if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
 
+						int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
+						int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
+						// .. and that new cell of box is free.
+
+						if (this.cellIsFree(newBoxRow, newBoxCol)) {
+
+							Node n = this.ChildNode();
+							n.action = c;
+							n.agentRow = newAgentRow;
+							n.agentCol = newAgentCol;
+
+							n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
+							//Update the new position of the box
+							//n.boxes2.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), new Position(newBoxRow, newBoxCol));
+							//here determine the box iondex and set it. The boxes2 needs to be sorted
+							//n.boxes2.set(arg0, arg1);
+							//TODO: this 0 is not ok here. needs to be the agent's number
+							
+							//get the box I want to move from the specific index
+//							System.err.println(n.boxes[newBoxRow][newBoxCol] - 'A');
+//							Box b = n.myBoxes.get(n.boxes[newBoxRow][newBoxCol] - 'A');
+//							//update its position in the same index
+//							b.position.row = newBoxRow;
+//							b.position.col = newBoxCol;
+//							n.myBoxes.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), b);
+							n.boxes[newAgentRow][newAgentCol] = 0;
+							expandedNodes.add(n);
+
+						}
+
+					}
+				} else if (c.actionType == Type.Pull) {
+					// Cell is free where agent is going
+
+					if (this.cellIsFree(newAgentRow, newAgentCol)) {
+						int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
+						int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
+						// .. and there's a box in "dir2" of the agent
+
+						for (Box b : myBoxes) {
+							// //////System.err.println("Box: "+b+" nameOfCharBox:
+							// "+this.boxes[boxRow][boxCol]);
+							if (b.name.equals(this.boxes[boxRow][boxCol])) {
+								boxColor = b.color;
+
+								// //////System.err.println("ITIASS HAPPENING
+								// pull");
+							}
+						}
+						// //////System.err.println(boxColor+" <- boxColor,
+						// agentColor-->"+theAgentColor);
+						// "+theAgentColor);
+						// //////System.err.println("Pull!!! Box color: "+boxColor+"
+						// agentColoragentColor-->"+theAgentName+theAgentColor);
+
+						if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
+
+							Node n = this.ChildNode();
+
+							// System.err.println("Pull!!!" +
+							// boxes[boxRow][boxCol]+": "+boxColor+" by:
+							// "+theAgentName+": "+theAgentColor);
+
+							n.action = c;
+							n.agentRow = newAgentRow;
+							n.agentCol = newAgentCol;
+							n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
+							n.boxes[boxRow][boxCol] = 0;
+							
+//							//get the box I want to move from the specific index
+//							Box b = n.myBoxes.get(n.boxes[this.agentRow][this.agentCol] - 'A');
+//							//update its position in the same index
+//							b.position.row = this.agentRow;
+//							b.position.col = this.agentCol;
+//							n.myBoxes.set((int)(n.boxes[this.agentRow][this.agentCol] - 'A'), b);
+							// //////System.err.println("Pull \n" + n);
+							expandedNodes.add(n);
+
+						}
+					}
+				}
+
+			}
+
+		} else {
+			for (Box b : boxes2) {
+				if (b.color.equals(theAgentColor)) {
+					myBoxes.add(b);
+				}
+			}
+			
+			//System.err.println("Level " + level + " for agent " + theAgentName);
+			List<Node> otherAgentsSolutionsAtCurrentPoint = new ArrayList<>();
+			List<Node> otherAgentsSolutionsAtNextPoint = new ArrayList<>();
+			List<Node> otherAgentsSolutionsAtNextNextPoint = new ArrayList<>();
+			for(List<Node> l:previousSolutions) {
+				try{
+					otherAgentsSolutionsAtCurrentPoint.add(l.get(level));
+					otherAgentsSolutionsAtNextPoint.add(l.get(level+1));
+					otherAgentsSolutionsAtNextNextPoint.add(l.get(level+2));
+					//System.err.println(l.get(level).toString());
+				} catch (Exception e) {
+					otherAgentsSolutionsAtCurrentPoint.add(l.get(l.size()-1));
+					otherAgentsSolutionsAtNextPoint.add(l.get(l.size()-1));
+					otherAgentsSolutionsAtNextNextPoint.add(l.get(l.size()-1));
+					//System.err.println(l.get(l.size()-1).toString());
+				}
+			}
+			
+			for (Command c : Command.EVERY) {
+				// Determine applicability of action
+				int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
+				int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+
+				String boxColor = "";
+
+				if (c.actionType == Type.Move) {
+					// Check if there's a wall or box on the cell to which the agent
+					// is moving
+					if (this.cellIsFree(newAgentRow, newAgentCol) && !conflictsWithOtherAgents(otherAgentsSolutionsAtCurrentPoint,
+							otherAgentsSolutionsAtNextPoint, otherAgentsSolutionsAtNextNextPoint, newAgentRow, newAgentCol)) {
 						Node n = this.ChildNode();
-
-						// System.err.println("Pull!!!" +
-						// boxes[boxRow][boxCol]+": "+boxColor+" by:
-						// "+theAgentName+": "+theAgentColor);
+						////// System.err.println("Move!!! by: "+theAgentName);
 
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						n.boxes[boxRow][boxCol] = 0;
-						
-//						//get the box I want to move from the specific index
-//						Box b = n.myBoxes.get(n.boxes[this.agentRow][this.agentCol] - 'A');
-//						//update its position in the same index
-//						b.position.row = this.agentRow;
-//						b.position.col = this.agentCol;
-//						n.myBoxes.set((int)(n.boxes[this.agentRow][this.agentCol] - 'A'), b);
-						// //////System.err.println("Pull \n" + n);
 						expandedNodes.add(n);
+						// //////System.err.println("Move \n" + n);
+						// //////System.err.println("ITIASS HAPPENING move");
+
+					} 
+					else {
+						this.expandedNodeId = -1;
+						expandedNodes.add(this);
+						
+					}
+				} else if (c.actionType == Type.Push) {
+
+					//////// System.err.println("MyBoxes: "+myBoxes);
+					for (Box b : myBoxes) {
+
+						if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
+							boxColor = b.color;
+							// //////System.err.println("ITIASS HAPPENING pull");
+						}
+					}
+
+					if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
+						// //////System.err.println("yes it is");
+
+						int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
+						int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
+						// .. and that new cell of box is free.
+
+						if (this.cellIsFree(newBoxRow, newBoxCol)) {
+
+							Node n = this.ChildNode();
+
+							// System.err.println("Push!!!" +
+							// boxes[newAgentRow][newAgentCol]+": "+boxColor+" by:
+							// "+theAgentName+": "+theAgentColor);
+							n.action = c;
+							n.agentRow = newAgentRow;
+							n.agentCol = newAgentCol;
+
+							n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
+							//Update the new position of the box
+							//n.boxes2.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), new Position(newBoxRow, newBoxCol));
+							//here determine the box iondex and set it. The boxes2 needs to be sorted
+							//n.boxes2.set(arg0, arg1);
+							//TODO: this 0 is not ok here. needs to be the agent's number
+							
+							//get the box I want to move from the specific index
+//							System.err.println(n.boxes[newBoxRow][newBoxCol] - 'A');
+//							Box b = n.myBoxes.get(n.boxes[newBoxRow][newBoxCol] - 'A');
+//							//update its position in the same index
+//							b.position.row = newBoxRow;
+//							b.position.col = newBoxCol;
+//							n.myBoxes.set((int)(n.boxes[newBoxRow][newBoxCol] - 'A'), b);
+							n.boxes[newAgentRow][newAgentCol] = 0;
+							expandedNodes.add(n);
+
+						}
 
 					}
+				} else if (c.actionType == Type.Pull) {
+					// Cell is free where agent is going
+
+					if (this.cellIsFree(newAgentRow, newAgentCol)) {
+						int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
+						int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
+						// .. and there's a box in "dir2" of the agent
+
+						for (Box b : myBoxes) {
+							// //////System.err.println("Box: "+b+" nameOfCharBox:
+							// "+this.boxes[boxRow][boxCol]);
+							if (b.name.equals(this.boxes[boxRow][boxCol])) {
+								boxColor = b.color;
+
+								// //////System.err.println("ITIASS HAPPENING
+								// pull");
+							}
+						}
+						// //////System.err.println(boxColor+" <- boxColor,
+						// agentColor-->"+theAgentColor);
+						// "+theAgentColor);
+						// //////System.err.println("Pull!!! Box color: "+boxColor+"
+						// agentColoragentColor-->"+theAgentName+theAgentColor);
+
+						if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
+
+							Node n = this.ChildNode();
+
+							// System.err.println("Pull!!!" +
+							// boxes[boxRow][boxCol]+": "+boxColor+" by:
+							// "+theAgentName+": "+theAgentColor);
+
+							n.action = c;
+							n.agentRow = newAgentRow;
+							n.agentCol = newAgentCol;
+							n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
+							n.boxes[boxRow][boxCol] = 0;
+							
+//							//get the box I want to move from the specific index
+//							Box b = n.myBoxes.get(n.boxes[this.agentRow][this.agentCol] - 'A');
+//							//update its position in the same index
+//							b.position.row = this.agentRow;
+//							b.position.col = this.agentCol;
+//							n.myBoxes.set((int)(n.boxes[this.agentRow][this.agentCol] - 'A'), b);
+							// //////System.err.println("Pull \n" + n);
+							expandedNodes.add(n);
+
+						}
+					}
 				}
+
 			}
 
 		}
-		// Collections.shuffle(expandedNodes, RND);
+				// Collections.shuffle(expandedNodes, RND);
 
 		// //////System.err.println("size: "+expandedNodes);
 		return expandedNodes;
+	}
+
+	private boolean conflictsWithOtherAgents(List<Node> otherAgentsSolutionsAtCurrentPoint,
+													List<Node> otherAgentsSolutionsAtNextPoint,
+													List<Node> otherAgentsSolutionsAtNextNextPoint,
+																					int row, int col) {
+		for(Node n:otherAgentsSolutionsAtCurrentPoint) {
+			if(n.boxAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with box from " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+			if(n.agentAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with agent " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+		}
+		
+		for(Node n:otherAgentsSolutionsAtNextPoint) {
+			if(n.boxAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with box from " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+			if(n.agentAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with agent " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+		}
+		
+		for(Node n:otherAgentsSolutionsAtNextNextPoint) {
+			if(n.boxAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with box from " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+			if(n.agentAt(row, col)) {
+				//System.err.println("Conflict for agent " + this.theAgentName + " with agent " + n.theAgentName + " on position (" + row + ", " + col +").");
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	private boolean cellIsFree(int row, int col) {
@@ -262,10 +442,16 @@ public class Node {
 	private boolean boxAt(int row, int col) {
 		return this.boxes[row][col] > 0;
 	}
+	
+	private boolean agentAt(int row, int col) {
+		return this.agentRow == row && this.agentCol == col;
+	}
 
 	private Node ChildNode() {
 		Node copy = new Node(this, MAX_ROW, MAX_COL);
-
+		
+		copy.level = this.level + 1;
+		//System.err.println("Level " + copy.level);
 		// aici
 		for (int row = 0; row < MAX_ROW; row++) {
 			//System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
@@ -274,6 +460,7 @@ public class Node {
 		}
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
+		copy.expandedNodeId = this.expandedNodeId + 1;
 		copy.theAgentName = this.theAgentName;
 		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.goals2 = this.goals2;

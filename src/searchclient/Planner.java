@@ -270,16 +270,16 @@ public class Planner {
 			}
 
 			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
-															// nodes is shuffled
-															// randomly; see
-															// Node.java.
-				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
-					// System.err.println("Adding to frontier:
-					// "+n.theAgentName+" "+n);
-					strategy.addToFrontier(n);
-				}
-			}
+//			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
+//															// nodes is shuffled
+//															// randomly; see
+//															// Node.java.
+//				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
+//					// System.err.println("Adding to frontier:
+//					// "+n.theAgentName+" "+n);
+//					strategy.addToFrontier(n);
+//				}
+//			}
 			iterations++;
 		}
 	}
@@ -347,17 +347,17 @@ public class Planner {
 	// updates the status of all goals for a given node (agent sees and updates
 	// only his own goals!!!)
 	private void updateGoalStates(Node node) {
-		List<Goal> goals = node.goals2;
-		List<Box> boxes = node.boxes2;
-
-		for (Goal g : goals) {
-			for (Box b : boxes) {
-				if (b.position == g.position && Character.toLowerCase(b.name) == g.name) {
-					g.isSatisfied = true;
-				}
-
-			}
-		}
+//		List<Goal> goals = node.goals2;
+//		List<Box> boxes = node.boxes2;
+//
+//		for (Goal g : goals) {
+//			for (Box b : boxes) {
+//				if (b.position == g.position && Character.toLowerCase(b.name) == g.name) {
+//					g.isSatisfied = true;
+//				}
+//
+//			}
+//		}
 	}
 
 	// checks if the goals for a given node are satisfied (agent sees only his

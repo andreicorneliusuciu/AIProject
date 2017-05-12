@@ -245,16 +245,33 @@ public class SearchClient {
 		//TODO Andrei: sort the allGoals list alphabetically
 		System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
-		
+		boolean flag = true;
 		for (int i = 0; i < agents.size(); i++) {
 			System.err.println("For agent " + i + ":");
 			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
 			System.err.println("&&&& Goals2 = " + agents.get(i).initialState.goals2);
 			for(Box b:agents.get(i).initialState.myBoxesFinal) {
+				mapForAgentOne[b.position.row][b.position.col] = b.name;
+			}
+			if(!flag) {
+				mapForAgentOne[agents.get(i).position.row][agents.get(i).position.col] = '*';
 				
 			}
+			flag = false;
 			System.err.println(" --------------------- ");
 		}
+		//Initialize agent zero to know everythong on the map
+		agents.get(0).initialState.boxes = mapForAgentOne;
+		for (int i = 1; i < agents.size(); i++) {
+			agents.get(i).initialState.boxes = new char[levelRowSize][levelColumnSize];
+			for(Box b:agents.get(i).initialState.myBoxesFinal) {
+				agents.get(i).initialState.boxes[b.position.row][b.position.col] = b.name;
+				
+			}
+			printMap(agents.get(i).initialState.boxes, i);
+		}
+		
+		
 //		for (int i = 0 ; i < agents.size(); i++) {
 //			
 //			agents.get(i).initialState = n;
@@ -276,7 +293,7 @@ public class SearchClient {
 		}
 		
 		System.err.println("\n ------------------------------------");
-		System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
+		System.err.println("^^^^^^^^ THE MAP: ^^^^^^^");
 		
 		for(int i1 = 0; i1 <  levelRowSize; i1++) {
 			for (int j = 0; j < levelColumnSize; j++) {
@@ -297,11 +314,22 @@ public class SearchClient {
 //		DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
 //				new Position(7,0)));
 		//Test Independent goals
-		distancesComputer.getShortestPath(new Position(1,1), new Position(5,26));
+		//distancesComputer.getShortestPath(new Position(1,1), new Position(5,26));
 		//System.err.println("Yes "  + DistancesComputer.getDistanceBetween2Positions(new Position(2,25),new Position(4,26)));
 	}
+	
+	public void printMap(char[][] map, int a) {
+		System.err.println(" Map for agent " + a + ": ");
+		for(int i = 0; i < levelRowSize; i++) {
+			for(int j = 0; j < levelColumnSize; j++) {
+				System.err.print(map[i][j] + " ");
+			}
+			System.err.println();
+		}
+		System.err.println(" +++++++++++++++++++ ");
+	}
 
-	public LinkedList<Node> Search(Strategy strategy, Node initialNode) throws IOException {
+	public LinkedList<Node> Search(Strategy strategy, Node initialNode, List<List<Node>> previousSolutions) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
 		strategy.addToFrontier(initialNode);
 
@@ -331,15 +359,30 @@ public class SearchClient {
 			}
 
 			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded
+			
+			for (Node n : leafNode.getExpandedNodes(previousSolutions)) { // The list of expanded
 															// nodes is shuffled
 															// randomly; see
 															// Node.java.
+//				if (!strategy.isExplored(n) && !strategy.inFrontier(n) && n.expandedNodeId != -1) {
+//					// System.err.println("Adding to frontier:
+//					// "+n.theAgentName+" "+n);
+//					strategy.addToFrontier(n);
+//				}
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
 					// System.err.println("Adding to frontier:
 					// "+n.theAgentName+" "+n);
-					strategy.addToFrontier(n);
-				}
+					if(n.expandedNodeId == -1) {
+						strategy.removeFromExplored(n);
+						strategy.addToFrontier(n);
+					}
+					
+				} 
+//				else {
+//					boolean b = strategy.removeFromExplored(n);
+//					System.err.println("AJUNG AICI si reuses sa remove from explored " + b);
+////					strategy.addToFrontier(n);
+//				}
 			}
 			iterations++;
 		}
@@ -680,25 +723,25 @@ public class SearchClient {
 														// they are updating
 
 		// this is preprocessing shit
-		boolean done = false;
-		ArrayList<Position> positions = new ArrayList<Position>();
-		for (Agent a : agents) {
-			for (Box b : allBoxes) {
-				for (Goal g : a.initialState.goals2) {
-					if (g.color == b.color) {
-						done = true;
-						positions.add(g.position);
-						positions.add(b.position);
-						rescueUnit(a, positions, a.initialState);
-						break;
-					}
-				}
-				if (done)
-					break;
-			}
-			done = false;
-			positions = new ArrayList<Position>();
-		}
+//		boolean done = false;
+//		ArrayList<Position> positions = new ArrayList<Position>();
+//		for (Agent a : agents) {
+//			for (Box b : allBoxes) {
+//				for (Goal g : a.initialState.goals2) {
+//					if (g.color == b.color) {
+//						done = true;
+//						positions.add(g.position);
+//						positions.add(b.position);
+//						rescueUnit(a, positions, a.initialState);
+//						break;
+//					}
+//				}
+//				if (done)
+//					break;
+//			}
+//			done = false;
+//			positions = new ArrayList<Position>();
+//		}
 		//////////////////////////////////////////
 
 		// read the input
@@ -715,15 +758,31 @@ public class SearchClient {
 		}
 		///////////////////////////////// readinput end
 
-		LinkedList<Node> solution;
+		LinkedList<Node> solutionAgentZero;
 
 		// List containing all the solutions for every agent
 		List<List<Node>> solutions = new ArrayList<>();
-
-		for (int i = 0; i < agents.size(); i++) {
+		
+		//Compute the solution for agent 0
+		try {
+			solutionAgentZero = client.Search(strategies.get(0), SearchClient.agents.get(0).initialState,null);
+			solutionAgentZero.add(0, SearchClient.agents.get(0).initialState);
+			solutions.add(solutionAgentZero);
+			//System.err.println("Solution for agent zero: " + solutionAgentZero);
+		} catch (Exception ex) {
+			System.err.println("Problems for agent " + 0 + " when solving the level");
+			ex.printStackTrace();
+			solutions = null;
+		}
+		
+		//Compute the solutions for other agents apart from agent 0
+		for (int i = 1; i < agents.size(); i++) {
+			LinkedList<Node> solution = null;
 			try {
-				solution = client.Search(strategies.get(i), SearchClient.agents.get(i).initialState);
-				System.err.println("initial command " + solution.get(0).action);
+				//send the previous solutions to the agent that is about to start searching for his own solution
+				solution = client.Search(strategies.get(i), SearchClient.agents.get(i).initialState, solutions);
+				solution.add(0, SearchClient.agents.get(i).initialState);
+				//System.err.println("Solution for agent " + i + ": " + solution);
 				solutions.add(solution);
 			} catch (Exception ex) {
 				System.err.println("Problems for agent " + i + " when solving the level");
@@ -757,7 +816,7 @@ public class SearchClient {
 			Planner plan = null;
 			//for(Agent a : agents){
 			
-			plan = new Planner(agents.get(0)); 
+			//plan = new Planner(agents.get(0)); 
 			//solutions.add(plan.solution);
 			
 			//}
@@ -770,6 +829,10 @@ public class SearchClient {
 					maxSol = m1;
 				}
 			}
+			for (int i = 0; i < solutions.size(); i++) {
+				solutions.get(i).remove(0);
+			}
+			
 			
 			//TODO: empty the same string builder object
 			for(int i = 0; i < maxSol; i++) {
@@ -806,6 +869,7 @@ public class SearchClient {
 							jointAction.toString());
 					System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Problems with the moves");
 					break;
+					
 				}
 			}
 		}
