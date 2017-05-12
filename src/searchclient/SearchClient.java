@@ -294,15 +294,20 @@ public class SearchClient {
 	public static void main(String[] args) throws Exception {
 		
 		
-		System.out.println("[Move(E)]");
-		System.out.println("[Move(E)]");
-		System.out.println("[Move(E)]");
-		System.out.println("[Push(E,E)]");
-		System.out.println("[Move(E)]");
-		System.out.println("[Move(E)]");
-		System.out.println("[Move(E)]");
-		System.out.println("[Push(E,E)]");
-		
+		System.out.println("[Move(E),Move(E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+		System.out.println("[Move(E),Push(E,E)]");
+//		System.out.println("[Move(E)]");
+//		System.out.println("[Push(E,E)]");
+//		System.out.println("[Move(E)]");
+//		System.out.println("[Move(E)]");
+//		System.out.println("[Move(E)]");
+//		System.out.println("[Push(E,E)]");
+//		
 
 		
 		
