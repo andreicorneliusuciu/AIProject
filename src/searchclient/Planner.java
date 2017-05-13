@@ -120,6 +120,7 @@ public class Planner {
 		Node newState = node.Copy();
 
 		Position goalPos = null;
+		char goalName = 0;
 
 		// find the goal position
 		if (!newState.goals2.contains(goal)) {
@@ -135,6 +136,7 @@ public class Planner {
 					if (goalpriority < g.priority) {
 						goalPos = g.position;
 						goalpriority = g.priority;
+						goalName = g.name;
 
 					}
 				}
@@ -162,7 +164,8 @@ public class Planner {
 		// fill it with the new goals bellow
 
 		// name it a random goal name of those the agent has
-		newGoalState[goalPos.row][goalPos.col] = node.goals2.get(0).name;
+		
+		newGoalState[goalPos.row][goalPos.col] = goalName;
 
 		// put in the newstate the new goals
 		newState.goals = newGoalState;
@@ -226,6 +229,8 @@ public class Planner {
 
 		float length = 1000;
 		Position shortestPos = null;
+		
+		char goalName = Character.toLowerCase(box.name);
 
 		// find shortest manhattan distance available position
 
@@ -272,7 +277,7 @@ public class Planner {
 			//System.err.println("404: Box not found in storebox. Shit");
 			return null;
 		} else {
-			newGoalState[shortestPos.row][shortestPos.col] = node.goals2.get(0).name;
+			newGoalState[shortestPos.row][shortestPos.col] = goalName;
 			//remove spot from storagespace
 			Heuristic.storageSpace.remove(shortestPos);
 			length = 1000;
