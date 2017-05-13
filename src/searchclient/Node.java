@@ -479,7 +479,6 @@ public class Node {
 													// same color as the
 													// smallNode in uberNode
 	{
-
 		//System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
 		//System.err.println("Agents before initialized: " + agents);
