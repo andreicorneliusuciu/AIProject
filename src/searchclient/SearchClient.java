@@ -691,14 +691,62 @@ public class SearchClient {
 								j2++;
 								continue;//Noop
 							}
-							serverAnalyze(n);
-							j2++;
-							noOpCount = 0;//TODO: Belongs somewhere else???
+							Command temp = n.action;
+							
+							if(temp!= null){
+								System.err.println(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)));
+								
+							}
+							if(temp == null){
+							
+							}
+							else if(temp.actionType.equals(Command.Type.Move)){
+								//Update one agent
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-+Command.dirToColChange(temp.dir1)))){
+										a.position = new Position(n.agentRow,n.agentCol);
+										a.initialState = n;
+										break;
+									}
+								}
+							} else if(temp.actionType.equals(Command.Type.Push)){
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										a.position = new Position(n.agentRow,n.agentCol);
+										for(Box b : allBoxes){
+											if(b.position.equals(new Position(a.position.row,a.position.col))){
+												b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2),b.position.col + Command.dirToColChange(temp.dir2));
+												a.initialState = n;
+												break;
+											}
+										}
+										break;
+									}
+								}
+							} else if(temp.actionType.equals(Command.Type.Pull)){
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										Position tempPos = new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1));
+										for(Box b : allBoxes){
+											if(b.position.equals(new Position(tempPos.row+Command.dirToRowChange(temp.dir2), tempPos.col+Command.dirToColChange(temp.dir2)))){
+												b.position = new Position(tempPos.row,tempPos.col);
+												a.initialState = n;
+												break;
+											}
+										}
+										a.position = new Position(n.agentRow,n.agentCol);
+										break;
+									}
+								}
+							}
 						}
-						if(replan){
-							break;
-						}
+						j2++;
+						noOpCount = 0;//TODO: Belongs somewhere else???
 					}
+					if(replan){
+						break;
+					}
+				}
 				
 				//recalculate agent freedom
 				boolean done2 = false;
@@ -726,70 +774,21 @@ public class SearchClient {
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
-				/*USEFUL DEBUGGING TOOL! DON'T REMOVE!
-				 * replanCounter++;
+				//USEFUL DEBUGGING TOOL! DON'T REMOVE!
+				replanCounter++;
 				if(replanCounter>=20){
 					serverMessages.close();
 					return;
 				}
-				*/
 			}
 
 			// initialize and reset variables
 
 		}
 	}
-}
 
 public static void serverAnalyze(Node n){
-	Command temp = n.action;
 	
-	if(temp!= null){
-		System.err.println(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)));
-		
-	}
-	if(temp == null){
-	
-	}
-	else if(temp.actionType.equals(Command.Type.Move)){
-		//Update one agent
-		for(Agent a : agents){
-			if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-+Command.dirToColChange(temp.dir1)))){
-				a.position = new Position(n.agentRow,n.agentCol);
-				a.initialState = n;
-				break;
-			}
-		}
-	} else if(temp.actionType.equals(Command.Type.Push)){
-		for(Agent a : agents){
-			if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
-				a.position = new Position(n.agentRow,n.agentCol);
-				for(Box b : allBoxes){
-					if(b.position.equals(new Position(a.position.row,a.position.col))){
-						b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2),b.position.col + Command.dirToColChange(temp.dir2));
-						a.initialState = n;
-						break;
-					}
-				}
-				break;
-			}
-		}
-	} else if(temp.actionType.equals(Command.Type.Pull)){
-		for(Agent a : agents){
-			if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
-				Position tempPos = new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1));
-				for(Box b : allBoxes){
-					if(b.position.equals(new Position(tempPos.row+Command.dirToRowChange(temp.dir2), tempPos.col+Command.dirToColChange(temp.dir2)))){
-						b.position = new Position(tempPos.row,tempPos.col);
-						a.initialState = n;
-						break;
-					}
-				}
-				a.position = new Position(n.agentRow,n.agentCol);
-				break;
-			}
-		}
-	}
 }
 	
 	
