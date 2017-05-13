@@ -12,16 +12,16 @@ import java.util.Set;
 public class DistancesComputer {
 	
 	public static int[][] map;
-	public static Set<Cell> allDistancesBetweenCells = new HashSet<>();
-	public static final int levelRowSize = SearchClient.levelRowSize-2;
-	public static final int levelColSize = SearchClient.levelColumnSize-2;
+	public static Map<Cell, Cell> allDistancesBetweenCells = new HashMap<>();
+	public static final int levelRowSize = SearchClient.levelRowSize;
+	public static final int levelColSize = SearchClient.levelColumnSize;
 	public Set<Position> visitated = new HashSet<>();
 
 	public DistancesComputer(int[][] map) {
 		DistancesComputer.map = map;
 	}
 	
-	public void computeDistanceBetweenTwoPoints(Position start, Position end) {
+	public void computeDistanceBetweenTwoPoints(Position start) {
 		
 		ArrayDeque<Position> queue = new ArrayDeque<>();
 		queue.add(start);
@@ -42,6 +42,8 @@ public class DistancesComputer {
 				}
 			}
 		}
+		
+		
 		//printMap(start, end);
 	}
 	
@@ -51,21 +53,81 @@ public class DistancesComputer {
 		else return false;
 	}
 	
-	public void computeAllDistances(Position start, Position end) {
-		computeDistanceBetweenTwoPoints(start, end);
+	public void computeAllDistancesBetweenOneCellAndTheOthers(Position start) {
 		
-//		Map<Position, Integer> otherCellsDistance = new HashMap<>();
-//		otherCellsDistance.put(new Position(0,0), 10);
-//		Cell cell = new Cell(cellPostition, otherCellsDistance);
-//		allDistancesBetweenCells.add(cell);
+		//
+		if(map[start.row][start.col] != -1) {
+			//this one computes the distance between start and all the other cells on the map
+			computeDistanceBetweenTwoPoints(start);
+		} else return;
+		
+		Map<Position, Integer> otherCellsDistance = new HashMap<>();
+		
+		for(int i = 1; i <=  levelRowSize-2; i++) {
+			for (int j = 1; j <= levelColSize-2; j++) {
+				if(map[i][j] != -1) {
+							
+					otherCellsDistance.put(new Position(i,j), new Integer(map[i][j]));
+				}
+			}
+		}
+		
+		Position cellPostition = new Position(start.row, start.col);
+		Cell cell = new Cell(cellPostition, otherCellsDistance);
+		allDistancesBetweenCells.put(cell, cell);
+		//printMap(cellPostition);
+		for(int i = 1; i <=  levelRowSize-2; i++) {
+			for (int j = 1; j <= levelColSize-2; j++) {
+				if(map[i][j] != -1)
+					map[i][j] = 0;
+			}
+		}
+		visitated.clear();
+		//reset the map
+	}
+	
+	public void computeAllDist() {
+		for(int i = 1; i <=  levelRowSize-2; i++) {
+			for (int j = 1; j <= levelColSize-2; j++) {
+				computeAllDistancesBetweenOneCellAndTheOthers(new Position(i,j));
+			}
+		}
+		
+//		System.err.println("NNNNNNNNNNNNNN " + allDistancesBetweenCells.size());
+		
+//		for(Cell c:allDistancesBetweenCells) {
+//			
+//			for(int i = 1; i <=  levelRowSize-2; i++) {
+//				for (int j = 1; j <= levelColSize-2; j++) {
+//					try {
+//						System.err.println("Dist from (" + c.position.row +", " + c.position.col+") to (" + i + ", " +j + ") is " + c.distancesToAllOtherCells.get(new Position(i,j))) ;
+//					}catch (Exception e) {
+//						//e.printStackTrace();
+//					}
+//				}
+//			}
+//		}
 	}
 	
 	public static int getDistanceBetween2Positions(Position p1, Position p2) {
 		//check for the wall
-		int dist = Math.abs(map[p2.row][p2.col] - map[p1.row][p1.col]);
-//		if(dist != 0)
-			return dist;
-	//	else return Integer.MAX_VALUE;
+		System.err.println("CELLLLLLL NULLL");
+		Cell c = allDistancesBetweenCells.get(new Cell(p1));
+		if(c == null) {
+			//If I dont find the distance I return a big value so that the it won't have priority in the state space queue
+			return Integer.MAX_VALUE;
+		}
+		if(c.distancesToAllOtherCells.containsKey(p2)) {
+			
+			//return the distance if I find it
+			System.err.println("The dist between " + p1 + " and " + p2 + " is " + c.distancesToAllOtherCells.get(p2));
+			return c.distancesToAllOtherCells.get(p2);
+			
+		}  
+		
+		System.err.println("CELLLLLLL NULLL");
+		return Integer.MAX_VALUE;
+		
 	}
 	
 	public int getDirection(Position p1, Position p2) {
@@ -77,19 +139,17 @@ public class DistancesComputer {
 		else return 2;
 	}
 	
-	public void printMap(Position start, Position end) {
+	public void printMap(Position start) {
 		System.err.println("\n ------------------------------------");
 		System.err.println("###### THE Distance for [" + start.row + ", " + start.col+ "] :");
 		
-		for(int i1 = 1; i1 <=  levelRowSize; i1++) {
-			for (int j = 1; j <= levelColSize; j++) {
+		for(int i1 = 1; i1 <=  levelRowSize - 2; i1++) {
+			for (int j = 1; j <= levelColSize - 2; j++) {
 				if(map[i1][j] == -1) {
 					System.err.print("+"+"  ");
 				} else if(i1 == start.row && j == start.col) {
 					System.err.print("S" + "  ");
-				} else if(i1 == end.row && j == end.col) {
-					
-					System.err.print("E" + " ");
+				
 				} else {
 					if(map[i1][j] <= 9)
 						System.err.print(map[i1][j] + "  ");
@@ -98,8 +158,6 @@ public class DistancesComputer {
 			}
 			System.err.println("");
 		}
-		
-		System.err.println(" ###### Endo of distance [" + end.row + ", " + end.col+ "] ####");
 	}
 	
 	public List<Position> getExpandedCells(Position cell) {

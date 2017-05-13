@@ -55,7 +55,7 @@ public class Planner {
 		LinkedList<Node> solution = new LinkedList<Node>();
 
 		Node thePlan = findHighestPlan(this.agent, this.state); // returns node with goals properly set
-		System.err.println("The plan: " + thePlan);
+		//System.err.println("The plan: " + thePlan);
 		//TODO feed this to the second level of the hierarchical planner
 		//decide if we need to cut the distance in half due to a large statespace and implement MoveToGoal
 		//every action in the highest part of the planner uses this to cut distances
@@ -120,14 +120,14 @@ public class Planner {
 
 				//	aBox = findClosestBox(theAgent, thisCurrentState, g); 
 
-				plan.add(MoveBoxToGoal(thisCurrentState, g));
+				//plan.add(MoveBoxToGoal(thisCurrentState, g));
 				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
-				plantoPrint.add(Type.MoveBoxToGoal);
+				//plantoPrint.add(Type.MoveBoxToGoal);
 				
 				//Andrei CODE: Devide the plan HERE
-			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 			    plantoPrint.add(Type.MoveToBox);
-				System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+				//System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 			}
 		}
 

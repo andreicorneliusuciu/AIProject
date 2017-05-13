@@ -247,8 +247,8 @@ public class SearchClient {
 
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
-		//DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
-		//distancesComputer.computeDistanceBetweenTwoPoints(new Position(1, 16), new Position(levelRowSize - 2, levelColumnSize - 2));
+		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
+		distancesComputer.computeAllDist();
 
 		// Test distances function
 		// System.err.println("Distance between (5,0) and (7,0) = " +
@@ -534,7 +534,7 @@ public class SearchClient {
 
 					System.out.println(jointAction.toString());
 					System.err.println("===== " + jointAction.toString() + " ====");
-					System.err.println("ZeAgents now are: /n"+agents);
+					//System.err.println("ZeAgents now are: /n"+agents);
 
 					String response = serverMessages.readLine();
 					if (response.contains("false")) {
@@ -544,10 +544,10 @@ public class SearchClient {
 						// reset initialstates to previous node before conflict
 						for (Agent a : agents) { //TODO rollback only the one 
 							if (a.initialState.parent != null) {
-								System.err.println("Agent "+a+" to which the server responded with : "+serverResponse[a.name]);
+								//System.err.println("Agent "+a+" to which the server responded with : "+serverResponse[a.name]);
 								if(serverResponse[a.name].equals("false"))
 								{
-									System.err.println("Agent "+a+" to which the server responded with..false? ==> : "+serverResponse[a.name]);
+									//System.err.println("Agent "+a+" to which the server responded with..false? ==> : "+serverResponse[a.name]);
 
 								a.initialState = a.initialState.parent;
 								}

@@ -149,18 +149,19 @@ public abstract class Heuristic implements Comparator<Node> {
 		int result = 0;
 		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
 		int i = 0;
-
 		Iterator<Goal> it1 = n.goals2.iterator();
 		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-
+		System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
+		System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
 		while (it1.hasNext() && it2.hasNext()) {
+			
 			Box b = it2.next();
 			Goal g = it1.next();
 			result += DistancesComputer.
 					getDistanceBetween2Positions(b.position, g.position);//here???
 
-			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
+//			result += DistancesComputer.
+//					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
 		}
 		
 		//System.err.println("[H] Heuristic result = " + result);
@@ -169,8 +170,8 @@ public abstract class Heuristic implements Comparator<Node> {
 	
 	public Set<Box> getBoxesPosition(Node n) {
 		Set<Box> boxesPosition = new TreeSet<>();
-		for(int i = 0; i <  DistancesComputer.levelRowSize; i++) {
-			for(int j = 0; j < DistancesComputer.levelColSize; j++) {
+		for(int i = 0; i <  DistancesComputer.levelRowSize -2 ; i++) {
+			for(int j = 0; j < DistancesComputer.levelColSize -2 ; j++) {
 				
 				if('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
 					boxesPosition.add(
