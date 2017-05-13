@@ -24,6 +24,8 @@ import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
 
+	
+	public static Cell[][] mapOfCell;
 	// The list of initial state for every agent
 	// public List<Node> initialStates;
 	public static boolean[][] walls;
@@ -92,7 +94,7 @@ public class SearchClient {
 				}
 			}
 			// careful when the level is narrow and the declarations are larger
-			if (line.length() > maxCol) {
+			if (line.length() > maxCol && !Pattern.matches("[a-zA-Z]", line.substring(0, 1))) {
 				maxCol = line.length();
 			}
 
@@ -256,6 +258,7 @@ public class SearchClient {
 		// new Position(7,0)));
 	}
 
+
 	public List<Strategy> getStrategies(String str) {
 
 		List<Strategy> strategies = new ArrayList<>(agents.size());
@@ -305,6 +308,122 @@ public class SearchClient {
 //	}
 
 	public static int noOpCount = 0;
+
+
+	public static boolean patternA(Cell c){
+		//Find pattern where goal is surrounded by three walls
+		int wallCount = 0;
+		int priorityAdd = 0;
+		if(!c.east){
+			wallCount++;
+		} else if(mapOfCell[c.position.row][c.position.col+1].prioritySet) {
+			if(mapOfCell[c.position.row][c.position.col+1].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row][c.position.col+1].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.west){
+			wallCount++;
+		} else if(mapOfCell[c.position.row][c.position.col-1].prioritySet) {
+			if(mapOfCell[c.position.row][c.position.col-1].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row][c.position.col-1].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.south){
+			wallCount++;
+		} else if(mapOfCell[c.position.row+1][c.position.col].prioritySet) {
+			if(mapOfCell[c.position.row+1][c.position.col].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row+1][c.position.col].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(!c.north){
+			wallCount++;
+		} else if(mapOfCell[c.position.row-1][c.position.col].prioritySet) {
+			if(mapOfCell[c.position.row-1][c.position.col].addPriority>=priorityAdd){
+				priorityAdd = mapOfCell[c.position.row-1][c.position.col].addPriority + 1;
+			}
+			wallCount++;
+		}
+		if(wallCount>2 && !c.prioritySet){
+			mapOfCell[c.position.row][c.position.col].prioritySet = true;
+			mapOfCell[c.position.row][c.position.col].priority += priorityAdd;
+			mapOfCell[c.position.row][c.position.col].addPriority = priorityAdd;
+			System.err.println("Found corner! " + priorityAdd);
+			return true;
+		}
+		return false;
+	}
+	
+	public static void goalPriority(){//TODO
+		for(SuperNode sn : superNodes){
+			if(sn.goalSuperNode){//Setup baseline priority. High is low, low is high.
+				for(Line l : sn.memberLines){
+					for(Position p : l.positions){
+						for(Goal g : allGoals){
+							if(sn.absorbed){
+								mapOfCell[p.row][p.col].priority = 0;
+							} else {
+								mapOfCell[p.row][p.col].priority = 100;
+							}
+						}
+					}
+				}
+			}
+		}
+		//If bugs occur, try commenting out everything after this line.
+		boolean done = false;
+		int totalFound = 0;
+		int baseline = 0;
+		int state = 0;
+		while(!done){
+			int curFound = new Integer(totalFound);
+			for(SuperNode sn : superNodes){
+				if(sn.goalSuperNode){
+					for(Line l : sn.memberLines){
+						for(Position p : l.positions){
+							if(state == 0){
+								if(patternA(mapOfCell[p.row][p.col])){
+									curFound++;
+								}
+							} else if(state==1){
+								if(!mapOfCell[p.row][p.col].prioritySet){
+									mapOfCell[p.row][p.col].priority += baseline;
+									mapOfCell[p.row][p.col].prioritySet = true;
+									curFound++;
+								}
+							}
+						}
+					}
+				}
+			}
+			done = true;
+			for(Goal g : allGoals){
+				if(!g.priorityGiven){
+					done = false;
+				}
+			}
+			System.err.println(curFound + " " + totalFound);
+			if(curFound==totalFound){
+				state++;
+				baseline = curFound+state;
+				totalFound = curFound;
+			} else {
+				totalFound = curFound;
+			}
+			if(state>1){
+				String print = "";
+				for(Goal g : allGoals){
+					g.priority = mapOfCell[g.position.row][g.position.col].priority;
+					print += "["+g.priority + "]\n";
+					System.err.println(print);
+				}
+				break;
+			}
+		}
+	}
+	
 
 	public static void main(String[] args) throws Exception { // TODO second
 																	// loop,
@@ -367,6 +486,13 @@ public class SearchClient {
 
 		uberNode.agents = agents;
 
+		storageAnalysis(uberNode);
+		goalPriority();
+		
+		//for(){
+			
+		//}
+		
 		//////////////////////////////////////////
 
 		//GET THE STRATEGY
@@ -814,46 +940,48 @@ public static String[] formattedServerResponse(String s){
 
 	public static void storageAnalysis(Node node) {// Swap out input with other types
 		// of data?
-		Cell[][] map = new Cell[levelRowSize][levelColumnSize];
+		//Cell[][] 
+		mapOfCell = new Cell[levelRowSize][levelColumnSize];
+		superNodes = new ArrayList<SuperNode>();
 
 		// Initialize cell map
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize; i2++) {
-				map[i][i2] = new Cell(i, i2);
+				mapOfCell[i][i2] = new Cell(i, i2);
 				if (walls[i][i2]) {
-					map[i][i2].type = 0;// Wall
+					mapOfCell[i][i2].type = 0;// Wall
 				} else {
-					map[i][i2].type = 1;// Free
+					mapOfCell[i][i2].type = 1;// Free
 				}
 			}
 		}
 		for (Goal g : allGoals) {
 			//map[g.position.row][g.position.col] = new Cell(g.position.row, g.position.col);
-			map[g.position.row][g.position.col].type = 2; // Goal
+			mapOfCell[g.position.row][g.position.col].type = 2; // Goal
 		}
 
 		// Link up cells
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize; i2++) {
-				if (map[i][i2].type >= 1) {
+				if (mapOfCell[i][i2].type >= 1) {
 					if (i + 1 < levelRowSize) {
-						if (map[i + 1][i2].type >= 1) {// + is south, right?
-							map[i][i2].south = true;
+						if (mapOfCell[i + 1][i2].type >= 1) {// + is south, right?
+							mapOfCell[i][i2].south = true;
 						}
 					}
 					if (i - 1 >= 0) {
-						if (map[i - 1][i2].type >= 1) {
-							map[i][i2].north = true;
+						if (mapOfCell[i - 1][i2].type >= 1) {
+							mapOfCell[i][i2].north = true;
 						}
 					}
 					if (i2 + 1 < levelColumnSize) {
-						if (map[i][i2 + 1].type >= 1) {
-							map[i][i2].east = true;
+						if (mapOfCell[i][i2 + 1].type >= 1) {
+							mapOfCell[i][i2].east = true;
 						}
 					}
 					if (i2 - 1 >= 0) {
-						if (map[i][i2 - 1].type >= 1) {
-							map[i][i2].west = true;
+						if (mapOfCell[i][i2 - 1].type >= 1) {
+							mapOfCell[i][i2].west = true;
 						}
 					}
 				}
@@ -864,33 +992,38 @@ public static String[] formattedServerResponse(String s){
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize;) {
-				if (map[i][i2].type == 1) {
+				System.err.println("TESUTO");
+				if (mapOfCell[i][i2].type == 1) {
 					boolean connected = true;
 					Line row = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
+						System.err.println("TESUTO1: " + levelColumnSize);
 						if (i2 < levelColumnSize) {
-							if (map[i][i2].type == 1) {
-								map[i][i2].rowID = rows.size();
-								positions.add(map[i][i2].position);
+							if (mapOfCell[i][i2].type == 1) {
+								mapOfCell[i][i2].rowID = rows.size();
+								positions.add(mapOfCell[i][i2].position);
 								i2++;
 							} else {
 								connected = false;
 							}
+						} else {
+							connected = false;
 						}
 					}
 					row.positions = positions;
 					rows.add(row);
 				}
-				if (map[i][i2].type == 2) {
+				if (mapOfCell[i][i2].type == 2) {
 					boolean connected = true;
 					Line row = new Line();
 					row.goalLine = true;
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						if (map[i][i2].type == 2) {
-							map[i][i2].rowID = rows.size();
-							positions.add(map[i][i2].position);
+						System.err.println("TESUTO2");
+						if (mapOfCell[i][i2].type == 2) {
+							mapOfCell[i][i2].rowID = rows.size();
+							positions.add(mapOfCell[i][i2].position);
 							i2++;
 						} else {
 							connected = false;
@@ -899,7 +1032,7 @@ public static String[] formattedServerResponse(String s){
 					row.positions = positions;
 					rows.add(row);
 				}
-				if (map[i][i2].type == 0) {
+				if (mapOfCell[i][i2].type == 0) {
 					i2++;
 				}
 			}
@@ -909,14 +1042,15 @@ public static String[] formattedServerResponse(String s){
 		ArrayList<Line> cols = new ArrayList<Line>();
 		for (int i = 0; i < levelColumnSize; i++) {
 			for (int i2 = 0; i2 < levelRowSize;) {
-				if (map[i2][i].type == 1) {//White
+				if (mapOfCell[i2][i].type == 1) {//White
 					boolean connected = true;
 					Line col = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						if (map[i2][i].type == 1) {
-							map[i2][i].colID = cols.size();
-							positions.add(map[i2][i].position);
+						System.err.println("TESUTO3");
+						if (mapOfCell[i2][i].type == 1) {
+							mapOfCell[i2][i].colID = cols.size();
+							positions.add(mapOfCell[i2][i].position);
 							i2++;
 						} else {
 							connected = false;
@@ -925,15 +1059,16 @@ public static String[] formattedServerResponse(String s){
 					col.positions = positions;
 					cols.add(col);
 				}
-				if (map[i2][i].type == 2) {//Goal
+				if (mapOfCell[i2][i].type == 2) {//Goal
 					boolean connected = true;
 					Line col = new Line();
 					col.goalLine = true;
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						if (map[i2][i].type == 2) {
-							map[i2][i].colID = cols.size();
-							positions.add(map[i2][i].position);
+						System.err.println("TESUTO4");
+						if (mapOfCell[i2][i].type == 2) {
+							mapOfCell[i2][i].colID = cols.size();
+							positions.add(mapOfCell[i2][i].position);
 							i2++;
 						} else {
 							connected = false;
@@ -942,7 +1077,7 @@ public static String[] formattedServerResponse(String s){
 					col.positions = positions;
 					cols.add(col);
 				}
-				if (map[i2][i].type == 0) {
+				if (mapOfCell[i2][i].type == 0) {
 					i2++;
 				}
 			}
@@ -950,11 +1085,11 @@ public static String[] formattedServerResponse(String s){
 		// Connect them
 		for (int i = 1; i < levelRowSize; i++) {
 			for (int i2 = 1; i2 < levelColumnSize; i2++) {
-				int curRow = map[i][i2].rowID;
-				int curCol = map[i][i2].colID;
-				if (map[i][i2].east) {
-					int nextRow = map[i][i2 + 1].rowID;
-					int nextCol = map[i][i2 + 1].colID;
+				int curRow = mapOfCell[i][i2].rowID;
+				int curCol = mapOfCell[i][i2].colID;
+				if (mapOfCell[i][i2].east) {
+					int nextRow = mapOfCell[i][i2 + 1].rowID;
+					int nextCol = mapOfCell[i][i2 + 1].colID;
 
 					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).east.add(nextRow);
@@ -963,9 +1098,9 @@ public static String[] formattedServerResponse(String s){
 						cols.get(curCol).east.add(nextCol);
 					}
 				}
-				if (map[i][i2].north) {
-					int nextRow = map[i - 1][i2].rowID;
-					int nextCol = map[i - 1][i2].colID;
+				if (mapOfCell[i][i2].north) {
+					int nextRow = mapOfCell[i - 1][i2].rowID;
+					int nextCol = mapOfCell[i - 1][i2].colID;
 
 					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).north.add(nextRow);
@@ -974,9 +1109,9 @@ public static String[] formattedServerResponse(String s){
 						cols.get(curCol).north.add(nextCol);
 					}
 				}
-				if (map[i][i2].west) {
-					int nextRow = map[i][i2 - 1].rowID;
-					int nextCol = map[i][i2 - 1].colID;
+				if (mapOfCell[i][i2].west) {
+					int nextRow = mapOfCell[i][i2 - 1].rowID;
+					int nextCol = mapOfCell[i][i2 - 1].colID;
 
 					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).west.add(nextRow);
@@ -985,9 +1120,9 @@ public static String[] formattedServerResponse(String s){
 						cols.get(curCol).west.add(nextCol);
 					}
 				}
-				if (map[i][i2].south) {
-					int nextRow = map[i + 1][i2].rowID;
-					int nextCol = map[i + 1][i2].colID;
+				if (mapOfCell[i][i2].south) {
+					int nextRow = mapOfCell[i + 1][i2].rowID;
+					int nextCol = mapOfCell[i + 1][i2].colID;
 
 					if (nextRow != curRow && nextRow >= 0) {
 						rows.get(curRow).south.add(nextRow);
@@ -1015,7 +1150,7 @@ public static String[] formattedServerResponse(String s){
 		String debug2 = "";
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize; i2++) {
-				debug2 += map[i][i2].rowID;
+				debug2 += mapOfCell[i][i2].rowID;
 			}
 			debug2 += "\n";
 		}
@@ -1023,8 +1158,8 @@ public static String[] formattedServerResponse(String s){
 		for (Line l : rows) {
 			printout += l.goalLine + "\n";
 		}
-		//System.err.println(debug);
-
+		System.err.println(debug2);
+		
 		//Draw virtual line
 		/*
 		 * ArrayList<Position> deadEnds = new ArrayList<Position>(); boolean

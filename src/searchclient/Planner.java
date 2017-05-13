@@ -119,15 +119,20 @@ public class Planner {
 			if (!g.isSatisfied && g.color.equals(theAgent.color)) {
 
 				//	aBox = findClosestBox(theAgent, thisCurrentState, g); 
-
+				Goal goal = new Goal(null,null,new Position());
+				goal = findClosestFreeCelltoGoal(g);
+				 plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+				 plantoPrint.add(Type.MoveToBox);
+				
+			//	 System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+				 
 				plan.add(MoveBoxToGoal(thisCurrentState, g));
 				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 				plantoPrint.add(Type.MoveBoxToGoal);
 				
 				//Andrei CODE: Devide the plan HERE
-			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
-			    plantoPrint.add(Type.MoveToBox);
-				System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+			   
+				
 			}
 		}
 
@@ -143,6 +148,16 @@ public class Planner {
 		}
 	}
 
+
+	private Goal findClosestFreeCelltoGoal(Goal g) {
+		
+		Goal newGoal = new Goal(null,null,new Position());
+		
+		
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	private Node MoveToRandomNearbyCell() {
 		// TODO Auto-generated method stub
