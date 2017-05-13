@@ -55,7 +55,7 @@ public class Planner {
 		LinkedList<Node> solution = new LinkedList<Node>();
 
 		Node thePlan = findHighestPlan(this.agent, this.state); // returns node with goals properly set
-		System.err.println("The plan: " + thePlan);
+		//System.err.println("The plan: " + thePlan);
 		//TODO feed this to the second level of the hierarchical planner
 		//decide if we need to cut the distance in half due to a large statespace and implement MoveToGoal
 		//every action in the highest part of the planner uses this to cut distances
@@ -153,8 +153,7 @@ public class Planner {
 				plantoPrint.add(Type.MoveBoxToGoal);
 				
 				//Andrei CODE: Devide the plan HERE
-			   
-				
+
 			}
 		}
 

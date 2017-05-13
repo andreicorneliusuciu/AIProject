@@ -80,6 +80,7 @@ public class Node {
 		copy.goals2 = new ArrayList<>(this.goals2);
 		copy.myBoxes = new ArrayList<>(this.myBoxes);
 		copy.action = this.action;
+		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.isMove = this.isMove;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
@@ -576,7 +577,7 @@ public class Node {
 		//System.err.println("Ubernode after refill: " + this.toString());
 
 
-		System.err.println("Agents after refill: " + agents);
+		//System.err.println("Agents after refill: " + agents);
 
 		//System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
