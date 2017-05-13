@@ -247,8 +247,8 @@ public class SearchClient {
 
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
-		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
-		distancesComputer.computeDistanceBetweenTwoPoints(new Position(1, 16), new Position(levelRowSize - 2, levelColumnSize - 2));
+		//DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
+		//distancesComputer.computeDistanceBetweenTwoPoints(new Position(1, 16), new Position(levelRowSize - 2, levelColumnSize - 2));
 
 		// Test distances function
 		// System.err.println("Distance between (5,0) and (7,0) = " +

@@ -125,8 +125,9 @@ public class Planner {
 				plantoPrint.add(Type.MoveBoxToGoal);
 				
 				//Andrei CODE: Devide the plan HERE
-				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
-
+			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
+			    plantoPrint.add(Type.MoveToBox);
+				System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(1, 1))));
 			}
 		}
 

@@ -42,7 +42,7 @@ public class DistancesComputer {
 				}
 			}
 		}
-		printMap(start, end);
+		//printMap(start, end);
 	}
 	
 	public boolean isInTheCorners(int x, int y, int row, int col) {
