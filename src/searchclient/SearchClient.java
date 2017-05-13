@@ -48,6 +48,8 @@ public class SearchClient {
 	// color to agent map
 	public Map<String, Character> colorToAgent = new HashMap<>();
 
+	public static int replanCounter = 0; //Used for debugging
+	
 	// the map represented as a matrix for computing the shortest distances
 	// between all two pair of cells on the map
 	public int[][] map;
@@ -393,7 +395,10 @@ public class SearchClient {
 		// TODO update allBoxes and allgoals
 
 		// for (Agent a : agents) { // positions, check if
-		allBoxes = agents.get(0).initialState.boxes2;
+		allBoxes = new ArrayList<Box>();
+		for(Box b : agents.get(0).initialState.boxes2){
+			allBoxes.add(new Box(b));
+		}
 
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
@@ -491,7 +496,7 @@ public class SearchClient {
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
-			System.err.println("The goals: " + allGoals);
+			//System.err.println("The goals: " + allGoals);
 
 			//update boxes status in all agents
 
@@ -596,7 +601,7 @@ public class SearchClient {
 
 								agents.get(j).initialState = n;
 								
-								uberNode.updateUberNode(agents);
+								//uberNode.updateUberNode(agents);
 								
 								
 								//agent here is not trapped this round
@@ -606,7 +611,7 @@ public class SearchClient {
 								
 								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
-								uberNode.updateUberNode(agents);
+								//uberNode.updateUberNode(agents);
 
 								//agent here is trapped this  round
 								
@@ -623,7 +628,112 @@ public class SearchClient {
 					System.out.println(jointAction.toString());
 					System.err.println("===== " + jointAction.toString() + " ====");
 					String response = serverMessages.readLine();
-					if (response.contains("false")) {
+					if(response.length()<2){
+						response = serverMessages.readLine();
+					}
+					System.err.println(response + " " + response.length());
+					String simplify = response.substring(1,response.length()-1);//Cuts off '[' ']'.
+					String[] commandAnalyze = simplify.split(",");
+					int j2 = 0;
+
+					System.err.println("Testing if agents and allboxes are correct:");
+					System.err.println(agents);
+					System.err.println(allBoxes);
+					boolean replan = false;
+					for(String s : commandAnalyze){
+						System.err.println("It enters. s is: " + s);
+						if(s.contains("false")){
+							//Don't update ubernode, replan
+							replan = true;
+						} else if(s.contains("true")) {
+							System.err.println("It enters 2");
+							//Update ubernode
+							Node n;
+							if(solutions.get(j2).size()>i){
+								n = solutions.get(j2).get(i);
+							} else {
+								n = null;
+							}
+							if(n == null){
+								j2++;
+								continue;//Noop
+							}
+							Command temp = n.action;
+							if(temp == null){
+							
+							}
+							else if(temp.actionType.equals(Command.Type.Move)){
+								//Update one agent
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										//Node n2 = solutions.get(j2).get(i+1);
+										a.position = new Position(n.agentRow,n.agentCol);
+										break;
+									}
+								}
+							} else if(temp.actionType.equals(Command.Type.Push)){
+								//Update one agent and one box
+								//Agent
+								System.err.println("TESUTO DESU ");
+								//System.err.println(n);
+								System.err.println((new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1))).toString());
+								System.err.println(new Position(n.agentRow,n.agentCol));
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										//Node n2 = solutions.get(j2).get(i+1);
+										System.err.print(a.name + " Has been detected moving from " + a.position.toString());
+										a.position = new Position(n.agentRow,n.agentCol);
+										System.err.print(" to " + a.position.toString() +"\n");
+										//Box
+										Boolean boxDetect = false;
+										for(Box b : allBoxes){
+											if(b.position.equals(new Position(a.position.row,a.position.col))){
+												System.err.print("Box moved from... " + b.position.toString());
+												b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2),b.position.col + Command.dirToColChange(temp.dir2));
+												boxDetect = true;
+												System.err.print(" to..." + b.position.toString());
+												break;
+											}
+										}
+										if(!boxDetect){
+											System.err.println("BUG! NO BOXES DETECTED");
+										}
+										break;
+									}
+								}
+							} else if(temp.actionType.equals(Command.Type.Pull)){
+								//Update one agent and one box
+								//Box
+								for(Box b : allBoxes){
+									if(b.position.equals(new Position(b.position.row-Command.dirToRowChange(temp.dir2), b.position.col-Command.dirToColChange(temp.dir2)))){
+										b.position = new Position(n.agentRow,n.agentCol);
+										break;
+									}
+								}
+								//Agent
+								for(Agent a : agents){
+									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										//Node n2 = solutions.get(j2).get(i+1);
+										a.position = new Position(n.agentRow,n.agentCol);
+										break;
+									}
+								}
+							}
+						} else {
+							System.err.println("BUG! " + s);
+							serverMessages.close();
+							return;
+						}
+						j2++;
+						
+					}
+					if(replan){
+						//Set initialstates to new and updated ubernode.
+						//uberNode.updateUberNode(agents);
+						break;
+					}
+					
+					/*if (response.contains("false")) {
 
 						// reset initialstates to previous node before conflict
 						for (Agent a : agents) {
@@ -640,7 +750,7 @@ public class SearchClient {
 						}
 						// update everyones initialStates to the relevant for
 						// them current state
-						uberNode.updateUberNode(agents);
+						//uberNode.updateUberNode(agents);
 
 						// TODO: replan! simple conflict resoltuion. To be used
 						// if snake fails
@@ -651,9 +761,10 @@ public class SearchClient {
 						break;
 					} else {
 
-					}
+					}*/
 
 				}
+				uberNode.updateUberNode(agents);
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
@@ -662,7 +773,12 @@ public class SearchClient {
 				//				for (Box b : allBoxes) {
 				//					b.isBlocking = false;
 				//				}
-
+				//return;
+				replanCounter++;
+				if(replanCounter >= 2){
+					serverMessages.close();
+					return;
+				}
 			}
 
 			// initialize and reset variables
@@ -883,13 +999,11 @@ public class SearchClient {
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize;) {
-				System.err.println("TESUTO");
 				if (mapOfCell[i][i2].type == 1) {
 					boolean connected = true;
 					Line row = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						System.err.println("TESUTO1: " + levelColumnSize);
 						if (i2 < levelColumnSize) {
 							if (mapOfCell[i][i2].type == 1) {
 								mapOfCell[i][i2].rowID = rows.size();
@@ -911,7 +1025,6 @@ public class SearchClient {
 					row.goalLine = true;
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						System.err.println("TESUTO2");
 						if (mapOfCell[i][i2].type == 2) {
 							mapOfCell[i][i2].rowID = rows.size();
 							positions.add(mapOfCell[i][i2].position);
@@ -938,7 +1051,6 @@ public class SearchClient {
 					Line col = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						System.err.println("TESUTO3");
 						if (mapOfCell[i2][i].type == 1) {
 							mapOfCell[i2][i].colID = cols.size();
 							positions.add(mapOfCell[i2][i].position);
@@ -956,7 +1068,6 @@ public class SearchClient {
 					col.goalLine = true;
 					ArrayList<Position> positions = new ArrayList<Position>();
 					while (connected) {
-						System.err.println("TESUTO4");
 						if (mapOfCell[i2][i].type == 2) {
 							mapOfCell[i2][i].colID = cols.size();
 							positions.add(mapOfCell[i2][i].position);
@@ -1049,7 +1160,7 @@ public class SearchClient {
 		for (Line l : rows) {
 			printout += l.goalLine + "\n";
 		}
-		System.err.println(debug2);
+		//System.err.println(debug2);
 		
 		//Draw virtual line
 		/*

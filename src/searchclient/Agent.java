@@ -19,6 +19,17 @@ public class Agent implements Comparator<Agent>, Comparable<Agent>{
 
 	}
 	
+	public Agent(Agent a){
+		this.name = a.name;
+		this.color = a.color;
+		this.position = new Position(a.position.row, a.position.col);
+		if(a.initialState != null){
+			this.initialState = a.initialState.Copy();
+		} else {
+			this.initialState = null;
+		}
+	}
+	
 	public Agent(int name, Node initialState) {
 		this.name = name;
 		this.initialState = initialState;

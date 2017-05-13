@@ -450,7 +450,7 @@ public class Node {
 	{
 		System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
-		System.err.println("Agents before initialized: " + agents);
+		//System.err.println("Agents before initialized: " + agents);
 
 		// we have to update the boxes2 locations!!! check if they a re updated
 		// cannot update those, use boxes[][] instead
@@ -464,7 +464,8 @@ public class Node {
 				this.boxes[i][j] = 0;
 			}
 		}
-
+		
+		/*
 		// readd the boxes for all agents, add only the boxes of their own color
 		for (Agent agent : agents) {
 			for (int i = 0; i < Node.MAX_ROW; i++) {
@@ -480,6 +481,10 @@ public class Node {
 
 				}
 			}
+		}*/
+		for(Box b : SearchClient.allBoxes){
+			this.boxes[b.position.row][b.position.col] = b.name;
+			this.boxes2.add(b);
 		}
 
 		// now update the states of the agents
@@ -506,23 +511,22 @@ public class Node {
 				}
 			}
 
-			for (Goal g : this.goals2) {
+			for (Goal g : SearchClient.allGoals) {
 
 				if (g.color.equals(a.color)) {
-					newInitialState.goals2.add(g);
+					newInitialState.goals2.add(new Goal(g));
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
 				}
 			}
 			a.initialState = newInitialState;
-
 		}
 
-		System.err.println("Uberboxes after refill: " + this.boxes2);
+		//System.err.println("Uberboxes after refill: " + this.boxes2);
 
-		System.err.println("Ubernode after refill: " + this.toString());
+		//System.err.println("Ubernode after refill: " + this.toString());
 
-		System.err.println("Agents after refill: " + agents);
-		System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
+		//System.err.println("Agents after refill: " + agents);
+		//System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
 	}
 

@@ -22,6 +22,14 @@ public class Box {
 		this.position = position;
 		this.isBlocking = isBlocking;
 	}
+	
+	public Box(Box b){
+		super();
+		this.name = b.name;
+		this.color = new String(b.color);
+		this.position = new Position(b.position.row,b.position.col);
+		this.isBlocking = isBlocking;
+	}
 
 	@Override
 	public String toString() {

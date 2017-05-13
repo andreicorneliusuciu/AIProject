@@ -14,6 +14,15 @@ public class Goal {
 		this.position = position;
 	}
 	
+	public Goal(Goal g){
+		this.name = g.name;
+		this.color = g.color;
+		this.position = new Position(g.position.row,g.position.col);
+		this.priority = g.priority;
+		this.isSatisfied = g.isSatisfied;
+		this.priorityGiven = g.priorityGiven;
+	}
+	
 	public void lowerPriority(int i)
 	{
 		if(priority-i>0)
