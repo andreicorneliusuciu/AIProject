@@ -499,7 +499,7 @@ public class Node {
 
 		for(Box b : SearchClient.allBoxes){
 			this.boxes[b.position.row][b.position.col] = b.name;
-			this.boxes2.add(b);
+			this.boxes2.add(new Box(b));
 		}
 		// now update the states of the agents
 

@@ -454,7 +454,7 @@ public class SearchClient {
 					if (g.color == b.color) {
 						done = true;
 						positions.add(g.position);
-						positions.add(b.position);
+						positions.add(new Position(b.position.row,b.position.col));
 						rescueUnit(a, positions);
 						break;
 					}
@@ -473,7 +473,7 @@ public class SearchClient {
 		}
 
 		for (Box b : allBoxes) {
-			uberNode.boxes2.add(b);
+			uberNode.boxes2.add(new Box(b));
 		}
 		// uberNode.boxes2 = allBoxes;
 
@@ -747,19 +747,34 @@ public class SearchClient {
 							} else if(temp.actionType.equals(Command.Type.Pull)){
 								//Update one agent and one box
 								//Box
-								for(Box b : allBoxes){
-									if(b.position.equals(new Position(b.position.row-Command.dirToRowChange(temp.dir2), b.position.col-Command.dirToColChange(temp.dir2)))){
-										b.position = new Position(n.agentRow,n.agentCol);
-										break;
-									}
-								}
 								//Agent
+								Boolean boxDetect = false;
 								for(Agent a : agents){
 									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
+										Position tempPos = new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1));
+										for(Box b : allBoxes){
+											if(b.position.equals(new Position(tempPos.row+Command.dirToRowChange(temp.dir2), tempPos.col+Command.dirToColChange(temp.dir2)))){
+												System.err.print("Box moved from... " + b.position.toString());
+												b.position = new Position(tempPos.row,tempPos.col);
+												boxDetect = true;
+												System.err.print(" to..." + b.position.toString());
+												break;
+											}
+											System.err.println(tempPos.toString());
+											System.err.println(new Position(tempPos.row-Command.dirToRowChange(temp.dir2), tempPos.col-Command.dirToColChange(temp.dir2)));
+										}
 										//Node n2 = solutions.get(j2).get(i+1);
 										a.position = new Position(n.agentRow,n.agentCol);
 										break;
 									}
+								}
+								
+								if(!boxDetect){
+									System.err.println("BUG2! Pull detects no boxes");
+									for(Box b : allBoxes){
+										System.err.print(b.position.toString());
+									}
+									System.err.println("");
 								}
 							}
 						} else {
@@ -777,9 +792,8 @@ public class SearchClient {
 						break;
 					}
 				}
-			
-				uberNode.updateUberNode(agents);
-
+				
+				
 				//recalculate agent freedom
 				boolean done2 = false;
 				ArrayList<Position> positions2 = new ArrayList<Position>();
@@ -789,7 +803,7 @@ public class SearchClient {
 							if (g.color == b.color) {
 								done2 = true;
 								positions2.add(g.position);
-								positions2.add(b.position);
+								positions2.add(new Position(b.position.row,b.position.col));
 								rescueUnit(a, positions2);
 								break;
 							}
@@ -800,14 +814,23 @@ public class SearchClient {
 					done2 = false;
 					positions2 = new ArrayList<Position>();
 				}
-
+				System.err.println("Allboxes printout before update");
+				for(Box b : allBoxes){
+					System.err.print(b.position.toString());
+				}
+				System.err.println("Allboxes printout after update");
 				uberNode.updateUberNode(agents);
+
+				for(Box b : allBoxes){
+					System.err.print(b.position.toString());
+				}
+				System.err.println("");
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
 				replanCounter++;
-				if(replanCounter>=2){
+				if(replanCounter>=20){
 					serverMessages.close();
 					return;
 				}
