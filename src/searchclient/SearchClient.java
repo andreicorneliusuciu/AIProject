@@ -736,6 +736,10 @@ public class SearchClient {
 										}
 										if(!boxDetect){
 											System.err.println("BUG! NO BOXES DETECTED");
+											for(Box b : allBoxes){
+												System.err.print(b.position.toString());
+											}
+											System.err.println("");
 										}
 										break;
 									}
@@ -802,6 +806,11 @@ public class SearchClient {
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
+				replanCounter++;
+				if(replanCounter>=2){
+					serverMessages.close();
+					return;
+				}
 			}
 
 			// initialize and reset variables
