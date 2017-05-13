@@ -171,6 +171,7 @@ public class Node {
 		copy.goals2 = this.goals2;
 		copy.myBoxes = this.myBoxes;
 		copy.action = this.action;
+		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.isMove = this.isMove;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
@@ -689,6 +690,7 @@ public class Node {
 			}
 			a.initialState = newInitialState;
 		}
+
 
 	}
 
