@@ -111,7 +111,7 @@ public class DistancesComputer {
 	
 	public static int getDistanceBetween2Positions(Position p1, Position p2) {
 		//check for the wall
-		System.err.println("CELLLLLLL NULLL");
+//		System.err.println("CELLLLLLL NULLL");
 		Cell c = allDistancesBetweenCells.get(new Cell(p1));
 		if(c == null) {
 			//If I dont find the distance I return a big value so that the it won't have priority in the state space queue
@@ -120,12 +120,12 @@ public class DistancesComputer {
 		if(c.distancesToAllOtherCells.containsKey(p2)) {
 			
 			//return the distance if I find it
-			System.err.println("The dist between " + p1 + " and " + p2 + " is " + c.distancesToAllOtherCells.get(p2));
+			//System.err.println("The dist between " + p1 + " and " + p2 + " is " + c.distancesToAllOtherCells.get(p2));
 			return c.distancesToAllOtherCells.get(p2);
 			
 		}  
 		
-		System.err.println("CELLLLLLL NULLL");
+		//System.err.println("CELLLLLLL NULLL");
 		return Integer.MAX_VALUE;
 		
 	}

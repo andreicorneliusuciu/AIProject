@@ -151,15 +151,16 @@ public abstract class Heuristic implements Comparator<Node> {
 		int i = 0;
 		Iterator<Goal> it1 = n.goals2.iterator();
 		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-		System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
-		System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
+		
 		while (it1.hasNext() && it2.hasNext()) {
 			
 			Box b = it2.next();
 			Goal g = it1.next();
 			result += DistancesComputer.
 					getDistanceBetween2Positions(b.position, g.position);//here???
-
+			//System.err.println("Dist between " + b.position + " and " + g.position + " is " + result);
+//			System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
+//			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
 //			result += DistancesComputer.
 //					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
 		}

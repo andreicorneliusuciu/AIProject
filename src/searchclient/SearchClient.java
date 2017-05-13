@@ -186,6 +186,10 @@ public class SearchClient {
 						// {
 						agents.get(i).initialState.boxes[row][col] = chr;
 						agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						if(agents.get(i).color.equals(boxesToColor.get(chr))) {
+							agents.get(i).initialState.myBoxesFinal
+							.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						}
 						// uberNode.boxes2.add(new Box(chr,
 						// boxesToColor.get(chr), new Position(row, col)));
 						// }
@@ -244,7 +248,11 @@ public class SearchClient {
 				mapForAllDistances[i1][j1] = map[i1][j1];
 			}
 		}
-
+		for (int i = 0; i < agents.size(); i++) {
+			System.err.println("For agent " + i + ":");
+			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
+		}
+		
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
 		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);

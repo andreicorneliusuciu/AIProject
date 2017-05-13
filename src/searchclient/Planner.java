@@ -120,13 +120,13 @@ public class Planner {
 
 				//	aBox = findClosestBox(theAgent, thisCurrentState, g); 
 
-				//plan.add(MoveBoxToGoal(thisCurrentState, g));
+				plan.add(MoveBoxToGoal(thisCurrentState, g));
 				//plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
-				//plantoPrint.add(Type.MoveBoxToGoal);
+				plantoPrint.add(Type.MoveBoxToGoal);
 				
 				//Andrei CODE: Devide the plan HERE
-			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
-			    plantoPrint.add(Type.MoveToBox);
+//			    plan.add(MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
+//			    plantoPrint.add(Type.MoveToBox);
 				//System.err.println("Andreis piece of shit plan "+MoveToBox(thisCurrentState, new Goal('&', "none", new Position(g.position.row, 1))));
 			}
 		}
