@@ -76,9 +76,6 @@ public abstract class Heuristic implements Comparator<Node> {
 						count = 3; // bottom
 					}
 				}
-				// } catch (IndexOutOfBoundsException e) {
-				// System.err.println(e);
-				// }
 
 				for (Boolean b : neighbors) {
 					if (b) {

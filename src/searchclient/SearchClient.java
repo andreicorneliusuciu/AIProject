@@ -24,14 +24,9 @@ import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
 
-	// The list of initial state for every agent
-	// public List<Node> initialStates;
 	public static boolean[][] walls;
 
 	public static Node uberNode;
-	// The size of the map
-	// public static int levelColSize;
-	// public static int levelRowSize;
 
 	// The list of agents. Index represents the agent, the value is the color
 	public static List<Agent> agents;
@@ -102,30 +97,15 @@ public class SearchClient {
 		}
 
 		int row = 0;
-		// Create the list of initial states for all the agents
-		// Ignore the other agents/boxes
-		// this.initialStates = new LinkedList<>();
-		// add the node to the list. The index represents the agent.
-
-		// this.levelRowSize = levelRowSize;// Keeps track of map size
-		// this.levelColSize = levelColumnSize;
-
-		// levelRowSize gives the no of rows on the map. levelColumnSize is the
-		// no of columns
+		
 		levelRowSize = lines.size() - noOfActualRowsForTheLevel;
 		levelColumnSize = maxCol;
 
-		// System.err.println("Row = " + levelRowSize + " CCOL = " +
-		// levelColumnSize);
 		walls = new boolean[levelRowSize][levelColumnSize];
 		map = new int[levelRowSize][levelColumnSize];
 
-		// for(int i = 0; i < agents.size(); i++) {
-		// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
-		// }
 		for (int i = 0; i < agents.size(); i++) {
 			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize));
-			// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
 		}
 		uberNode = new Node(null, levelRowSize, levelColumnSize);
 
@@ -158,12 +138,7 @@ public class SearchClient {
 						agentT.initialState.agentRow = agentT.position.row;
 
 						agents.add(agentT);
-
-						// agents.add(new Node(null, levelRowSize,
-						// levelColumnSize));
 					} else {
-						// update the position of the agents declared above the
-						// map into the input file
 						Agent a = agents.get(index);
 						a.position.row = row;
 						a.position.col = col;
@@ -190,9 +165,6 @@ public class SearchClient {
 							agents.get(i).initialState.myBoxesFinal
 							.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 						}
-						// uberNode.boxes2.add(new Box(chr,
-						// boxesToColor.get(chr), new Position(row, col)));
-						// }
 					}
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					// if I find the goal before the corresponding box on the
@@ -201,19 +173,13 @@ public class SearchClient {
 						boxesToColor.put(Character.toUpperCase(chr), "blue");
 					}
 
-					// System.err.println("Filling allGoals " + chr);
-
 					allGoals.add(new Goal(chr, boxesToColor.get(Character.toUpperCase(chr)), new Position(row, col)));
-
-					// System.err.println("Filling allGoals " + allGoals);
 
 					for (int i = 0; i < agents.size(); i++) {
 						// put the goal to the agent map just if they are the
 						// same color
 						if (agents.get(i).color.equals(boxesToColor.get(Character.toUpperCase(chr)))) {
 							agents.get(i).initialState.goals[row][col] = chr;
-							// System.err.println("goal made here: " + row + ","
-							// + col + " by agent " + agents.get(i));
 							agents.get(i).initialState.goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
@@ -253,15 +219,9 @@ public class SearchClient {
 			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
 		}
 		
-		// Compute all the distances on a NxN map. It does not work for non
-		// square maps.
+		// Compute all the distances on a NxM map.
 		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
 		distancesComputer.computeAllDist();
-
-		// Test distances function
-		// System.err.println("Distance between (5,0) and (7,0) = " +
-		// DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
-		// new Position(7,0)));
 	}
 
 	public List<Strategy> getStrategies(String str) {
@@ -303,20 +263,18 @@ public class SearchClient {
 		return strategies;
 	}
 
-//	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
-//		int i = 0;
-//		for (Strategy s : strategiesSearchResults) {
-//			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
-//			System.err.println(s.searchStatus() + "\n");
-//			i++;
-//		}
-//	}
+	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+		int i = 0;
+		for (Strategy s : strategiesSearchResults) {
+			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+			System.err.println(s.searchStatus() + "\n");
+			i++;
+		}
+	}
 
 	public static int noOpCount = 0;
 
-	public static void main(String[] args) throws Exception { // TODO second
-																	// loop,
-																// freakout
+	public static void main(String[] args) throws Exception {
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
 		// Use stderr to print to console
@@ -325,9 +283,6 @@ public class SearchClient {
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
 
-		// TODO update allBoxes and allgoals
-
-		// for (Agent a : agents) { // positions, check if
 		allBoxes = agents.get(0).initialState.boxes2;
 
 		boolean done = false;
@@ -370,8 +325,6 @@ public class SearchClient {
 
 			uberNode.boxes[b.position.row][b.position.col] = b.name;
 		}
-
-		//System.err.println("The node uber alles: " + uberNode);
 
 		uberNode.agents = agents;
 
@@ -448,17 +401,16 @@ public class SearchClient {
 					solutions.add(tempList);
 
 					a.isTrapped = false;
-				}
-								 else if (a.initialState.isGoalState()) {
+				} else if (a.initialState.isGoalState()) {
 				
-									Node tnode = a.initialState.Copy();
-									tnode.doNoOp = true;
-									tnode.parent = null;
-									tnode.action = null;
-									List<Node> tlist = new ArrayList<Node>();
-									tlist.add(tnode);
-									solutions.add(tlist);
-								}
+					Node tnode = a.initialState.Copy();
+					tnode.doNoOp = true;
+					tnode.parent = null;
+					tnode.action = null;
+					List<Node> tlist = new ArrayList<Node>();
+					tlist.add(tnode);
+					solutions.add(tlist);
+				}
 				else if (noOpCount > 10) {
 					//TODO change the plan
 				}
