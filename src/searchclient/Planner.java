@@ -367,7 +367,14 @@ public class Planner {
 		/// System.err.println(" ");
 //			for (Node na : plan)
 //			System.err.println("Plan selected: " + na.toString());
+		if(plan.size()>0){
 		return plan.get(0);
+		}
+		else{
+			Node temN = currentState.Copy();
+			currentState.doNoOp = true;
+			return temN;
+		}
 
 	}
 

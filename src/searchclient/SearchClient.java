@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.Iterator;
 
 import searchclient.Heuristic.AStar;
 import searchclient.Heuristic.Greedy;
@@ -23,8 +24,9 @@ import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
+	// SNAKE WALL
+	static List<List<Node>> solutions = new ArrayList<>();
 
-	
 	public static Cell[][] mapOfCell;
 	// The list of initial state for every agent
 	// public List<Node> initialStates;
@@ -43,8 +45,6 @@ public class SearchClient {
 	// List with all the boxes.
 	public static List<Box> allBoxes;
 
-	public static ArrayList<SuperNode> superNodes;
-
 	// Key = Color, Value = List of Box numbers
 	public Map<String, List<Integer>> colorToBoxes = new HashMap<>();
 
@@ -54,7 +54,10 @@ public class SearchClient {
 	public Map<String, Character> colorToAgent = new HashMap<>();
 
 	public static int replanCounter = 0; //Used for debugging
-	
+
+	// Supernodes. Ask Janus.
+	public static ArrayList<SuperNode> superNodes;
+
 	// the map represented as a matrix for computing the shortest distances
 	// between all two pair of cells on the map
 	public int[][] map;
@@ -69,6 +72,8 @@ public class SearchClient {
 		allGoals = new ArrayList<>();
 		int maxCol = 0;
 
+		boxesToColor.put('*', "cellphone");
+		boxesToColor.put('-', "cedsllphone");
 		int noOfActualRowsForTheLevel = 0;
 		while (!line.equals("")) {
 			// Read lines specifying colors of the boxes and the agents
@@ -127,11 +132,13 @@ public class SearchClient {
 		// for(int i = 0; i < agents.size(); i++) {
 		// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
 		// }
+		ArrayList<ArrayList<Position>> blockedPositions = new ArrayList<ArrayList<Position>>();
 		for (int i = 0; i < agents.size(); i++) {
-			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize));
+			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize, blockedPositions, 0));
 			// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
+
 		}
-		uberNode = new Node(null, levelRowSize, levelColumnSize);
+		uberNode = new Node(null, levelRowSize, levelColumnSize, null, 0);
 
 		for (String l : lines) {
 			if (Pattern.matches("[a-zA-Z]", l.substring(0, 1)) || l.matches("^\\s*$")) {
@@ -155,7 +162,8 @@ public class SearchClient {
 
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr), null));
 					if (index == -1) {
-						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col), new Node(null, levelRowSize, levelColumnSize));
+
+						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col), new Node(null, levelRowSize, levelColumnSize, blockedPositions, 0));
 						agentT.initialState.theAgentColor = agentT.color;
 						agentT.initialState.theAgentName = agentT.name;
 						agentT.initialState.agentCol = agentT.position.col;
@@ -243,7 +251,7 @@ public class SearchClient {
 		// }
 
 		int[][] mapForAllDistances = new int[levelRowSize][levelColumnSize];
-		for (int i1 = 0; i1 < levelRowSize ; i1++) {
+		for (int i1 = 0; i1 < levelRowSize; i1++) {
 			for (int j1 = 0; j1 < levelColumnSize; j1++) {
 				mapForAllDistances[i1][j1] = map[i1][j1];
 			}
@@ -258,8 +266,8 @@ public class SearchClient {
 		// System.err.println("Distance between (5,0) and (7,0) = " +
 		// DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
 		// new Position(7,0)));
-	}
 
+	}
 
 	public List<Strategy> getStrategies(String str) {
 
@@ -300,55 +308,54 @@ public class SearchClient {
 		return strategies;
 	}
 
-//	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
-//		int i = 0;
-//		for (Strategy s : strategiesSearchResults) {
-//			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
-//			System.err.println(s.searchStatus() + "\n");
-//			i++;
-//		}
-//	}
+	//	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+	//		int i = 0;
+	//		for (Strategy s : strategiesSearchResults) {
+	//			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+	//			System.err.println(s.searchStatus() + "\n");
+	//			i++;
+	//		}
+	//	}
 
 	public static int noOpCount = 0;
 
-
-	public static boolean patternA(Cell c){
+	public static boolean patternA(Cell c) {
 		//Find pattern where goal is surrounded by three walls
 		int wallCount = 0;
 		int priorityAdd = 0;
-		if(!c.east){
+		if (!c.east) {
 			wallCount++;
-		} else if(mapOfCell[c.position.row][c.position.col+1].prioritySet) {
-			if(mapOfCell[c.position.row][c.position.col+1].addPriority>=priorityAdd){
-				priorityAdd = mapOfCell[c.position.row][c.position.col+1].addPriority + 1;
+		} else if (mapOfCell[c.position.row][c.position.col + 1].prioritySet) {
+			if (mapOfCell[c.position.row][c.position.col + 1].addPriority >= priorityAdd) {
+				priorityAdd = mapOfCell[c.position.row][c.position.col + 1].addPriority + 1;
 			}
 			wallCount++;
 		}
-		if(!c.west){
+		if (!c.west) {
 			wallCount++;
-		} else if(mapOfCell[c.position.row][c.position.col-1].prioritySet) {
-			if(mapOfCell[c.position.row][c.position.col-1].addPriority>=priorityAdd){
-				priorityAdd = mapOfCell[c.position.row][c.position.col-1].addPriority + 1;
+		} else if (mapOfCell[c.position.row][c.position.col - 1].prioritySet) {
+			if (mapOfCell[c.position.row][c.position.col - 1].addPriority >= priorityAdd) {
+				priorityAdd = mapOfCell[c.position.row][c.position.col - 1].addPriority + 1;
 			}
 			wallCount++;
 		}
-		if(!c.south){
+		if (!c.south) {
 			wallCount++;
-		} else if(mapOfCell[c.position.row+1][c.position.col].prioritySet) {
-			if(mapOfCell[c.position.row+1][c.position.col].addPriority>=priorityAdd){
-				priorityAdd = mapOfCell[c.position.row+1][c.position.col].addPriority + 1;
+		} else if (mapOfCell[c.position.row + 1][c.position.col].prioritySet) {
+			if (mapOfCell[c.position.row + 1][c.position.col].addPriority >= priorityAdd) {
+				priorityAdd = mapOfCell[c.position.row + 1][c.position.col].addPriority + 1;
 			}
 			wallCount++;
 		}
-		if(!c.north){
+		if (!c.north) {
 			wallCount++;
-		} else if(mapOfCell[c.position.row-1][c.position.col].prioritySet) {
-			if(mapOfCell[c.position.row-1][c.position.col].addPriority>=priorityAdd){
-				priorityAdd = mapOfCell[c.position.row-1][c.position.col].addPriority + 1;
+		} else if (mapOfCell[c.position.row - 1][c.position.col].prioritySet) {
+			if (mapOfCell[c.position.row - 1][c.position.col].addPriority >= priorityAdd) {
+				priorityAdd = mapOfCell[c.position.row - 1][c.position.col].addPriority + 1;
 			}
 			wallCount++;
 		}
-		if(wallCount>2 && !c.prioritySet){
+		if (wallCount > 2 && !c.prioritySet) {
 			mapOfCell[c.position.row][c.position.col].prioritySet = true;
 			mapOfCell[c.position.row][c.position.col].priority += priorityAdd;
 			mapOfCell[c.position.row][c.position.col].addPriority = priorityAdd;
@@ -357,14 +364,14 @@ public class SearchClient {
 		}
 		return false;
 	}
-	
-	public static void goalPriority(){//TODO
-		for(SuperNode sn : superNodes){
-			if(sn.goalSuperNode){//Setup baseline priority. High is low, low is high.
-				for(Line l : sn.memberLines){
-					for(Position p : l.positions){
-						for(Goal g : allGoals){
-							if(sn.absorbed){
+
+	public static void goalPriority() {//TODO
+		for (SuperNode sn : superNodes) {
+			if (sn.goalSuperNode) {//Setup baseline priority. High is low, low is high.
+				for (Line l : sn.memberLines) {
+					for (Position p : l.positions) {
+						for (Goal g : allGoals) {
+							if (sn.absorbed) {
 								mapOfCell[p.row][p.col].priority = 0;
 							} else {
 								mapOfCell[p.row][p.col].priority = 100;
@@ -379,18 +386,18 @@ public class SearchClient {
 		int totalFound = 0;
 		int baseline = 0;
 		int state = 0;
-		while(!done){
+		while (!done) {
 			int curFound = new Integer(totalFound);
-			for(SuperNode sn : superNodes){
-				if(sn.goalSuperNode){
-					for(Line l : sn.memberLines){
-						for(Position p : l.positions){
-							if(state == 0){
-								if(patternA(mapOfCell[p.row][p.col])){
+			for (SuperNode sn : superNodes) {
+				if (sn.goalSuperNode) {
+					for (Line l : sn.memberLines) {
+						for (Position p : l.positions) {
+							if (state == 0) {
+								if (patternA(mapOfCell[p.row][p.col])) {
 									curFound++;
 								}
-							} else if(state==1){
-								if(!mapOfCell[p.row][p.col].prioritySet){
+							} else if (state == 1) {
+								if (!mapOfCell[p.row][p.col].prioritySet) {
 									mapOfCell[p.row][p.col].priority += baseline;
 									mapOfCell[p.row][p.col].prioritySet = true;
 									curFound++;
@@ -401,31 +408,30 @@ public class SearchClient {
 				}
 			}
 			done = true;
-			for(Goal g : allGoals){
-				if(!g.priorityGiven){
+			for (Goal g : allGoals) {
+				if (!g.priorityGiven) {
 					done = false;
 				}
 			}
 			System.err.println(curFound + " " + totalFound);
-			if(curFound==totalFound){
+			if (curFound == totalFound) {
 				state++;
-				baseline = curFound+state;
+				baseline = curFound + state;
 				totalFound = curFound;
 			} else {
 				totalFound = curFound;
 			}
-			if(state>1){
+			if (state > 1) {
 				String print = "";
-				for(Goal g : allGoals){
+				for (Goal g : allGoals) {
 					g.priority = mapOfCell[g.position.row][g.position.col].priority;
-					print += "["+g.priority + "]\n";
+					print += "[" + g.priority + "]\n";
 				}
 				System.err.println(print);
 				break;
 			}
 		}
 	}
-	
 
 	public static void main(String[] args) throws Exception { // TODO second
 																	// loop,
@@ -442,7 +448,7 @@ public class SearchClient {
 
 		// for (Agent a : agents) { // positions, check if
 		allBoxes = new ArrayList<Box>();
-		for(Box b : agents.get(0).initialState.boxes2){
+		for (Box b : agents.get(0).initialState.boxes2) {
 			allBoxes.add(new Box(b));
 		}
 
@@ -454,7 +460,9 @@ public class SearchClient {
 					if (g.color == b.color) {
 						done = true;
 						positions.add(g.position);
-						positions.add(new Position(b.position.row,b.position.col));
+
+						positions.add(new Position(b.position.row, b.position.col));
+
 						rescueUnit(a, positions);
 						break;
 					}
@@ -487,17 +495,15 @@ public class SearchClient {
 			uberNode.boxes[b.position.row][b.position.col] = b.name;
 		}
 
-		//System.err.println("The node uber alles: " + uberNode);
-
 		uberNode.agents = agents;
 
 		//storageAnalysis(uberNode);
 		//goalPriority();
-		
+
 		//for(){
-			
+
 		//}
-		
+
 		//////////////////////////////////////////
 
 		//GET THE STRATEGY
@@ -516,8 +522,21 @@ public class SearchClient {
 
 			Planner plan = null;
 
-			List<List<Node>> solutions = new ArrayList<List<Node>>();
+			solutions = new ArrayList<List<Node>>();
+
 			LinkedList<Node> solution = new LinkedList<Node>();
+			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
+
+			ArrayList<ArrayList<Position>> blockedPositions = new ArrayList<ArrayList<Position>>();
+			ArrayList<Integer> priorAgents = new ArrayList<Integer>();
+			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
+
+			// check if agents are trapped
+			//			for (Agent a : agents) {
+			//
+			//				rescueUnit(a, positions);
+			//
+			//			}
 
 			//System.err.println("The goals: " + allGoals);
 
@@ -528,6 +547,7 @@ public class SearchClient {
 				if (!g.isSatisfied) {
 					isGoalState = false;
 					break;
+
 				}
 			}
 
@@ -550,6 +570,7 @@ public class SearchClient {
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
 
+					agents.get(a.name).initialState.assignBlocked(blockedPositions);
 					plan = new Planner(agents.get(a.name));
 					//if plan is not trapped
 					solution = plan.findSolution(strategies.get(agentIndex));
@@ -561,6 +582,7 @@ public class SearchClient {
 					// agent
 					// trapped
 
+					agents.get(a.name).initialState.assignBlocked(blockedPositions);
 					LinkedList<Node> tempList = new LinkedList<Node>();
 					Node tempInitialState = a.initialState.Copy();
 					// System.err.println("InitialState for trapped agent " +
@@ -571,25 +593,70 @@ public class SearchClient {
 					solutions.add(tempList);
 
 					a.isTrapped = false;
-				}
-								 else if (a.initialState.isGoalState()) {
-				
-									Node tnode = a.initialState.Copy();
-									tnode.doNoOp = true;
-									tnode.parent = null;
-									tnode.action = null;
-									List<Node> tlist = new ArrayList<Node>();
-									tlist.add(tnode);
-									solutions.add(tlist);
-								}
-				else if (noOpCount > 10) {
+				} else if (a.initialState.isGoalState()) {
+
+					agents.get(a.name).initialState.assignBlocked(blockedPositions);
+					Node tnode = a.initialState.Copy();
+					tnode.doNoOp = true;
+					tnode.parent = null;
+					tnode.action = null;
+					List<Node> tlist = new ArrayList<Node>();
+					tlist.add(tnode);
+					solutions.add(tlist);
+				} else if (noOpCount > 10) {
 					//TODO change the plan
 				}
 
 				agentIndex++;
+
+				// TODO: Turn plans into arraylistarraylistposition
+				ArrayList<Position> twall = new ArrayList<Position>();
+				twall.add(new Position(agents.get(a.name).initialState.agentRow, agents.get(a.name).initialState.agentCol));
+				if (solutions.size() == 1) {
+					blockedPositions.add(twall);
+				} else {
+					blockedPositions.get(0).add(twall.get(0));
+				}
+				int i2 = 1;
+				for (Node n : solution) {
+					twall = new ArrayList<Position>();
+					if (n.action != null) {
+						Command temp = n.action;
+						int rowPosition = n.agentRow;// +
+														// temp.dirToRowChange(temp.dir1);
+						int colPosition = n.agentCol;// +
+														// temp.dirToColChange(temp.dir1);
+						twall.add(new Position(rowPosition, colPosition));
+						int rowPosition2 = -1;
+						int colPosition2 = -1;
+						if (temp.dir2 != null) {
+							if (temp.actionType.equals(Command.Type.Push)) {
+								rowPosition2 = rowPosition + temp.dirToRowChange(temp.dir2);
+								colPosition2 = colPosition + temp.dirToColChange(temp.dir2);
+								twall.add(new Position(rowPosition2, colPosition2));
+							} else {
+
+								rowPosition2 = rowPosition - temp.dirToRowChange(temp.dir1);
+								colPosition2 = colPosition - temp.dirToColChange(temp.dir1);
+								twall.add(new Position(rowPosition2, colPosition2));
+							}
+						}
+						if (a.name == 0 || blockedPositions.size() <= i2) {
+							blockedPositions.add(twall);
+						} else {
+							for (Position p : twall) {
+								blockedPositions.get(i2).add(p);
+							}
+						}
+						i2++;
+					}
+				}
+
 			}
 
-			if (solutions.isEmpty()) {
+			if (solutions.isEmpty())
+
+			{
 				//System.err.println(strategy.searchStatus());
 				System.err.println("Unable to solve level.");
 
@@ -598,14 +665,15 @@ public class SearchClient {
 			} else {
 				System.err.println("Found solution of max length " + solutions.size());
 
-
-
 				int maxSol = 0;
 				int m1;
 				for (int i = 0; i < solutions.size(); i++) {
 					m1 = solutions.get(i).size();
 					if (m1 > maxSol) {
 						maxSol = m1;
+
+						// Create row objects
+
 					}
 				}
 
@@ -618,21 +686,13 @@ public class SearchClient {
 					// if (!solutions.isEmpty()) {
 					// for every agent
 					for (int j = 0; j < solutions.size(); j++) {
-						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
 						try {
 
 							n = solutions.get(j).get(i);
 
 							if (!n.doNoOp) {
 								jointAction.append(n.action.toString() + ",");
-
-								// simply state the last state as the agents
-								// initialState
-
-								//agents.get(j).initialState = n;
-
-								//agent here is not trapped this round
-
 							} else {
 
 								noOpCount++;
@@ -646,16 +706,8 @@ public class SearchClient {
 							}
 						} catch (IndexOutOfBoundsException e) {
 							jointAction.append("NoOp,");
-							//make a dummy initialstate for consistency
-							
-							//System.err.println("memeow size for agent: "+agents.get(j).name+" : "+solutions.get(j).size());
-							Node atempInitialState = solutions.get(j).get(solutions.get(j).size()-1).Copy();
-							atempInitialState.parent = solutions.get(j).get(solutions.get(j).size()-1);
-							//atempInitialState.doNoOp = true; // append noop in
-							//System.err.println("Agent :" +agents.get(j).name+" got initialState due to noop exception :"+atempInitialState);
-							//agents.get(j).initialState=atempInitialState;
-							//solutions.get(j).add(atempInitialState);
-							
+							Node atempInitialState = solutions.get(j).get(solutions.get(j).size() - 1).Copy();
+							atempInitialState.parent = solutions.get(j).get(solutions.get(j).size() - 1);
 						}
 
 					}
@@ -666,56 +718,55 @@ public class SearchClient {
 					System.err.println("===== " + jointAction.toString() + " ====");
 
 					String response = serverMessages.readLine();
-					if(response.length()<2){
+					if (response.length() < 2) {
 						response = serverMessages.readLine();
 					}
 					System.err.println(response + " " + response.length());
-					String simplify = response.substring(1,response.length()-1);//Cuts off '[' ']'.
+					String simplify = response.substring(1, response.length() - 1);//Cuts off '[' ']'.
 					String[] commandAnalyze = simplify.split(",");
 					int j2 = 0;
 
 					boolean replan = false;
-					for(String s : commandAnalyze){
-						if(s.contains("false")){
+					for (String s : commandAnalyze) {
+						if (s.contains("false")) {
 							//Don't update ubernode, replan
 							replan = true;
-						} else if(s.contains("true")) {
+						} else if (s.contains("true")) {
 							//Update ubernode
 							Node n;
-							if(solutions.get(j2).size()>i){
+							if (solutions.get(j2).size() > i) {
 								n = solutions.get(j2).get(i);
 							} else {
 								n = null;
 							}
-							if(n == null){
+							if (n == null) {
 								j2++;
 								continue;//Noop
 							}
 							Command temp = n.action;
-							
-							if(temp!= null){
-								System.err.println(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)));
-								
+
+							if (temp != null) {
+								System.err.println(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)));
+
 							}
-							if(temp == null){
-							
-							}
-							else if(temp.actionType.equals(Command.Type.Move)){
+							if (temp == null) {
+
+							} else if (temp.actionType.equals(Command.Type.Move)) {
 								//Update one agent
-								for(Agent a : agents){
-									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-+Command.dirToColChange(temp.dir1)))){
-										a.position = new Position(n.agentRow,n.agentCol);
+								for (Agent a : agents) {
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - +Command.dirToColChange(temp.dir1)))) {
+										a.position = new Position(n.agentRow, n.agentCol);
 										a.initialState = n;
 										break;
 									}
 								}
-							} else if(temp.actionType.equals(Command.Type.Push)){
-								for(Agent a : agents){
-									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
-										a.position = new Position(n.agentRow,n.agentCol);
-										for(Box b : allBoxes){
-											if(b.position.equals(new Position(a.position.row,a.position.col))){
-												b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2),b.position.col + Command.dirToColChange(temp.dir2));
+							} else if (temp.actionType.equals(Command.Type.Push)) {
+								for (Agent a : agents) {
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)))) {
+										a.position = new Position(n.agentRow, n.agentCol);
+										for (Box b : allBoxes) {
+											if (b.position.equals(new Position(a.position.row, a.position.col))) {
+												b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2), b.position.col + Command.dirToColChange(temp.dir2));
 												a.initialState = n;
 												break;
 											}
@@ -723,18 +774,18 @@ public class SearchClient {
 										break;
 									}
 								}
-							} else if(temp.actionType.equals(Command.Type.Pull)){
-								for(Agent a : agents){
-									if(a.position.equals(new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1)))){
-										Position tempPos = new Position(n.agentRow-Command.dirToRowChange(temp.dir1),n.agentCol-Command.dirToColChange(temp.dir1));
-										for(Box b : allBoxes){
-											if(b.position.equals(new Position(tempPos.row+Command.dirToRowChange(temp.dir2), tempPos.col+Command.dirToColChange(temp.dir2)))){
-												b.position = new Position(tempPos.row,tempPos.col);
+							} else if (temp.actionType.equals(Command.Type.Pull)) {
+								for (Agent a : agents) {
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)))) {
+										Position tempPos = new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1));
+										for (Box b : allBoxes) {
+											if (b.position.equals(new Position(tempPos.row + Command.dirToRowChange(temp.dir2), tempPos.col + Command.dirToColChange(temp.dir2)))) {
+												b.position = new Position(tempPos.row, tempPos.col);
 												a.initialState = n;
 												break;
 											}
 										}
-										a.position = new Position(n.agentRow,n.agentCol);
+										a.position = new Position(n.agentRow, n.agentCol);
 										break;
 									}
 								}
@@ -743,11 +794,11 @@ public class SearchClient {
 						j2++;
 						noOpCount = 0;//TODO: Belongs somewhere else???
 					}
-					if(replan){
+					if (replan) {
 						break;
 					}
+
 				}
-				
 				//recalculate agent freedom
 				boolean done2 = false;
 				ArrayList<Position> positions2 = new ArrayList<Position>();
@@ -757,7 +808,7 @@ public class SearchClient {
 							if (g.color == b.color) {
 								done2 = true;
 								positions2.add(g.position);
-								positions2.add(new Position(b.position.row,b.position.col));
+								positions2.add(new Position(b.position.row, b.position.col));
 								rescueUnit(a, positions2);
 								break;
 							}
@@ -776,7 +827,7 @@ public class SearchClient {
 				System.err.println("Replanning initiated with above agents");
 				//USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
-				if(replanCounter>=20){
+				if (replanCounter >= 20) {
 					serverMessages.close();
 					return;
 				}
@@ -787,38 +838,27 @@ public class SearchClient {
 		}
 	}
 
-public static void serverAnalyze(Node n){
-	
-}
-	
-	
-public static String[] formattedServerResponse(String s){
-		
-		
-		String[] split = s.split(",");
-		
-		split[0] = split[0].substring(1);
-		
-		split[split.length-1] = split[split.length-1].substring(1, split[split.length-1].length()-1);
+	public static void serverAnalyze(Node n) {
 
-		for(int i=0; i< split.length;i++){
-			
+	}
+
+	public static String[] formattedServerResponse(String s) {
+
+		String[] split = s.split(",");
+
+		split[0] = split[0].substring(1);
+
+		split[split.length - 1] = split[split.length - 1].substring(1, split[split.length - 1].length() - 1);
+
+		for (int i = 0; i < split.length; i++) {
+
 			split[i] = split[i].trim();
-			
+
 		}
-		
-		
+
 		return split;
 	}
 
-
-	
-	
-	
-	
-	
-	
-	
 	public static int[][] flowFill(Agent agent, List<Box> allBoxes2) {
 		int[][] matrix = new int[levelRowSize][levelColumnSize];
 		int[][] result = new int[levelRowSize][levelColumnSize];
@@ -980,9 +1020,10 @@ public static String[] formattedServerResponse(String s){
 		}
 	}
 
-	public static void storageAnalysis(Node node) {// Swap out input with other types
-		// of data?
-		//Cell[][] 
+	public static void storageAnalysis(Node node) {// Swap out input with other
+														// types
+													// of data?
+													//Cell[][] 
 		mapOfCell = new Cell[levelRowSize][levelColumnSize];
 		superNodes = new ArrayList<SuperNode>();
 
@@ -990,6 +1031,7 @@ public static String[] formattedServerResponse(String s){
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize; i2++) {
 				mapOfCell[i][i2] = new Cell(i, i2);
+
 				if (walls[i][i2]) {
 					mapOfCell[i][i2].type = 0;// Wall
 				} else {
@@ -1000,6 +1042,7 @@ public static String[] formattedServerResponse(String s){
 		for (Goal g : allGoals) {
 			//map[g.position.row][g.position.col] = new Cell(g.position.row, g.position.col);
 			mapOfCell[g.position.row][g.position.col].type = 2; // Goal
+
 		}
 
 		// Link up cells
@@ -1024,6 +1067,7 @@ public static String[] formattedServerResponse(String s){
 					if (i2 - 1 >= 0) {
 						if (mapOfCell[i][i2 - 1].type >= 1) {
 							mapOfCell[i][i2].west = true;
+
 						}
 					}
 				}
@@ -1035,6 +1079,7 @@ public static String[] formattedServerResponse(String s){
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize;) {
 				if (mapOfCell[i][i2].type == 1) {
+
 					boolean connected = true;
 					Line row = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
@@ -1043,18 +1088,21 @@ public static String[] formattedServerResponse(String s){
 							if (mapOfCell[i][i2].type == 1) {
 								mapOfCell[i][i2].rowID = rows.size();
 								positions.add(mapOfCell[i][i2].position);
+
 								i2++;
 							} else {
 								connected = false;
 							}
 						} else {
 							connected = false;
+
 						}
 					}
 					row.positions = positions;
 					rows.add(row);
 				}
 				if (mapOfCell[i][i2].type == 2) {
+
 					boolean connected = true;
 					Line row = new Line();
 					row.goalLine = true;
@@ -1063,6 +1111,7 @@ public static String[] formattedServerResponse(String s){
 						if (mapOfCell[i][i2].type == 2) {
 							mapOfCell[i][i2].rowID = rows.size();
 							positions.add(mapOfCell[i][i2].position);
+
 							i2++;
 						} else {
 							connected = false;
@@ -1071,6 +1120,7 @@ public static String[] formattedServerResponse(String s){
 					row.positions = positions;
 					rows.add(row);
 				}
+
 				if (mapOfCell[i][i2].type == 0) {
 					i2++;
 				}
@@ -1113,6 +1163,7 @@ public static String[] formattedServerResponse(String s){
 					}
 					col.positions = positions;
 					cols.add(col);
+
 				}
 				if (mapOfCell[i2][i].type == 0) {
 					i2++;
@@ -1196,7 +1247,7 @@ public static String[] formattedServerResponse(String s){
 			printout += l.goalLine + "\n";
 		}
 		//System.err.println(debug2);
-		
+
 		//Draw virtual line
 		/*
 		 * ArrayList<Position> deadEnds = new ArrayList<Position>(); boolean
@@ -1325,8 +1376,191 @@ public static String[] formattedServerResponse(String s){
 
 		//Those who have absorbed false have LOWER priority than those who have absorbed true.
 	}
-
 }
+///////////////////////////////// readinput end
+
+// TEST
+// String debug = "";
+// for(int i = 0; i<rows.size(); i++){
+// debug += "East: !" + rows.get(i).east.isEmpty() + "\n";
+// debug += "West: !" + rows.get(i).west.isEmpty() + "\n";
+// debug += "North: !" + rows.get(i).north.isEmpty() + "\n";
+// debug += "South: !" + rows.get(i).south.isEmpty() + "\n";
+// for(Position p : rows.get(i).positions){
+// debug += p.toString();
+// }
+// debug += "\n";
+// }
+//
+// String debug2 = "";
+// for(int i = 0; i<levelRowSize; i++){
+// for(int i2 = 0; i2<levelColumnSize; i2++){
+// debug2 += map[i][i2].rowID;
+// }
+// debug2 += "\n";
+// }
+// String printout = "";
+// for(Line l : rows){
+// printout += l.goalLine + "\n";
+// }
+// System.err.println(debug);
+
+// Draw virtual line
+/*
+ * ArrayList<Position> deadEnds = new ArrayList<Position>(); boolean done =
+ * false; while(!done){ int curSize = deadEnds.size(); for(Line l : rows){ int
+ * connectionCount = 0; if(l.east.size()>0){ connectionCtoun ======= //call
+ * planner for all agents, fill solutions, repeat. Pass strategy to planner.
+ * Planner plan = null; //for(Agent a : agents){
+ * 
+ * plan = new Planner(agents.get(0)); //solutions.add(plan.solution);
+ * 
+ * //}
+ * 
+ * 
+ * if (solutions == null) { System.err.println(strategy.searchStatus());
+ * System.err.println("Unable to solve level.");
+ * 
+ * System.exit(0);
+ * 
+ * } else { //System.err.println("\nSummary for " + strategy.toString()); //
+ * System.err.println("Found solution of length " + solutions.size());
+ * System.err.println(strategy.searchStatus()); //Multi-agent commands
+ * 
+ * 
+ * int m1; for (int i = 0; i < solutions.size(); i++) { m1 =
+ * solutions.get(i).size(); if (m1 > maxSol) { maxSol = m1; >>>>>>> AlgorithmsV2
+ * } } }
+ */
+
+// Prioritize cells based on dead ends
+// boolean done = true;
+// while(!done){
+// for(Goal g : allGoals){
+// //If g isn't a dead end...
+// //And all neighbors are walls and dead ends except one
+// //This is a dead end. Priority should be lower than innermost dead end.
+// }
+// }
+// // Supernode setup
+// superNodes = new ArrayList<SuperNode>();
+// int superID = 0;
+// for(int i = 0; i<rows.size(); i++){
+// if(!rows.get(i).isInSuperNode){
+// //Make new supernode
+// boolean localDone = false;
+// Set<Line> superLines = new HashSet<Line>();
+// rows.get(i).isInSuperNode = true;
+// rows.get(i).superNodeID = superID;
+// superLines.add(rows.get(i));
+// Set<Integer> east = new HashSet<Integer>();
+// Set<Integer> west = new HashSet<Integer>();
+// Set<Integer> south = new HashSet<Integer>();
+// Set<Integer> north = new HashSet<Integer>();
+// boolean goal = false;
+// while(!localDone){
+// Set<Line> superLinesTemp = new HashSet<Line>();
+// int curSize = superLines.size();
+// for(Line l : superLines){
+// superLinesTemp.add(l);
+// }
+//
+// Iterator<Line> it = superLines.iterator();
+// while (it.hasNext()) {
+// Line l = it.next();
+// if(l.goalLine){
+// goal = true;
+// }
+// for(int id : l.east){
+// east.add(id);
+// }
+// for(int id : l.west){
+// west.add(id);
+// }
+// for(int id : l.south){
+// if(rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine &&
+// !l.goalLine){//If they're both goals or not goals
+// superLinesTemp.add(rows.get(id));
+// rows.get(id).isInSuperNode = true;
+// rows.get(id).superNodeID = superID;
+// } else {
+// south.add(id);
+// }
+// }
+// for(int id : l.north){
+// if(rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine &&
+// !l.goalLine){//If they're both goals or not goals
+// superLinesTemp.add(rows.get(id));
+// rows.get(id).isInSuperNode = true;
+// rows.get(id).superNodeID = superID;
+// } else {
+// north.add(id);
+// }
+// }
+// }
+// superLines = superLinesTemp;
+//
+// if(superLines.size() == curSize){
+// //System.err.println(superLines.size() + " = " + curSize + " = " +
+// superLinesTemp.size());
+// localDone = true;
+// }
+// }
+// //Create the SuperNode
+// SuperNode tempSuperNode = new SuperNode();
+// tempSuperNode.east = east;
+// tempSuperNode.west = west;
+// tempSuperNode.south = south;
+// tempSuperNode.north = north;
+// tempSuperNode.memberLines = superLines;
+// tempSuperNode.goalSuperNode = goal;
+// superNodes.add(tempSuperNode);
+// superID++;
+// }
+// }
+// //Connect the supernodes
+// for(SuperNode sn : superNodes){
+// for(Integer id : sn.east){
+// sn.connectedID.add(rows.get(id).superNodeID);
+// }
+// for(Integer id : sn.west){
+// sn.connectedID.add(rows.get(id).superNodeID);
+// }
+// for(Integer id : sn.south){
+// sn.connectedID.add(rows.get(id).superNodeID);
+// }
+// for(Integer id : sn.north){
+// sn.connectedID.add(rows.get(id).superNodeID);
+// }
+// }
+// //If a goal supernode is ONLY connected to ONE superNode, absorb it into that
+// superNode.
+// Iterator<SuperNode> it = superNodes.iterator();
+//// for(SuperNode sn : superNodes){
+//// if(sn.connectedID.size() == 1 && sn.goalSuperNode){
+//// for(Integer id : sn.connectedID){
+//// superNodes.get(id).internalGoalNodes.add(sn);
+//// }
+//// }
+//// }
+//
+// while (it.hasNext()) {
+// SuperNode sn = it.next();
+// if(sn.connectedID.size() == 1 && sn.goalSuperNode){
+// for(Integer id : sn.connectedID){
+// superNodes.get(id).internalGoalNodes.add(sn);
+// sn.absorbed = true;
+// //System.err.println("It gets here! WOO!");
+// }
+// }
+// //System.err.println(sn.connectedID.size());
+// }
+//
+// //Those who have absorbed false have LOWER priority than those who have
+// absorbed true.
+// }
+
+// }
 /*
  * TODO Andrei: update the non square maps with wall on the empty spaces -
  * update the boxes2 and the goals list in the Node class - call the heuristic

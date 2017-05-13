@@ -14,6 +14,7 @@ public class Cell {
 	int priority = 0;
 	int addPriority = 0;
 	boolean prioritySet = false;
+
 	boolean north = false;
 	boolean east = false;
 	boolean west = false;

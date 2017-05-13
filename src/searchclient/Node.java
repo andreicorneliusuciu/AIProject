@@ -13,6 +13,13 @@ import java.util.TreeSet;
 import searchclient.Command.Type;
 
 public class Node {
+	// WALL SNAKE METHOD
+	public ArrayList<Position> tempWalls;
+	public ArrayList<ArrayList<Position>> blockedPositions;
+	public int blockedPositionsID = 0;
+	public ArrayList<Integer> priorAgentIDs;
+	// WALL SNAKE METHOD
+
 	private static final Random RND = new Random(1);
 
 	public static int MAX_ROW;
@@ -50,7 +57,90 @@ public class Node {
 
 	private int _hash = 0;
 
-	public Node(Node parent, int maxRow, int maxCol) {
+	public void assignBlocked(ArrayList<ArrayList<Position>> positions) {
+		blockedPositions = positions;
+		if (this.blockedPositions.size() > blockedPositionsID) {
+			for (Position p : this.blockedPositions.get(blockedPositionsID)) {
+				this.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
+												// imaginary color
+			}
+			if (this.blockedPositions.size() > blockedPositionsID + 1) {
+				for (Position p : this.blockedPositions.get(blockedPositionsID + 1)) {
+					this.boxes[p.row][p.col] = '*';
+				}
+				if (this.blockedPositions.size() > blockedPositionsID + 2) {
+					for (Position p : this.blockedPositions.get(blockedPositionsID + 2)) {
+						this.boxes[p.row][p.col] = '*';
+					}
+					String tester = "TESTAH " + theAgentName + "\n";
+					for (int j = 0; j < SearchClient.levelRowSize; j++) {
+						for (int j2 = 0; j2 < SearchClient.levelColumnSize; j2++) {
+							tester += this.boxes[j][j2];
+						}
+						tester += "\n";
+					}
+					// System.err.println(tester);
+				}
+			}
+		} else {
+			// TODO: We've passed last case
+			if (SearchClient.solutions != null) {
+				for (List<Node> n : SearchClient.solutions) {
+					Position derpp = new Position(n.get(n.size() - 1).agentRow, n.get(n.size() - 1).agentCol);
+					this.boxes[derpp.row][derpp.col] = '*';
+				}
+			}
+		}
+
+		if (this.blockedPositions.size() > this.blockedPositionsID - 1 && this.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
+			// Fog of war
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
+																																								// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
+				for (Position p : this.blockedPositions.get(this.blockedPositionsID - 1)) {
+					// Get data from agent just prior to this one.
+					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(this.blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		} else if (this.blockedPositions.size() <= this.blockedPositionsID - 1 && SearchClient.solutions != null) {// We're
+																														// over
+																													// the
+																													// edge
+
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
+																																								// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
+				for (Position p : this.blockedPositions.get(this.blockedPositions.size() - 1)) {
+					// Get data from agent just prior to this one.
+					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		}
+	}
+
+	public void assignPriorAgents(ArrayList<Integer> priorAgents) {
+		this.priorAgentIDs = priorAgents;
+	}
+
+	public Node(Node parent, int maxRow, int maxCol, ArrayList<ArrayList<Position>> blockedPositions, int blockedPositionsID) {
+		this.blockedPositionsID = blockedPositionsID;
+		this.blockedPositions = blockedPositions;
+		// if(this.blockedPositions.size()>blockedPositionsID){
+		// this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
+		// } //Else, the other agent finished his plan.
+		this.priorAgentIDs = new ArrayList<Integer>();
 
 		this.parent = parent;
 
@@ -67,7 +157,7 @@ public class Node {
 
 	public Node Copy() {
 
-		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
+		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositions, blockedPositionsID);
 
 		copy.parent = this.parent;
 		copy.agentRow = this.agentRow;
@@ -75,10 +165,11 @@ public class Node {
 		copy.theAgentName = this.theAgentName;
 		copy.theAgentColor = this.theAgentColor;
 		// copy.boxes = this.boxes;
-		copy.boxes2 = new ArrayList<>(this.boxes2);
+
+		copy.boxes2 = this.boxes2;
 		// copy.goals = this.goals;
-		copy.goals2 = new ArrayList<>(this.goals2);
-		copy.myBoxes = new ArrayList<>(this.myBoxes);
+		copy.goals2 = this.goals2;
+		copy.myBoxes = this.myBoxes;
 		copy.action = this.action;
 		copy.isMove = this.isMove;
 		copy.doNoOp = this.doNoOp;
@@ -112,7 +203,7 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
-		if(!isMove) {
+		if (!isMove) {
 			for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
 					char g = this.goals[row][col];
@@ -122,23 +213,19 @@ public class Node {
 					}
 				}
 			}
-			
+
 			return true;
 		} else {
-			
-			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col; 
+
+			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
 		}
 	}
-	
-//	public boolean isAgentInTheFinalPosition() {
-//		return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col; 
-//	}
 
 	public ArrayList<Node> getExpandedNodes() {
 		// Box theBox = null;
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
-		if(isMove) {
-		
+		if (isMove) {
+
 			for (Command c : Command.EVERY) {
 				// Determine applicability of action
 				int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
@@ -155,155 +242,154 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						expandedNodes.add(n);
-						
+
 					}
 				}
 			}
 			return expandedNodes;
-			
+
 		} else {
 			//all the possible actions are expanded
-		
+
 			for (Box b : boxes2) {
 				if (b.color.equals(theAgentColor)) {
 					myBoxes.add(b);
 				}
 			}
-	
-			
+
 			for (Command c : Command.EVERY) {
 				// Determine applicability of action
 				int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 				int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
-	
+
 				String boxColor = "";
-	
+
 				if (c.actionType == Type.Move) {
 					// Check if there's a wall or box on the cell to which the agent
 					// is moving
 					if (this.cellIsFree(newAgentRow, newAgentCol)) {
 						Node n = this.ChildNode();
 						////// //System.err.println("Move!!! by: "+theAgentName);
-	
+
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						expandedNodes.add(n);
 						// ////////System.err.println("Move \n" + n);
 						// ////////System.err.println("ITIASS HAPPENING move");
-	
+
 					}
 				} else if (c.actionType == Type.Push) {
-	
+
 					//////// //System.err.println("MyBoxes: "+myBoxes);
 					for (Box b : myBoxes) {
-	
+
 						if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
 							boxColor = b.color;
 							// ////////System.err.println("ITIASS HAPPENING pull");
 						}
 					}
-	
+
 					////System.err.println("ZEBUG: "+theAgentColor);
 					if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
 						// ////////System.err.println("yes it is");
-	
+
 						int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 						int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
 						// .. and that new cell of box is free.
-	
+
 						if (this.cellIsFree(newBoxRow, newBoxCol)) {
-	
+
 							Node n = this.ChildNode();
-	
+
 							// //System.err.println("Push!!!" +
 							// boxes[newAgentRow][newAgentCol]+": "+boxColor+" by:
 							// "+theAgentName+": "+theAgentColor);
 							n.action = c;
 							n.agentRow = newAgentRow;
 							n.agentCol = newAgentCol;
-	
+
 							n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-	
+
 							// Update boxes2 in childnode
 							for (Box b : this.boxes2) {
-	
+
 								if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
-	
+
 									for (Box childbox : n.boxes2) {
 										if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
-	
+
 											childbox.position.row = newBoxRow;
 											childbox.position.col = newBoxCol;
 										}
 									}
 								}
-	
+
 							}
-	
+
 							n.boxes[newAgentRow][newAgentCol] = 0;
 							expandedNodes.add(n);
-	
+
 						}
-	
+
 					}
 				} else if (c.actionType == Type.Pull) {
 					// Cell is free where agent is going
-	
+
 					if (this.cellIsFree(newAgentRow, newAgentCol)) {
 						int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
 						int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
 						// .. and there's a box in "dir2" of the agent
-	
+
 						for (Box b : myBoxes) {
 							// ////////System.err.println("Box: "+b+" nameOfCharBox:
 							// "+this.boxes[boxRow][boxCol]);
 							if (b.name.equals(this.boxes[boxRow][boxCol])) {
 								boxColor = b.color;
-	
+
 							}
 						}
-	
+
 						if (this.boxAt(boxRow, boxCol) && theAgentColor.equals(boxColor)) {
-	
+
 							Node n = this.ChildNode();
-	
+
 							// //System.err.println("Pull!!!" +
 							// boxes[boxRow][boxCol]+": "+boxColor+" by:
 							// "+theAgentName+": "+theAgentColor);
-	
+
 							n.action = c;
 							n.agentRow = newAgentRow;
 							n.agentCol = newAgentCol;
 							n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 							n.boxes[boxRow][boxCol] = 0;
-	
+
 							for (Box b : this.boxes2) {
-	
+
 								if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
-	
+
 									for (Box childbox : n.boxes2) {
 										if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
-	
+
 											childbox.position.row = agentRow;
 											childbox.position.col = agentCol;
-	
+
 										}
 									}
 								}
-	
+
 							}
 							expandedNodes.add(n);
-	
+
 						}
 					}
 				}
-	
+
 			}
 		}
-			// Collections.shuffle(expandedNodes, RND);
-	
-			// ////////System.err.println("size: "+expandedNodes);
+		// Collections.shuffle(expandedNodes, RND);
+
+		// ////////System.err.println("size: "+expandedNodes);
 		return expandedNodes;
 	}
 
@@ -316,22 +402,97 @@ public class Node {
 	}
 
 	private Node ChildNode() {
-		Node copy = new Node(this, MAX_ROW, MAX_COL);
-
+		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositions, blockedPositionsID + 1);
+		// System.err.println("This is the thing maaaan| "
+		// +copy.blockedPositionsID);
 		// aici
+
+		for (int j = 0; j < SearchClient.levelRowSize; j++) {
+			for (int j2 = 0; j2 < SearchClient.levelColumnSize; j2++) {
+				if (copy.boxes[j][j2] == '*') {
+					copy.boxes[j][j2] = ' ';
+				}
+			}
+		}
 		for (int row = 0; row < MAX_ROW; row++) {
 			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
 			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}
+		for (int j = 0; j < SearchClient.levelRowSize; j++) {
+			for (int j2 = 0; j2 < SearchClient.levelColumnSize; j2++) {
+				if (copy.boxes[j][j2] == '*') {
+					copy.boxes[j][j2] = ' ';
+				}
+			}
+		}
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
+
 		copy.goals2 = this.goals2;
-		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.boxes2 = this.boxes2;
-		copy.isMove = this.isMove;
-		// ////////System.err.println("copy:::::"+copy.myBoxes);
+
+		if (copy.blockedPositions.size() > copy.blockedPositionsID) {
+			for (Position p : copy.blockedPositions.get(copy.blockedPositionsID)) {
+				copy.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
+												// imaginary color
+			}
+			if (copy.blockedPositions.size() > copy.blockedPositionsID + 1) {
+				for (Position p : copy.blockedPositions.get(copy.blockedPositionsID + 1)) {
+					copy.boxes[p.row][p.col] = '*';
+				}
+				if (copy.blockedPositions.size() > copy.blockedPositionsID + 2) {
+					for (Position p : copy.blockedPositions.get(copy.blockedPositionsID + 2)) {
+						copy.boxes[p.row][p.col] = '*';
+					}
+					String tester = "TESTAH " + theAgentName + "\n";
+					for (int j = 0; j < SearchClient.levelRowSize; j++) {
+						for (int j2 = 0; j2 < SearchClient.levelColumnSize; j2++) {
+							tester += copy.boxes[j][j2];
+						}
+						tester += "\n";
+					}
+					// System.err.println(tester);
+				}
+			}
+		} else {
+			// TODO: We've passed last case
+			for (List<Node> n : SearchClient.solutions) {
+				Position derpp = new Position(n.get(n.size() - 1).agentRow, n.get(n.size() - 1).agentCol);
+				copy.boxes[derpp.row][derpp.col] = '*';
+			}
+		}
+
+		if (copy.blockedPositions.size() > copy.blockedPositionsID - 1 && copy.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
+			// Fog of war
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't																																							// exists
+				for (Position p : copy.blockedPositions.get(copy.blockedPositionsID - 1)) {
+					// Get data from agent just prior to this one.
+					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		} else if (copy.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && copy.blockedPositions.size()>0) {// We're
+																													// over
+																													// the
+																													// edge
+
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't
+																																							// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
+				for (Position p : copy.blockedPositions.get(copy.blockedPositions.size() - 1)) {
+					// Get data from agent just prior to this one.
+					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		}
+		// //////System.err.println("copy:::::"+copy.myBoxes);
 
 		return copy;
 	}
@@ -445,9 +606,6 @@ public class Node {
 
 							break;
 						} else {
-
-							//System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
-							//System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
 							return true;
 						}
 
@@ -460,9 +618,6 @@ public class Node {
 						if (b.name == node2.boxes[i][j] && b.color.equals(this.theAgentColor)) {
 							break;
 						} else {
-
-							//System.err.println("conflict boxes of node1 agent of node2:" + this.toString());
-							//System.err.println("conflict in boxes of node1 agent of node2:" + node2.toString());
 							return true;
 						}
 
@@ -476,8 +631,9 @@ public class Node {
 	}
 
 	public void updateUberNode(List<Agent> agents) // update the boxes of the
-													// same color as the
-													// smallNode in uberNode
+
+	// same color as the
+	// smallNode in uberNode
 	{
 		//System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
@@ -496,7 +652,7 @@ public class Node {
 			}
 		}
 
-		for(Box b : SearchClient.allBoxes){
+		for (Box b : SearchClient.allBoxes) {
 			this.boxes[b.position.row][b.position.col] = b.name;
 			this.boxes2.add(new Box(b));
 		}
@@ -529,13 +685,10 @@ public class Node {
 					newInitialState.goals2.add(new Goal(g));
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
 				}
+
 			}
 			a.initialState = newInitialState;
 		}
-
-		//System.err.println("Uberboxes after refill: " + this.boxes2);
-
-		//System.err.println("Agents after refill in searchclient: " + SearchClient.agents);
 
 	}
 
