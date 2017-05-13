@@ -1,6 +1,7 @@
 package searchclient;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -14,7 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import searchclient.Heuristic.AStar;
+import searchclient.Heuristic.Greedy;
+import searchclient.Heuristic.WeightedAStar;
 import searchclient.Strategy.StrategyBFS;
+import searchclient.Strategy.StrategyBestFirst;
 import searchclient.Strategy.StrategyDFS;
 
 public class SearchClient {
@@ -225,10 +230,10 @@ public class SearchClient {
 		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
 
-		System.err.println(" + Agents without updated boxes: " + agents);
-		System.err.println(" + Boxes without updates: " + boxesToColor);
+		//System.err.println(" + Agents : " + agents);
+		//System.err.println(" + Boxes : " + boxesToColor);
 		// TODO Andrei: sort the allGoals list alphabetically
-		System.err.println(" + Goals: " + allGoals);
+		//System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
 
 		// for (int i = 0 ; i < agents.size(); i++) {
@@ -237,35 +242,75 @@ public class SearchClient {
 		// System.err.println("\n $ Goals: " + n.goals2 + " Boxes: " +n.boxes2);
 		// }
 
-		int[][] mapWithoutBorders = new int[levelRowSize - 2][levelColumnSize - 2];
-		for (int i1 = 1; i1 < levelRowSize - 1; i1++) {
-			for (int j1 = 1; j1 < levelColumnSize - 1; j1++) {
-				mapWithoutBorders[i1 - 1][j1 - 1] = map[i1][j1];
+		int[][] mapForAllDistances = new int[levelRowSize][levelColumnSize];
+		for (int i1 = 0; i1 < levelRowSize ; i1++) {
+			for (int j1 = 0; j1 < levelColumnSize; j1++) {
+				mapForAllDistances[i1][j1] = map[i1][j1];
 			}
 		}
 
-		// System.err.println("\n ------------------------------------");
-		// System.err.println("^^^^^^^^ THE MAP Without Borders: ^^^^^^^");
-		//
-		// for (int i1 = 0; i1 < levelRowSize - 2; i1++) {
-		// for (int j = 0; j < levelColumnSize - 2; j++) {
-		// System.err.print(mapWithoutBorders[i1][j]);
-		// }
-		// System.err.println("");
-		// }
-
-		// System.err.println(" ^^^^^^^^ THE MAP END ^^^^^^^");
-
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
-		DistancesComputer distancesComputer = new DistancesComputer(mapWithoutBorders);
-		distancesComputer.computeDistanceBetweenTwoPoints(new Position(0, 0), new Position(levelRowSize - 3, levelColumnSize - 3));
+		//DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
+		//distancesComputer.computeDistanceBetweenTwoPoints(new Position(1, 16), new Position(levelRowSize - 2, levelColumnSize - 2));
 
 		// Test distances function
 		// System.err.println("Distance between (5,0) and (7,0) = " +
 		// DistancesComputer.getDistanceBetween2Positions(new Position(0,0),
 		// new Position(7,0)));
 	}
+
+
+	public List<Strategy> getStrategies(String str) {
+
+		List<Strategy> strategies = new ArrayList<>(agents.size());
+
+		switch (str.toLowerCase()) {
+		case "-bfs":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
+			break;
+		case "-dfs":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyDFS());
+			System.err.println("DFS Strategy.");
+			break;
+		case "-astar":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new AStar(agents.get(i).initialState)));
+			System.err.println("A* Strategy.");
+			break;
+		case "-wastar":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new WeightedAStar(agents.get(i).initialState, 5)));
+			System.err.println("WA* Strategy.");
+			break;
+		case "-greedy":
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBestFirst(new Greedy(agents.get(i).initialState)));
+			System.err.println("Greedy Best First Strategy.");
+			break;
+		default:
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			break;
+		}
+
+		return strategies;
+	}
+
+//	private static void printSearchStatus(List<Strategy> strategiesSearchResults, List<List<Node>> solutions) {
+//		int i = 0;
+//		for (Strategy s : strategiesSearchResults) {
+//			System.err.println("[RES] Strategy search result for agent " + i + ". Solution lenght is " + solutions.get(i).size() + ".");
+//			System.err.println(s.searchStatus() + "\n");
+//			i++;
+//		}
+//	}
+
+	public static int noOpCount = 0;
+
 
 	public static boolean patternA(Cell c){
 		//Find pattern where goal is surrounded by three walls
@@ -381,6 +426,7 @@ public class SearchClient {
 		}
 	}
 	
+
 	public static void main(String[] args) throws Exception { // TODO second
 																	// loop,
 																// freakout
@@ -441,12 +487,12 @@ public class SearchClient {
 			uberNode.boxes[b.position.row][b.position.col] = b.name;
 		}
 
-		System.err.println("The node uber alles: " + uberNode);
+		//System.err.println("The node uber alles: " + uberNode);
 
 		uberNode.agents = agents;
 
-		storageAnalysis(uberNode);
-		goalPriority();
+		//storageAnalysis(uberNode);
+		//goalPriority();
 		
 		//for(){
 			
@@ -454,45 +500,22 @@ public class SearchClient {
 		
 		//////////////////////////////////////////
 
-		// read the input
-		Strategy strategy;
+		//GET THE STRATEGY
+		List<Strategy> strategies = null;
 
 		if (args.length > 0) {
-			switch (args[0].toLowerCase()) {
-			case "-bfs":
-				strategy = new StrategyBFS();
-				break;
-			case "-dfs":
-				strategy = new StrategyDFS();
-				break;
-			// case "-astar":
-			// strategy = new StrategyBestFirst(new
-			// AStar(client.initialStates.get(0)));
-			// break;
-			// case "-wastar":
-			// // You're welcome to test WA* out with different values, but for
-			// // the report you must at least indicate benchmarks for W = 5.
-			// strategy = new StrategyBestFirst(new
-			// WeightedAStar(client.initialStates.get(0), 5));
-			// break;
-			// case "-greedy":
-			// strategy = new StrategyBestFirst(new
-			// Greedy(client.initialStates.get(0)));
-			// break;
-			default:
-				strategy = new StrategyBFS();
-				System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-			}
+			strategies = client.getStrategies(args[0]);
 		} else {
-			strategy = new StrategyBFS();
+			strategies = new ArrayList<>(agents.size());
+			for (int i = 0; i < agents.size(); i++)
+				strategies.add(new StrategyBFS());
 			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
-
-		// check if goal is reached
 
 		while (true) {
 
 			Planner plan = null;
+
 			List<List<Node>> solutions = new ArrayList<List<Node>>();
 			LinkedList<Node> solution = new LinkedList<Node>();
 
@@ -515,10 +538,10 @@ public class SearchClient {
 				break;
 			}
 
-			System.err.println("Initializing agents with initial state: /n" + agents);
+			//System.err.println("Initializing agents with initial state: /n" + agents);
 
 			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
-
+			int agentIndex = 0;
 			//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
@@ -529,7 +552,7 @@ public class SearchClient {
 
 					plan = new Planner(agents.get(a.name));
 					//if plan is not trapped
-					solution = plan.findSolution();
+					solution = plan.findSolution(strategies.get(agentIndex));
 					solutions.add(solution);
 					//if plan is trapped, break out of if statement
 				}
@@ -548,26 +571,34 @@ public class SearchClient {
 					solutions.add(tempList);
 
 					a.isTrapped = false;
-
-				} else if (a.initialState.isGoalState()) {
-
-					Node tnode = a.initialState.Copy();
-					tnode.doNoOp = true;
-					tnode.parent = null;
-					List<Node> tlist = new ArrayList<Node>();
-					tlist.add(tnode);
-					solutions.add(tlist);
 				}
+								 else if (a.initialState.isGoalState()) {
+				
+									Node tnode = a.initialState.Copy();
+									tnode.doNoOp = true;
+									tnode.parent = null;
+									tnode.action = null;
+									List<Node> tlist = new ArrayList<Node>();
+									tlist.add(tnode);
+									solutions.add(tlist);
+								}
+				else if (noOpCount > 10) {
+					//TODO change the plan
+				}
+
+				agentIndex++;
 			}
 
 			if (solutions.isEmpty()) {
-				System.err.println(strategy.searchStatus());
+				//System.err.println(strategy.searchStatus());
 				System.err.println("Unable to solve level.");
 
 				System.exit(0);
 
 			} else {
 				System.err.println("Found solution of max length " + solutions.size());
+
+
 
 				int maxSol = 0;
 				int m1;
@@ -585,7 +616,6 @@ public class SearchClient {
 
 					jointAction.append('[');
 					// if (!solutions.isEmpty()) {
-
 					// for every agent
 					for (int j = 0; j < solutions.size(); j++) {
 						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -600,25 +630,32 @@ public class SearchClient {
 								// initialState
 
 								agents.get(j).initialState = n;
-								
-								//uberNode.updateUberNode(agents);
-								
-								
+
 								//agent here is not trapped this round
-								
 
 							} else {
-								
+
+								noOpCount++;
+
 								jointAction.append("NoOp,");
 								agents.get(j).initialState = n;
 								//uberNode.updateUberNode(agents);
 
 								//agent here is trapped this  round
-								
 
 							}
 						} catch (IndexOutOfBoundsException e) {
 							jointAction.append("NoOp,");
+							//make a dummy initialstate for consistency
+							
+							//System.err.println("memeow size for agent: "+agents.get(j).name+" : "+solutions.get(j).size());
+							Node atempInitialState = solutions.get(j).get(solutions.get(j).size()-1).Copy();
+							atempInitialState.parent = solutions.get(j).get(solutions.get(j).size()-1);
+							//atempInitialState.doNoOp = true; // append noop in
+							//System.err.println("Agent :" +agents.get(j).name+" got initialState due to noop exception :"+atempInitialState);
+							agents.get(j).initialState=atempInitialState;
+							//solutions.get(j).add(atempInitialState);
+							
 						}
 
 					}
@@ -627,6 +664,8 @@ public class SearchClient {
 
 					System.out.println(jointAction.toString());
 					System.err.println("===== " + jointAction.toString() + " ====");
+					System.err.println("ZeAgents now are: /n"+agents);
+
 					String response = serverMessages.readLine();
 					if(response.length()<2){
 						response = serverMessages.readLine();
@@ -725,6 +764,7 @@ public class SearchClient {
 							return;
 						}
 						j2++;
+						noOpCount = 0;
 						
 					}
 					if(replan){
@@ -732,53 +772,36 @@ public class SearchClient {
 						//uberNode.updateUberNode(agents);
 						break;
 					}
-					
-					/*if (response.contains("false")) {
+				}
+			
+				uberNode.updateUberNode(agents);
 
-						// reset initialstates to previous node before conflict
-						for (Agent a : agents) {
-							if (a.initialState.parent != null) {
-								System.err.println("Update agent " + a);
-								a.initialState = a.initialState.parent;
-
-							} else {
-
-								System.err.println("InitialState parent was null for agent " + a);
-
-								// keep same? do something maybe?
+				//recalculate agent freedom
+				boolean done2 = false;
+				ArrayList<Position> positions2 = new ArrayList<Position>();
+				for (Agent a : agents) {
+					for (Box b : allBoxes) {
+						for (Goal g : a.initialState.goals2) {
+							if (g.color == b.color) {
+								done2 = true;
+								positions2.add(g.position);
+								positions2.add(b.position);
+								rescueUnit(a, positions2);
+								break;
 							}
 						}
-						// update everyones initialStates to the relevant for
-						// them current state
-						//uberNode.updateUberNode(agents);
-
-						// TODO: replan! simple conflict resoltuion. To be used
-						// if snake fails
-
-						System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, jointAction.toString());
-						System.err.format("%s was attempted in \n%s\n", jointAction.toString(), "Snake Failed, Hard Replanning initiated!!!");
-
-						break;
-					} else {
-
-					}*/
-
+						if (done2)
+							break;
+					}
+					done2 = false;
+					positions2 = new ArrayList<Position>();
 				}
+
 				uberNode.updateUberNode(agents);
 				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
-				//				System.err.println("Resetting trapped boxes");
-				//				for (Box b : allBoxes) {
-				//					b.isBlocking = false;
-				//				}
-				//return;
-				replanCounter++;
-				if(replanCounter >= 2){
-					serverMessages.close();
-					return;
-				}
 			}
 
 			// initialize and reset variables
@@ -786,6 +809,39 @@ public class SearchClient {
 		}
 	}
 
+	
+	
+public static String[] formattedServerResponse(String s){
+		
+		
+		String[] split = s.split(",");
+		
+		split[0] = split[0].substring(1);
+		
+		split[split.length-1] = split[split.length-1].substring(1, split[split.length-1].length()-1);
+
+		for(int i=0; i< split.length;i++){
+			
+			split[i] = split[i].trim();
+			
+		}
+		
+		
+		return split;
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public static int[][] flowFill(Agent agent, List<Box> allBoxes2) {
 		int[][] matrix = new int[levelRowSize][levelColumnSize];
 		int[][] result = new int[levelRowSize][levelColumnSize];
@@ -941,6 +997,8 @@ public class SearchClient {
 						}
 					}
 				}
+			} else {
+				agent.isTrapped = false;
 			}
 		}
 	}
