@@ -36,7 +36,7 @@ public class Planner {
 		positions = Heuristic.findStorage(theAgent.initialState);
 		Heuristic.storageSpace = positions;
 
-		this.agent = new Agent(theAgent);
+		this.agent = theAgent;
 
 		this.state = theAgent.initialState.Copy();
 		// this.state.printGoals();
@@ -346,24 +346,21 @@ public class Planner {
 		// TODO find closest box-goal distance and satisfy that first
 		int chosenPriority = Integer.MAX_VALUE;
 		Goal chosen = null;
+		System.err.println(" POSITION OF CHOSEN GOAL");
+		for(Goal g : thisCurrentState.goals2){
+			System.err.println(g.isSatisfied + " : " + g.position);
+		}
 		for (Goal g : thisCurrentState.goals2) {
-			if(chosenPriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied){
+			if(chosenPriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied && g.color.equals(theAgent.color)){
 				chosenPriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position);
 				chosen = g;
 			}
 		}
 		
-		if(chosen!=null){
-
-			System.err.println(chosen.position + " POSITION OF CHOSEN GOAL");
-			for(Goal g : SearchClient.allGoals){
-				System.err.println(g.isSatisfied + " : " + g.position);
-			}
-		}
 		//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
 		//System.err.println("Goal :" + g.name + " ," + g.color + " issatisfied: " + g.isSatisfied);
 		if(chosen == null){
-			
+			System.err.println("NO CHOSEN FOR : " + theAgent.name);
 		}
 		else if (!chosen.isSatisfied && chosen.color.equals(theAgent.color)) {
 				//System.err.println("Goal accepted :" + g.name);

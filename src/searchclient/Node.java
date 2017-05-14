@@ -705,12 +705,13 @@ public class Node {
 				}
 			}
 
+			System.err.println("PRINTOUT OF GALZ");
 			for (Goal g : SearchClient.allGoals) {
-
-				if (g.color.equals(a.color)) {
-					newInitialState.goals2.add(g);
+				//if (g.color.equals(a.color)) {
+					newInitialState.goals2.add(new Goal(g));
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
-				}
+				//}
+				System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
 
 			}
 			a.initialState = newInitialState;

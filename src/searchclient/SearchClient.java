@@ -466,7 +466,7 @@ public class SearchClient {
 		for (Agent a : agents) {
 			for (Box b : allBoxes) {
 				for (Goal g : a.initialState.goals2) {
-					if (g.color == b.color) {
+					if (g.color.equals( b.color)) {
 						done = true;
 						positions.add(g.position);
 
@@ -566,7 +566,7 @@ public class SearchClient {
 				System.err.println("Success!!!");
 				break;
 			}
-
+			
 			//System.err.println("Initializing agents with initial state: /n" + agents);
 
 			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);

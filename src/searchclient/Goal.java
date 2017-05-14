@@ -16,7 +16,7 @@ public class Goal {
 	
 	public Goal(Goal g){
 		this.name = g.name;
-		this.color = g.color;
+		this.color = new String(g.color);
 		this.position = new Position(g.position.row,g.position.col);
 		this.priority = g.priority;
 		this.isSatisfied = g.isSatisfied;
