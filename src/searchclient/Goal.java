@@ -6,6 +6,7 @@ public class Goal {
 	public Position position;
 	public boolean priorityGiven = false;
 	public boolean isSatisfied = false;
+	public boolean assigned = false;
 	public Integer priority = 10; //lower for more priority
 	
 	public Goal(Character name, String color, Position position) {
@@ -21,6 +22,7 @@ public class Goal {
 		this.priority = g.priority;
 		this.isSatisfied = g.isSatisfied;
 		this.priorityGiven = g.priorityGiven;
+		this.assigned = g.assigned;
 	}
 	
 	public void lowerPriority(int i)

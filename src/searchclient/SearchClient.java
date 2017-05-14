@@ -582,9 +582,12 @@ public class SearchClient {
 					a.initialState.assignBlocked(blockedPositions);
 					plan = new Planner(a);//TODO: If plan fails, try to plan without blockGoalsMode
 					//if plan is not trapped
+					if(!plan.noPlan){
+					
 					solution = plan.findSolution(strategies.get(agentIndex));
 					solutions.add(solution);
 					//if plan is trapped, break out of if statement
+					}
 				}
 				if (a.isTrapped && !a.initialState.isGoalState()) { //
 					// if

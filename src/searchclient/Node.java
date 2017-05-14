@@ -674,12 +674,15 @@ public class Node {
 			this.boxes2.add(new Box(b));
 		}
 		// now update the states of the agents
-
+		for(Goal g : SearchClient.allGoals){
+			g.assigned = false;
+		}
 		for(Box b : SearchClient.allBoxes){
 			if(b.isOnOwnGoal()){
 				for(Goal g : SearchClient.allGoals){
 					if(g.position.equals(b.position)){
 						g.isSatisfied = true;
+						g.assigned = true;
 					}
 				}
 			}
