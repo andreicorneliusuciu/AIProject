@@ -15,12 +15,14 @@ import searchclient.Command.Type;
 public class Node {
 	// WALL SNAKE METHOD
 	public ArrayList<Position> tempWalls;
-	public ArrayList<ArrayList<Position>> blockedPositions;
+	//public ArrayList<ArrayList<Position>> blockedPositions;
 	public int blockedPositionsID = 0;
 	public ArrayList<Integer> priorAgentIDs;
 	// WALL SNAKE METHOD
 
 	private static final Random RND = new Random(1);
+	
+	public boolean blockGoalsMode;
 
 	public static int MAX_ROW;
 	public static int MAX_COL;
@@ -58,18 +60,18 @@ public class Node {
 	private int _hash = 0;
 
 	public void assignBlocked(ArrayList<ArrayList<Position>> positions) {
-		blockedPositions = positions;
-		if (this.blockedPositions.size() > blockedPositionsID) {
-			for (Position p : this.blockedPositions.get(blockedPositionsID)) {
+		SearchClient.blockedPositions = positions;
+		if (SearchClient.blockedPositions.size() > blockedPositionsID) {
+			for (Position p : SearchClient.blockedPositions.get(blockedPositionsID)) {
 				this.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
 												// imaginary color
 			}
-			if (this.blockedPositions.size() > blockedPositionsID + 1) {
-				for (Position p : this.blockedPositions.get(blockedPositionsID + 1)) {
+			if (SearchClient.blockedPositions.size() > blockedPositionsID + 1) {
+				for (Position p : SearchClient.blockedPositions.get(blockedPositionsID + 1)) {
 					this.boxes[p.row][p.col] = '*';
 				}
-				if (this.blockedPositions.size() > blockedPositionsID + 2) {
-					for (Position p : this.blockedPositions.get(blockedPositionsID + 2)) {
+				if (SearchClient.blockedPositions.size() > blockedPositionsID + 2) {
+					for (Position p : SearchClient.blockedPositions.get(blockedPositionsID + 2)) {
 						this.boxes[p.row][p.col] = '*';
 					}
 					String tester = "TESTAH " + theAgentName + "\n";
@@ -92,7 +94,7 @@ public class Node {
 			}
 		}
 
-		if (this.blockedPositions.size() > this.blockedPositionsID - 1 && this.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
+		if (SearchClient.blockedPositions.size() > this.blockedPositionsID - 1 && this.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
 			// Fog of war
 			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
 																																								// get
@@ -103,12 +105,12 @@ public class Node {
 																																							// no
 																																							// prior
 																																							// exists
-				for (Position p : this.blockedPositions.get(this.blockedPositionsID - 1)) {
+				for (Position p : SearchClient.blockedPositions.get(this.blockedPositionsID - 1)) {
 					// Get data from agent just prior to this one.
 					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(this.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
-		} else if (this.blockedPositions.size() <= this.blockedPositionsID - 1 && SearchClient.solutions != null) {// We're
+		} else if (SearchClient.blockedPositions.size() <= this.blockedPositionsID - 1 && SearchClient.solutions != null) {// We're
 																														// over
 																													// the
 																													// edge
@@ -122,9 +124,16 @@ public class Node {
 																																							// no
 																																							// prior
 																																							// exists
-				for (Position p : this.blockedPositions.get(this.blockedPositions.size() - 1)) {
+				for (Position p : SearchClient.blockedPositions.get(SearchClient.blockedPositions.size() - 1)) {
 					// Get data from agent just prior to this one.
 					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		}
+		if(blockGoalsMode){
+			for(Goal g : SearchClient.allGoals){
+				if(g.isSatisfied){
+					this.boxes[g.position.row][g.position.col] = '*';
 				}
 			}
 		}
@@ -134,14 +143,13 @@ public class Node {
 		this.priorAgentIDs = priorAgents;
 	}
 
-	public Node(Node parent, int maxRow, int maxCol, ArrayList<ArrayList<Position>> blockedPositions, int blockedPositionsID) {
+	public Node(Node parent, int maxRow, int maxCol, int blockedPositionsID) {
 		this.blockedPositionsID = blockedPositionsID;
-		this.blockedPositions = blockedPositions;
 		// if(this.blockedPositions.size()>blockedPositionsID){
 		// this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
 		// } //Else, the other agent finished his plan.
 		this.priorAgentIDs = new ArrayList<Integer>();
-
+		
 		this.parent = parent;
 
 		MAX_ROW = maxRow;
@@ -157,7 +165,7 @@ public class Node {
 
 	public Node Copy() {
 
-		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositions, blockedPositionsID);
+		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositionsID);
 
 		copy.parent = this.parent;
 		copy.agentRow = this.agentRow;
@@ -403,7 +411,8 @@ public class Node {
 	}
 
 	private Node ChildNode() {
-		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositions, blockedPositionsID + 1);
+		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositionsID + 1);
+		copy.blockGoalsMode = this.blockGoalsMode;
 		// System.err.println("This is the thing maaaan| "
 		// +copy.blockedPositionsID);
 		// aici
@@ -434,17 +443,17 @@ public class Node {
 		copy.goals2 = this.goals2;
 		copy.boxes2 = this.boxes2;
 
-		if (copy.blockedPositions.size() > copy.blockedPositionsID) {
-			for (Position p : copy.blockedPositions.get(copy.blockedPositionsID)) {
+		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID) {
+			for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID)) {
 				copy.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
 												// imaginary color
 			}
-			if (copy.blockedPositions.size() > copy.blockedPositionsID + 1) {
-				for (Position p : copy.blockedPositions.get(copy.blockedPositionsID + 1)) {
+			if (SearchClient.blockedPositions.size() > copy.blockedPositionsID + 1) {
+				for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID + 1)) {
 					copy.boxes[p.row][p.col] = '*';
 				}
-				if (copy.blockedPositions.size() > copy.blockedPositionsID + 2) {
-					for (Position p : copy.blockedPositions.get(copy.blockedPositionsID + 2)) {
+				if (SearchClient.blockedPositions.size() > copy.blockedPositionsID + 2) {
+					for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID + 2)) {
 						copy.boxes[p.row][p.col] = '*';
 					}
 					String tester = "TESTAH " + theAgentName + "\n";
@@ -465,15 +474,15 @@ public class Node {
 			}
 		}
 
-		if (copy.blockedPositions.size() > copy.blockedPositionsID - 1 && copy.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
+		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID - 1 && copy.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
 			// Fog of war
 			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't																																							// exists
-				for (Position p : copy.blockedPositions.get(copy.blockedPositionsID - 1)) {
+				for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID - 1)) {
 					// Get data from agent just prior to this one.
 					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
-		} else if (copy.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && copy.blockedPositions.size()>0) {// We're
+		} else if (SearchClient.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && SearchClient.blockedPositions.size()>0) {// We're
 																													// over
 																													// the
 																													// edge
@@ -487,9 +496,16 @@ public class Node {
 																																							// no
 																																							// prior
 																																							// exists
-				for (Position p : copy.blockedPositions.get(copy.blockedPositions.size() - 1)) {
+				for (Position p : SearchClient.blockedPositions.get(SearchClient.blockedPositions.size() - 1)) {
 					// Get data from agent just prior to this one.
 					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
+				}
+			}
+		}
+		if(copy.blockGoalsMode){
+			for(Goal g : SearchClient.allGoals){
+				if(g.isSatisfied){
+					copy.boxes[g.position.row][g.position.col] = '*';
 				}
 			}
 		}
@@ -659,6 +675,15 @@ public class Node {
 		}
 		// now update the states of the agents
 
+		for(Box b : SearchClient.allBoxes){
+			if(b.isOnOwnGoal()){
+				for(Goal g : SearchClient.allGoals){
+					if(g.position.equals(b.position)){
+						g.isSatisfied = true;
+					}
+				}
+			}
+		}
 		for (Agent a : agents) {
 
 			Node newInitialState = this.Copy();
@@ -683,7 +708,7 @@ public class Node {
 			for (Goal g : SearchClient.allGoals) {
 
 				if (g.color.equals(a.color)) {
-					newInitialState.goals2.add(new Goal(g));
+					newInitialState.goals2.add(g);
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
 				}
 

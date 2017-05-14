@@ -130,13 +130,13 @@ public class Planner {
 			return null;
 		} else {
 
-			int goalpriority = 0;
+			int goalpriority = Integer.MAX_VALUE;
 			for (Goal g : newState.goals2) {
 				if (g.name.equals(goal.name) && !g.isSatisfied) {
 					// pick highest priority goal first!!!!
-					if (goalpriority < g.priority) {
+					if (goalpriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(new Position(node.agentRow,node.agentCol), g.position)) {
 						goalPos = g.position;
-						goalpriority = g.priority;
+						goalpriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(new Position(node.agentRow,node.agentCol), g.position);
 						goalName = g.name;
 
 					}
@@ -344,14 +344,28 @@ public class Planner {
 		// goals[][]= "+currentState.theAgentColor);
 
 		// TODO find closest box-goal distance and satisfy that first
-
+		int chosenPriority = Integer.MAX_VALUE;
+		Goal chosen = null;
 		for (Goal g : thisCurrentState.goals2) {
-			Box aBox = null;
+			if(chosenPriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied){
+				chosenPriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position);
+				chosen = g;
+			}
+		}
+		
+		if(chosen!=null){
 
-			//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
-			//System.err.println("Goal :" + g.name + " ," + g.color + " issatisfied: " + g.isSatisfied);
-
-			if (!g.isSatisfied && g.color.equals(theAgent.color)) {
+			System.err.println(chosen.position + " POSITION OF CHOSEN GOAL");
+			for(Goal g : SearchClient.allGoals){
+				System.err.println(g.isSatisfied + " : " + g.position);
+			}
+		}
+		//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
+		//System.err.println("Goal :" + g.name + " ," + g.color + " issatisfied: " + g.isSatisfied);
+		if(chosen == null){
+			
+		}
+		else if (!chosen.isSatisfied && chosen.color.equals(theAgent.color)) {
 				//System.err.println("Goal accepted :" + g.name);
 
 				Box b = null;
@@ -367,7 +381,7 @@ public class Planner {
 				System.err.println("Box picked: " + b);
 
 				System.err.println("lort:    " + theAgent.name + "       " + agent.position);
-				if (DistancesComputer.getDistanceBetween2Positions(theAgent.position, b.position) > 5) {
+				/*if (DistancesComputer.getDistanceBetween2Positions(theAgent.position, b.position) > 1) {
 
 					Position pos = findClosestFreeCelltoBox(b);
 
@@ -380,17 +394,17 @@ public class Planner {
 					// thisCurrentState.agentRow = pos.row;
 					// thisCurrentState.agentCol = pos.col;
 
-				} else {
+				} else {*/
 
-					plan.add(MoveBoxToGoal(thisCurrentState, g));
+					plan.add(MoveBoxToGoal(thisCurrentState, chosen));
 					// plan.add(MoveToBox(thisCurrentState, new Goal('&',
 					// "none",
 					// new Position(g.position.row, 1))));
 					plantoPrint.add(Type.MoveBoxToGoal);
 
-				}
+//				}
 
-			}
+			
 		}
 
 		// Object plantoString;

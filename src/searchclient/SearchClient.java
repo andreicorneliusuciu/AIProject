@@ -26,6 +26,7 @@ import searchclient.Strategy.StrategyDFS;
 public class SearchClient {
 	// SNAKE WALL
 	static List<List<Node>> solutions = new ArrayList<>();
+	public static ArrayList<ArrayList<Position>> blockedPositions;
 
 	public static Cell[][] mapOfCell;
 	// The list of initial state for every agent
@@ -134,11 +135,11 @@ public class SearchClient {
 		// }
 		ArrayList<ArrayList<Position>> blockedPositions = new ArrayList<ArrayList<Position>>();
 		for (int i = 0; i < agents.size(); i++) {
-			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize, blockedPositions, 0));
+			agents.get(i).assignInitialState(new Node(null, levelRowSize, levelColumnSize, 0));
 			// initialStates.add(new Node(null, levelRowSize, levelColumnSize));
 
 		}
-		uberNode = new Node(null, levelRowSize, levelColumnSize, null, 0);
+		uberNode = new Node(null, levelRowSize, levelColumnSize, 0);
 
 		for (String l : lines) {
 			if (Pattern.matches("[a-zA-Z]", l.substring(0, 1)) || l.matches("^\\s*$")) {
@@ -163,7 +164,7 @@ public class SearchClient {
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr), null));
 					if (index == -1) {
 
-						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col), new Node(null, levelRowSize, levelColumnSize, blockedPositions, 0));
+						Agent agentT = new Agent(Integer.parseInt("" + chr), "blue", new Position(row, col), new Node(null, levelRowSize, levelColumnSize, 0));
 						agentT.initialState.theAgentColor = agentT.color;
 						agentT.initialState.theAgentName = agentT.name;
 						agentT.initialState.agentCol = agentT.position.col;
@@ -533,11 +534,11 @@ public class SearchClient {
 			solutions = new ArrayList<List<Node>>();
 
 			LinkedList<Node> solution = new LinkedList<Node>();
-			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
+			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL,0);
 
-			ArrayList<ArrayList<Position>> blockedPositions = new ArrayList<ArrayList<Position>>();
+			blockedPositions = new ArrayList<ArrayList<Position>>();
 			ArrayList<Integer> priorAgents = new ArrayList<Integer>();
-			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
+			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, 0);
 
 			// check if agents are trapped
 			//			for (Agent a : agents) {
@@ -577,9 +578,9 @@ public class SearchClient {
 
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
-
-					agents.get(a.name).initialState.assignBlocked(blockedPositions);
-					plan = new Planner(agents.get(a.name));
+					a.initialState.blockGoalsMode = true;
+					a.initialState.assignBlocked(blockedPositions);
+					plan = new Planner(a);//TODO: If plan fails, try to plan without blockGoalsMode
 					//if plan is not trapped
 					solution = plan.findSolution(strategies.get(agentIndex));
 					solutions.add(solution);
@@ -694,7 +695,7 @@ public class SearchClient {
 					// if (!solutions.isEmpty()) {
 					// for every agent
 					for (int j = 0; j < solutions.size(); j++) {
-						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL, null, 0);
+						Node n = new Node(null, Node.MAX_ROW, Node.MAX_COL, 0);
 						try {
 
 							n = solutions.get(j).get(i);
@@ -726,7 +727,7 @@ public class SearchClient {
 					System.err.println("===== " + jointAction.toString() + " ====");
 
 					String response = serverMessages.readLine();
-					if (response.length() < 2) {
+					while (response.length() < 2) {
 						response = serverMessages.readLine();
 					}
 					System.err.println(response + " " + response.length());
