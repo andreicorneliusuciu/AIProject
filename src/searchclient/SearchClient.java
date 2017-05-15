@@ -597,6 +597,7 @@ public class SearchClient {
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
 					a.initialState.blockGoalsMode = true;
+					
 					a.initialState.assignBlocked(blockedPositions);
 					plan = new Planner(a);// TODO: If plan fails, try to plan
 											// without blockGoalsMode

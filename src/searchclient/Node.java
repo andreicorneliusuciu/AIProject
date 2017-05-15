@@ -439,7 +439,7 @@ public class Node {
 		copy.theAgentColor = this.theAgentColor;
 		copy.myBoxes = this.myBoxes;
 		copy.theAgentName = this.theAgentName;
-
+		copy.myBoxesFinal = this.myBoxesFinal;
 		copy.goals2 = this.goals2;
 		copy.boxes2 = this.boxes2;
 

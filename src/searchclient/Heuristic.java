@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
-import java.lang.Math;
-
-import searchclient.NotImplementedException;
 import searchclient.Node;
 
 public abstract class Heuristic implements Comparator<Node> {
@@ -262,7 +259,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int i = 0;
 		Iterator<Goal> it1 = n.goals2.iterator();
 		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-
+		// System.err.println("[H] boxes size = " + boxesOrderedAlphabetically.size());
+		 //System.err.println("[H] goals2 size = " + n.goals2.size());
 		while (it1.hasNext() && it2.hasNext()) {
 
 			Box b = it2.next();
@@ -279,12 +277,13 @@ public abstract class Heuristic implements Comparator<Node> {
 			// n.agentCol));
 		}
 
-		// System.err.println("[H] Heuristic result = " + result);
+		 //System.err.println("[H] Heuristic result = " + result);
 		return result;
 	}
 
 	public Set<Box> getBoxesPosition(Node n) {
 		Set<Box> boxesPosition = new TreeSet<>();
+		System.err.println("MY BOXES FINAL" + n.myBoxesFinal);
 		for (int i = 0; i < DistancesComputer.levelRowSize - 2; i++) {
 			for (int j = 0; j < DistancesComputer.levelColSize - 2; j++) {
 
