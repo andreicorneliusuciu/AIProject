@@ -546,15 +546,15 @@ public class Node {
 	}
 
 	public void printGoals() {
-		//System.err.println("__________________________________________________\n");
+		System.err.println("__________________________________________________\n");
 		for (int i = 0; i < Node.MAX_ROW; i++) {
-			//System.err.print("\n");
+			System.err.print("\n");
 			for (int j = 0; j < Node.MAX_COL; j++) {
 
-				//System.err.print(this.goals[i][j]);
+				System.err.print(this.goals[i][j]);
 			}
 		}
-		//System.err.println("\n__________________________________________________");
+		System.err.println("\n__________________________________________________");
 
 	}
 

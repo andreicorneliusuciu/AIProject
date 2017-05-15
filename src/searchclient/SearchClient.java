@@ -491,6 +491,11 @@ public class SearchClient {
 			positions = new ArrayList<Position>();
 		}
 
+		
+		System.err.println("these are my boxes: "+agents.get(1).initialState.boxes2);
+		System.err.println("these are all boxes: "+allBoxes);
+
+		
 		// fill up the central node
 		// uberNode.goals2 = allGoals;
 		for (Goal g : allGoals) {
@@ -535,6 +540,9 @@ public class SearchClient {
 			System.err.println(
 					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
+		
+		
+
 
 		while (true) {
 
