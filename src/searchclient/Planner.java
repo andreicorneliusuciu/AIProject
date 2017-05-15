@@ -125,7 +125,7 @@ public class Planner {
 		// make a goal state i n an actual goal so it can be achieved
 
 		Node newState = node.Copy();
-
+		newState.isMove = false;
 		Position goalPos = null;
 		char goalName = 0;
 
@@ -364,6 +364,7 @@ public class Planner {
 		}
 		if(chosen != null){
 			chosen.assigned = true;
+			thisCurrentState.nameOfGoal = chosen.name;
 		}
 		
 		//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
@@ -386,29 +387,29 @@ public class Planner {
 
 				System.err.println("Box picked: " + b);
 
-				System.err.println("lort:    " + theAgent.name + "       " + agent.position);
-				/*if (DistancesComputer.getDistanceBetween2Positions(theAgent.position, b.position) > 1) {
-
-					Position pos = findClosestFreeCelltoBox(b);
-
-					plan.add(MoveToBox(thisCurrentState, pos));
-					plantoPrint.add(Type.MoveToBox);
-
-					// System.err.println("Andreis piece of shit plan
-					// "+MoveToBox(thisCurrentState, new Goal('&', "none", new
-					// Position(1, 1))));
-					// thisCurrentState.agentRow = pos.row;
-					// thisCurrentState.agentCol = pos.col;
-
-				} else {*/
-
+//				System.err.println("lort:    " + theAgent.name + "       " + agent.position);
+//				if (DistancesComputer.getDistanceBetween2Positions(theAgent.position, b.position) > 1) {
+//
+//					Position pos = findClosestFreeCelltoBox(b);
+//
+//					plan.add(MoveToBox(thisCurrentState, pos));
+//					plantoPrint.add(Type.MoveToBox);
+//
+//					// System.err.println("Andreis piece of shit plan
+//					// "+MoveToBox(thisCurrentState, new Goal('&', "none", new
+//					// Position(1, 1))));
+//					// thisCurrentState.agentRow = pos.row;
+//					// thisCurrentState.agentCol = pos.col;
+//
+//				} else {
+					
 					plan.add(MoveBoxToGoal(thisCurrentState, chosen));
 					// plan.add(MoveToBox(thisCurrentState, new Goal('&',
 					// "none",
 					// new Position(g.position.row, 1))));
 					plantoPrint.add(Type.MoveBoxToGoal);
 
-//				}
+				//}
 
 			
 		}

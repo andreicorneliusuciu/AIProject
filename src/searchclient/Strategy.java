@@ -188,7 +188,6 @@ public abstract class Strategy {
 		@Override
 		public void addToFrontier(Node n) {
 			frontier.add(n);
-			// System.err.println(frontier);
 			frontierSet.add(n);
 		}
 

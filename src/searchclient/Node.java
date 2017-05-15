@@ -27,6 +27,8 @@ public class Node {
 	public static int MAX_ROW;
 	public static int MAX_COL;
 
+	public char nameOfGoal = 0;
+	
 	public int agentRow;
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
