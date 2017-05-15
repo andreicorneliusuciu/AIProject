@@ -147,24 +147,36 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	public int h(Node n) {
 		int result = 0;
-		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
-		int i = 0;
-		Iterator<Goal> it1 = n.goals2.iterator();
-		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
+		if(n.isMove) {
+			result += DistancesComputer.
+					getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
+		} else {
 		
-		while (it1.hasNext() && it2.hasNext()) {
-
-			Box b = it2.next();
-			Goal g = it1.next();
+//		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
+//		int i = 0;
+//		Iterator<Goal> it1 = n.goals2.iterator();
+//		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
+//		
+//		while (it1.hasNext() && it2.hasNext()) {
+//
+//			Box b = it2.next();
+//			Goal g = it1.next();
+//			result += DistancesComputer.
+//					getDistanceBetween2Positions(b.position, g.position);//here???
+//			//System.err.println("Dist between " + b.position + " and " + g.position + " is " + result);
+////			System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
+////			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
+//			result += DistancesComputer.
+//					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
+//		}
+//		}
 			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, g.position);//here???
-			//System.err.println("Dist between " + b.position + " and " + g.position + " is " + result);
-//			System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
-//			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
+					getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
 			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
+					getDistanceBetween2Positions(n.boxes2.get(0).position, new Position(n.agentRow, n.agentCol));
+//			System.err.println("[HEURISTIC] The agent " + n.theAgentName + " at postition " +new Position(n.agentRow, n.agentCol) + "has the "
+//					+ "goal at " + n.goals2.get(0) + " which is " + result + " cells away.");
 		}
-		
 		//System.err.println("[H] Heuristic result = " + result);
 		return result;
 	}
