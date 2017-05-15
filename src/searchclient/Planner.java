@@ -36,12 +36,14 @@ public class Planner {
 
 		positions = Heuristic.findStorage(theAgent.initialState);
 		Heuristic.storageSpace = positions;
-
+		
+		
 		this.agent = theAgent;
 
 		this.state = theAgent.initialState.Copy();
 		// this.state.printGoals();
-
+		System.err.println("pizda " + this.state.toFString(positions));
+		
 		updateGoalStates(this.state);
 		//// System.err.println("InitialState goals: " + state.goals2);
 
@@ -52,6 +54,9 @@ public class Planner {
 		// be achieved by normal moves.
 
 	}
+	
+	
+	
 
 	public LinkedList<Node> findSolution(Strategy strategy) {
 		LinkedList<Node> solution = new LinkedList<Node>();

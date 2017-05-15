@@ -603,6 +603,36 @@ public class Node {
 		}
 		return s.toString();
 	}
+	
+	
+	public String toFString(List<Position> storage) {
+		StringBuilder s = new StringBuilder();
+		s.append("\n");
+		for (int row = 0; row < MAX_ROW; row++) {
+			if (!SearchClient.walls[row][0]) {
+				break;
+			}
+			for (int col = 0; col < MAX_COL; col++) {
+				if (this.boxes[row][col] > 0) {
+					s.append(this.boxes[row][col]);
+				} else if (this.goals[row][col] > 0) {
+					s.append(this.goals[row][col]);
+				} else if (SearchClient.walls[row][col]) {
+					s.append("+");
+				} else if (row == this.agentRow && col == this.agentCol) {
+					s.append(Integer.toString(theAgentName));
+				} else if(storage.contains(new Position(row,col))){
+						s.append("¤");
+				}
+				
+				else {
+					s.append(" ");
+				}
+			}
+			s.append("\n");
+		}
+		return s.toString();
+	}
 
 	public boolean isConflict(Node node2) {
 
