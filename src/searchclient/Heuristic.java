@@ -146,7 +146,7 @@ public abstract class Heuristic implements Comparator<Node> {
 	////////////////////
 
 	public int h(Node n) {
-		int result = 0;
+		/*int result = 0;
 		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
 		int i = 0;
 		Iterator<Goal> it1 = n.goals2.iterator();
@@ -166,7 +166,38 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 		
 		//System.err.println("[H] Heuristic result = " + result);
-		return result;
+		return result;*/
+		
+		if(n.isMove){
+			//Return distance between agent and goalposition
+			return DistancesComputer.getDistanceBetween2Positions(new Position(n.agentRow,n.agentCol),n.goalPosition);
+		} else {
+			//Return distance between agent and good box + good box and goalposition
+			int distance = Integer.MAX_VALUE;
+			Box chosen = null;
+			for(Goal g : n.goals2){
+				if(g.position.equals(n.goalPosition)){
+					for(Box b : n.boxes2){
+						//System.err.println(b.position);
+						char temp1 = Character.toLowerCase(b.name);
+						if(temp1 == g.name){
+							int calc = DistancesComputer.getDistanceBetween2Positions(b.position, n.goalPosition);
+							if(calc < distance){
+								chosen = b;
+								distance = calc;
+							}
+						}
+					}
+					break;
+				}
+			}
+			int formula = distance + DistancesComputer.getDistanceBetween2Positions(new Position(n.agentRow,n.agentCol),chosen.position);
+			//System.err.println("Box: " + chosen.position + " Goal: " + n.goalPosition + " Formula: " + formula);
+			//if(chosen.position.equals(n.goalPosition)){
+			//	chosen = null;
+			//}
+			return formula;
+		}
 	}
 	
 	public Set<Box> getBoxesPosition(Node n) {

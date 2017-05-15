@@ -22,6 +22,8 @@ public class Node {
 
 	private static final Random RND = new Random(1);
 	
+	public Position goalPosition = null;
+	
 	public boolean blockGoalsMode;
 
 	public static int MAX_ROW;
@@ -169,6 +171,7 @@ public class Node {
 
 		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositionsID);
 
+		copy.goalPosition = this.goalPosition;
 		copy.parent = this.parent;
 		copy.agentRow = this.agentRow;
 		copy.agentCol = this.agentCol;
@@ -215,7 +218,7 @@ public class Node {
 
 	public boolean isGoalState() {
 		if (!isMove) {
-			for (int row = 1; row < MAX_ROW - 1; row++) {
+			/*for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
 					char g = this.goals[row][col];
 					char b = Character.toLowerCase(boxes[row][col]);
@@ -225,10 +228,26 @@ public class Node {
 				}
 			}
 
-			return true;
+			return true;*/
+			for(Goal g : this.goals2){
+				if(g.position.equals(goalPosition)){
+					for(Box b : this.boxes2){
+						if(b.position.equals(goalPosition)){
+							return true;
+						}
+					}
+					break;
+				}
+			}
+			return false;
+			/*if(this.g > 15){
+				return true;
+			} else {
+				return false;
+			}*/
 		} else {
 
-			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
+			return this.agentRow == goalPosition.row && this.agentCol == goalPosition.col;
 		}
 	}
 
@@ -415,6 +434,8 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositionsID + 1);
 		copy.blockGoalsMode = this.blockGoalsMode;
+		copy.goalPosition = this.goalPosition;
+		copy.isMove = this.isMove;
 		// System.err.println("This is the thing maaaan| "
 		// +copy.blockedPositionsID);
 		// aici
