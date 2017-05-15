@@ -163,35 +163,42 @@ public class Node {
 		}
 	}
 
-	public Node Copy() {
+	public Node Copy() {Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositionsID);
 
-		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositionsID);
+	copy.parent = this.parent;
+	copy.agentRow = this.agentRow;
+	copy.agentCol = this.agentCol;
+	copy.theAgentName = this.theAgentName;
+	copy.theAgentColor = this.theAgentColor;
+	// copy.boxes = this.boxes;
 
-		copy.parent = this.parent;
-		copy.agentRow = this.agentRow;
-		copy.agentCol = this.agentCol;
-		copy.theAgentName = this.theAgentName;
-		copy.theAgentColor = this.theAgentColor;
-		// copy.boxes = this.boxes;
-
-		copy.boxes2 = this.boxes2;
-		// copy.goals = this.goals;
-		copy.goals2 = this.goals2;
-		copy.myBoxes = this.myBoxes;
-		copy.action = this.action;
-		copy.myBoxesFinal = this.myBoxesFinal;
-		copy.isMove = this.isMove;
-		copy.doNoOp = this.doNoOp;
-		// copy._hash =this._hash;
-		copy.g = this.g;
-		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
-			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
-		}
-
-		return copy;
+	for(Box b : this.boxes2){
+	copy.boxes2.add(b);
 	}
+	// copy.goals = this.goals;
+	for(Goal g : this.goals2){
+		copy.goals2.add(g);
+		}
+	for(Box b : this.myBoxes){
+		copy.boxes2.add(b);
+		}
+	
+	copy.action = this.action;
+	
+	for(Box b : this.myBoxesFinal){
+		copy.boxes2.add(b);
+		}
+	copy.isMove = this.isMove;
+	copy.doNoOp = this.doNoOp;
+	// copy._hash =this._hash;
+	copy.g = this.g;
+	for (int row = 0; row < MAX_ROW; row++) {
+		System.arraycopy(SearchClient.walls[row], 0, SearchClient.walls[row], 0, MAX_COL);
+		System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
+		System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
+	}
+
+	return copy;}
 
 	public void clearGoals() {
 
@@ -726,8 +733,15 @@ public class Node {
 			newInitialState.agentCol = a.initialState.agentCol;
 			newInitialState.theAgentColor = a.initialState.theAgentColor;
 
+			//System.err.println("fuck1"+this.myBoxesFinal);
+
+			//TODO why does this nto update in .copy() ????????
+			newInitialState.myBoxesFinal = a.initialState.myBoxesFinal;
+			//System.err.println("fuck2"+a.initialState.myBoxesFinal);
 			// erase goals2
 			newInitialState.goals2.clear();
+			
+			//System.err.println("after goals2 clear, referece:"+this.goals2);
 			newInitialState.theAgentName = a.name;
 			newInitialState.doNoOp = false;
 
