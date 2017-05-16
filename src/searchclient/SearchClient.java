@@ -199,9 +199,8 @@ public class SearchClient {
 						// {
 						agents.get(i).initialState.boxes[row][col] = chr;
 						agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
-						if(agents.get(i).color.equals(boxesToColor.get(chr))) {
-							agents.get(i).initialState.myBoxesFinal
-							.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						if (agents.get(i).color.equals(boxesToColor.get(chr))) {
+							agents.get(i).initialState.myBoxesFinal.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 						}
 						// uberNode.boxes2.add(new Box(chr,
 						// boxesToColor.get(chr), new Position(row, col)));
@@ -265,7 +264,7 @@ public class SearchClient {
 			System.err.println("For agent " + i + ":");
 			System.err.println("**** myBoxesFinal = " + agents.get(i).initialState.myBoxesFinal);
 		}
-		
+
 		// Compute all the distances on a NxN map. It does not work for non
 		// square maps.
 		DistancesComputer distancesComputer = new DistancesComputer(mapForAllDistances);
@@ -466,7 +465,7 @@ public class SearchClient {
 		for (Agent a : agents) {
 			for (Box b : allBoxes) {
 				for (Goal g : a.initialState.goals2) {
-					if (g.color.equals( b.color)) {
+					if (g.color.equals(b.color)) {
 						done = true;
 						positions.add(g.position);
 
@@ -515,6 +514,45 @@ public class SearchClient {
 
 		//////////////////////////////////////////
 
+		//TURN ALL USELESS BOXES TO WALLS
+		List<Box> usefulBoxes = new ArrayList<Box>();
+
+		//set useless boxes to walls
+		for (Agent a : agents) {
+			for (Box b : allBoxes) {
+
+				if (a.color.equals(b.color)) {
+					usefulBoxes.add(b);
+				}
+
+			}
+		}
+
+		List<Box> uselessBoxes = new ArrayList<Box>();
+
+		
+		for (Box b : allBoxes) {
+			if (!usefulBoxes.contains(b)) {
+
+				walls[b.position.row][b.position.col] = true;
+				uselessBoxes.add(b);
+			}
+		}
+		
+		System.err.println("AllBoxes before : "+allBoxes);
+
+		
+		for(Box b : uselessBoxes)
+		{
+			allBoxes.remove(b);
+		}
+		
+		
+		System.err.println("AllBoxes after : "+allBoxes);
+		
+		
+		
+
 		//GET THE STRATEGY
 		List<Strategy> strategies = null;
 
@@ -534,7 +572,7 @@ public class SearchClient {
 			solutions = new ArrayList<List<Node>>();
 
 			LinkedList<Node> solution = new LinkedList<Node>();
-			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL,0);
+			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL, 0);
 
 			blockedPositions = new ArrayList<ArrayList<Position>>();
 			ArrayList<Integer> priorAgents = new ArrayList<Integer>();
@@ -568,13 +606,13 @@ public class SearchClient {
 			}
 			ArrayList<Position> poswall = new ArrayList<Position>();
 			ArrayList<Position> temppie = new ArrayList<Position>();
-			for(Agent atemp : agents){
-				poswall.add(new Position(atemp.position.row,atemp.position.col));
+			for (Agent atemp : agents) {
+				poswall.add(new Position(atemp.position.row, atemp.position.col));
 			}
-			temppie.add(new Position(0,0));
+			temppie.add(new Position(0, 0));
 			blockedPositions.add(poswall);
 			blockedPositions.add(temppie);
-			
+
 			//System.err.println("Initializing agents with initial state: /n" + agents);
 
 			//	Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -582,7 +620,7 @@ public class SearchClient {
 			//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
-				if (!a.isTrapped /*&& !a.initialState.isGoalState()*/) {
+				if (!a.isTrapped /* && !a.initialState.isGoalState() */) {
 
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
@@ -590,16 +628,16 @@ public class SearchClient {
 					a.initialState.assignBlocked(blockedPositions);
 					plan = new Planner(a);//TODO: If plan fails, try to plan without blockGoalsMode
 					//if plan is not trapped
-					if(!plan.noPlan){
-					
-						if(agents.size() == 1 && allGoals.size()>= 55){
+					if (!plan.noPlan) {
+
+						if (agents.size() == 1 && allGoals.size() >= 55) {
 							strategies.clear();
 							strategies.add(new StrategyBFS());
 						}
-					solution = plan.findSolution(strategies.get(agentIndex));
-						
-					solutions.add(solution);
-					//if plan is trapped, break out of if statement
+						solution = plan.findSolution(strategies.get(agentIndex));
+
+						solutions.add(solution);
+						//if plan is trapped, break out of if statement
 					}
 				}
 				if (a.isTrapped && !a.initialState.isGoalState()) { //
@@ -633,7 +671,7 @@ public class SearchClient {
 				}
 
 				agentIndex++;
-				
+
 				// TODO: Turn plans into arraylistarraylistposition
 				ArrayList<Position> twall = new ArrayList<Position>();
 				twall.add(new Position(agents.get(a.name).initialState.agentRow, agents.get(a.name).initialState.agentCol));
@@ -845,7 +883,7 @@ public class SearchClient {
 					done2 = false;
 					positions2 = new ArrayList<Position>();
 				}
-				for(Goal g : SearchClient.allGoals){
+				for (Goal g : SearchClient.allGoals) {
 					g.assigned = false;
 				}
 				uberNode.updateUberNode(agents);
@@ -1406,4 +1444,3 @@ public class SearchClient {
 		//Those who have absorbed false have LOWER priority than those who have absorbed true.
 	}
 }
-
