@@ -21,19 +21,19 @@ public class Node {
 	// WALL SNAKE METHOD
 
 	private static final Random RND = new Random(1);
-	
+
 	public boolean blockGoalsMode;
 
 	public static int MAX_ROW;
 	public static int MAX_COL;
 
 	public char nameOfGoal = 0;
-	
+
 	public int agentRow;
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
-	public Set<Box> myBoxesFinal = new TreeSet<>();
+	public List<Box> myBoxesFinal = new ArrayList<Box>();
 	public boolean isMove = false;
 
 	// public List<Agent> agents;
@@ -113,9 +113,9 @@ public class Node {
 				}
 			}
 		} else if (SearchClient.blockedPositions.size() <= this.blockedPositionsID - 1 && SearchClient.solutions != null) {// We're
-																														// over
-																													// the
-																													// edge
+																																// over
+																															// the
+																															// edge
 
 			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
 																																								// get
@@ -132,9 +132,9 @@ public class Node {
 				}
 			}
 		}
-		if(blockGoalsMode){
-			for(Goal g : SearchClient.allGoals){
-				if(g.isSatisfied){
+		if (blockGoalsMode) {
+			for (Goal g : SearchClient.allGoals) {
+				if (g.isSatisfied) {
 					this.boxes[g.position.row][g.position.col] = '*';
 				}
 			}
@@ -151,7 +151,7 @@ public class Node {
 		// this.tempWalls = this.blockedPositions.get(this.blockedPositionsID);
 		// } //Else, the other agent finished his plan.
 		this.priorAgentIDs = new ArrayList<Integer>();
-		
+
 		this.parent = parent;
 
 		MAX_ROW = maxRow;
@@ -161,19 +161,18 @@ public class Node {
 		if (parent == null) {
 			this.g = 0;
 		} else {
-			/*if(this.action == null){
-				this.g = parent.g() + 1;
-			} else if(this.action.actionType != Command.Type.Move){
-				this.g = parent.g() + 2;
-			} else {*/
-				this.g = parent.g() + 1;
-				this.g= 0;
+			/*
+			 * if(this.action == null){ this.g = parent.g() + 1; } else
+			 * if(this.action.actionType != Command.Type.Move){ this.g =
+			 * parent.g() + 2; } else {
+			 */
+			this.g = parent.g() + 1;
+			this.g = 0;
 			//}
 		}
 	}
 
 	public Node Copy() {
-
 		Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, blockedPositionsID);
 
 		copy.parent = this.parent;
@@ -183,22 +182,22 @@ public class Node {
 		copy.theAgentColor = this.theAgentColor;
 		// copy.boxes = this.boxes;
 
-		for(Box b : this.boxes2){
-		copy.boxes2.add(new Box(b));
+		for (Box b : this.boxes2) {
+			copy.boxes2.add(b);
 		}
 		// copy.goals = this.goals;
-		//for(Goal g : this.goals2){
-			copy.goals2 = this.goals2;
-		//}
-		for(Box b : this.myBoxes){
-			copy.boxes2.add(new Box(b));
-			}
-		
+		for (Goal g : this.goals2) {
+			copy.goals2.add(g);
+		}
+		for (Box b : this.myBoxes) {
+			copy.boxes2.add(b);
+		}
+
 		copy.action = this.action;
-		
-		for(Box b : this.myBoxesFinal){
-			copy.boxes2.add(new Box(b));
-			}
+
+		for (Box b : this.myBoxesFinal) {
+			copy.boxes2.add(b);
+		}
 		copy.isMove = this.isMove;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
@@ -210,7 +209,6 @@ public class Node {
 		}
 
 		return copy;
-
 	}
 
 	public void clearGoals() {
@@ -233,9 +231,9 @@ public class Node {
 
 	public boolean isGoalState() {
 		if (!isMove) {
-			/*if(this.g() > 5){
-				return true;
-			}*/
+			/*
+			 * if(this.g() > 5){ return true; }
+			 */
 			System.err.println(this);
 			for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
@@ -248,19 +246,13 @@ public class Node {
 			}
 
 			return true;
-			/*boolean done = false;
-			for(Goal g : this.goals2){
-				for(Box b : this.boxes2){
-					char temp = Character.toLowerCase(b.name);
-					if(b.position.equals(g.position) && temp == g.name){
-						done = true;
-						System.err.println("DONE!");
-						break;
-					}
-				}
-			}
-			//System.err.println(goals2.get(0).position);
-			return done;*/
+			/*
+			 * boolean done = false; for(Goal g : this.goals2){ for(Box b :
+			 * this.boxes2){ char temp = Character.toLowerCase(b.name);
+			 * if(b.position.equals(g.position) && temp == g.name){ done = true;
+			 * System.err.println("DONE!"); break; } } }
+			 * //System.err.println(goals2.get(0).position); return done;
+			 */
 		} else {
 
 			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
@@ -474,17 +466,18 @@ public class Node {
 			}
 		}
 		copy.theAgentColor = this.theAgentColor;
-		for(Box b : this.myBoxes){
+		for (Box b : this.myBoxes) {
 			copy.myBoxes.add(new Box(b));
 		}
 		copy.theAgentName = this.theAgentName;
-		
-		for(Goal g : this.goals2){
+
+		for (Goal g : this.goals2) {
 			copy.goals2.add(new Goal(g));
 		}
-		for(Box b : this.boxes2){
+		for (Box b : this.boxes2) {
 			copy.boxes2.add(new Box(b));
 		}
+
 		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID) {
 			for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID)) {
 				copy.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
@@ -524,13 +517,13 @@ public class Node {
 					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
-		} else if (SearchClient.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && SearchClient.blockedPositions.size()>0) {// We're
-																													// over
-																													// the
-																													// edge
+		} else if (SearchClient.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && SearchClient.blockedPositions.size() > 0) {// We're
+			// over
+			// the
+			// edge
 
 			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't
-																																							// get
+																																								// get
 																																							// data
 																																							// from
 																																							// prior
@@ -544,9 +537,9 @@ public class Node {
 				}
 			}
 		}
-		if(copy.blockGoalsMode){
-			for(Goal g : SearchClient.allGoals){
-				if(g.isSatisfied){
+		if (copy.blockGoalsMode) {
+			for (Goal g : SearchClient.allGoals) {
+				if (g.isSatisfied) {
 					copy.boxes[g.position.row][g.position.col] = '*';
 				}
 			}
@@ -588,15 +581,15 @@ public class Node {
 	}
 
 	public void printGoals() {
-		//System.err.println("__________________________________________________\n");
+		System.err.println("__________________________________________________\n");
 		for (int i = 0; i < Node.MAX_ROW; i++) {
-			//System.err.print("\n");
+			System.err.print("\n");
 			for (int j = 0; j < Node.MAX_COL; j++) {
 
-				//System.err.print(this.goals[i][j]);
+				System.err.print(this.goals[i][j]);
 			}
 		}
-		//System.err.println("\n__________________________________________________");
+		System.err.println("\n__________________________________________________");
 
 	}
 
@@ -638,6 +631,35 @@ public class Node {
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append(Integer.toString(theAgentName));
 				} else {
+					s.append(" ");
+				}
+			}
+			s.append("\n");
+		}
+		return s.toString();
+	}
+
+	public String toFString(List<Position> storage) {
+		StringBuilder s = new StringBuilder();
+		s.append("\n");
+		for (int row = 0; row < MAX_ROW; row++) {
+			if (!SearchClient.walls[row][0]) {
+				break;
+			}
+			for (int col = 0; col < MAX_COL; col++) {
+				if (this.boxes[row][col] > 0) {
+					s.append(this.boxes[row][col]);
+				} else if (this.goals[row][col] > 0) {
+					s.append(this.goals[row][col]);
+				} else if (SearchClient.walls[row][col]) {
+					s.append("+");
+				} else if (row == this.agentRow && col == this.agentCol) {
+					s.append(Integer.toString(theAgentName));
+				} else if (storage.contains(new Position(row, col))) {
+					s.append("¤");
+				}
+
+				else {
 					s.append(" ");
 				}
 			}
@@ -704,11 +726,11 @@ public class Node {
 		// TODO update boxes2 based on last nodes of all agents and moves that
 		// are stored in their initialState
 		this.goals2.clear();
-		for(Goal g : SearchClient.allGoals){
+		for (Goal g : SearchClient.allGoals) {
 			g.assigned = false;
 			this.goals2.add(new Goal(g));
 		}
-		
+
 		this.boxes2.clear();
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = 0; j < Node.MAX_COL; j++) {
@@ -721,13 +743,13 @@ public class Node {
 			this.boxes2.add(new Box(b));
 		}
 		// now update the states of the agents
-		for(Goal g : SearchClient.allGoals){
+		for (Goal g : SearchClient.allGoals) {
 			g.assigned = false;
 		}
-		for(Box b : SearchClient.allBoxes){
-			if(b.isOnOwnGoal()){
-				for(Goal g : SearchClient.allGoals){
-					if(g.position.equals(b.position)){
+		for (Box b : SearchClient.allBoxes) {
+			if (b.isOnOwnGoal()) {
+				for (Goal g : SearchClient.allGoals) {
+					if (g.position.equals(b.position)) {
 						g.isSatisfied = true;
 						g.assigned = true;
 					}
@@ -742,8 +764,15 @@ public class Node {
 			newInitialState.agentCol = a.initialState.agentCol;
 			newInitialState.theAgentColor = a.initialState.theAgentColor;
 
+			//System.err.println("fuck1"+this.myBoxesFinal);
+
+			//TODO why does this nto update in .copy() ????????
+			newInitialState.myBoxesFinal = a.initialState.myBoxesFinal;
+			//System.err.println("fuck2"+a.initialState.myBoxesFinal);
 			// erase goals2
 			newInitialState.goals2.clear();
+
+			//System.err.println("after goals2 clear, referece:"+this.goals2);
 			newInitialState.theAgentName = a.name;
 			newInitialState.doNoOp = false;
 
@@ -754,18 +783,21 @@ public class Node {
 				}
 			}
 
-			System.err.println("PRINTOUT OF GALZ");
+			//System.err.println("PRINTOUT OF GALZ");
 			for (Goal g : SearchClient.allGoals) {
-				if (g.color.equals(a.color)) {
-					newInitialState.goals2.add(new Goal(g));
-					newInitialState.goals[g.position.row][g.position.col] = g.name;
-				}
-				System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
 
+				//if (SearchClient.flowFills[a.name][a.position.row][a.position.col] == SearchClient.flowFills[a.name][g.position.row][g.position.col]) {
+
+					if (g.color.equals(a.color)) {
+						newInitialState.goals2.add(new Goal(g));
+						newInitialState.goals[g.position.row][g.position.col] = g.name;
+					}
+
+					//System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
+				//}
 			}
 			a.initialState = newInitialState;
 		}
-
 
 	}
 

@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
-import java.lang.Math;
-
-import searchclient.NotImplementedException;
 import searchclient.Node;
 
 public abstract class Heuristic implements Comparator<Node> {
@@ -56,9 +53,11 @@ public abstract class Heuristic implements Comparator<Node> {
 				int count = 0;
 				neighbors = getNeighbors(i, j, x, y, wallSpace);
 
+
 				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
 					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
 						theList.add(new Position(i, j));
+
 
 					}
 				}
@@ -80,6 +79,41 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
 					if (!wallSpace[i][j] && wallSpace[i - 1][j - 1] && wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				/////////
+
+				// No walls around the position
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && wallSpace[i + 1][j - 1] && wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
+
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && wallSpace[i][j - 1] && !wallSpace[i][j + 1] && wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j - 1] && wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+
 						theList.add(new Position(i, j));
 
 					}
@@ -124,6 +158,7 @@ public abstract class Heuristic implements Comparator<Node> {
 					}
 				}
 
+
 				// } catch (IndexOutOfBoundsException e) {
 				// //system.err.println(e);
 				// }
@@ -159,6 +194,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					if (!wallSpace[i][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1]) {
 						theList.add(new Position(i, j));
+
 
 					}
 				}
@@ -240,7 +276,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int i = 0;
 		Iterator<Goal> it1 = n.goals2.iterator();
 		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-		
+		// System.err.println("[H] boxes size = " + boxesOrderedAlphabetically.size());
+		 //System.err.println("[H] goals2 size = " + n.goals2.size());
 		while (it1.hasNext() && it2.hasNext()) {
 
 			Box b = it2.next();
@@ -293,21 +330,26 @@ public abstract class Heuristic implements Comparator<Node> {
 		//System.err.println(new Position(n.agentRow,n.agentCol));
 		//System.err.println("[H] Heuristic result = " + result);
 		//System.err.println("Distance: " + DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position) + " ChosenB: " + chosenB.position + " " + chosenB.name + " chosenG: " + chosenG.name + " " + chosenG.position + " ChosenA: " + chosenA.assignedChar);
+		try{
 		return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position)*8 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow,n.agentCol))*4 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow,n.agentCol))*2;
+		}catch(NullPointerException e){
+			return 1000;
+			
+		}
 	}
-	
+
 	public Set<Box> getBoxesPosition(Node n) {
 		Set<Box> boxesPosition = new TreeSet<>();
-		for(int i = 0; i <  DistancesComputer.levelRowSize -2 ; i++) {
-			for(int j = 0; j < DistancesComputer.levelColSize -2 ; j++) {
-				
-				if('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
-					boxesPosition.add(
-							new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
-				}			
-			}		
+		//System.err.println("MY BOXES FINAL" + n.myBoxesFinal);
+		for (int i = 0; i < DistancesComputer.levelRowSize - 2; i++) {
+			for (int j = 0; j < DistancesComputer.levelColSize - 2; j++) {
+
+				if ('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
+					boxesPosition.add(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
+				}
+			}
 		}
-		
+
 		return boxesPosition;
 	}
 
