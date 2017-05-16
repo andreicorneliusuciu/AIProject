@@ -710,7 +710,7 @@ public class Node {
 				}
 			}
 
-			System.err.println("PRINTOUT OF GALZ");
+		//	System.err.println("PRINTOUT OF GALZ");
 			for (Goal g : SearchClient.allGoals) {
 				//if (g.color.equals(a.color)) {
 					newInitialState.goals2.add(new Goal(g));

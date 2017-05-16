@@ -44,16 +44,10 @@ public class Planner {
 		this.agent = theAgent;
 
 		this.state = theAgent.initialState.Copy();
-		// this.state.printGoals();
-	//	System.err.println("pizda " + this.state.toFString(positions));
-		//System.err.println("pizdaZ " + this.state.toFString(tempPositions));
+
 
 		updateGoalStates(this.state);
-		//// System.err.println("InitialState goals: " + state.goals2);
-
-		//// System.err.println("Boxes to give to closestbox: "
-		//// +this.state.boxes2);
-
+		
 		// HOWTHINGSWORK highest level commands generate goalastates to
 		// be achieved by normal moves.
 
