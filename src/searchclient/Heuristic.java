@@ -276,8 +276,11 @@ public abstract class Heuristic implements Comparator<Node> {
 			// getDistanceBetween2Positions(b.position, new Position(n.agentRow,
 			// n.agentCol));
 		}
+		result += DistancesComputer.
+				getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
+		
 
-		 //System.err.println("[H] Heuristic result = " + result);
+		 System.err.println("[H] Heuristic result = " + result);
 		return result;
 	}
 

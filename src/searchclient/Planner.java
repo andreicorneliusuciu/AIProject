@@ -588,7 +588,7 @@ public class Planner {
 				// satisfy goals
 				if (g > 0) {
 					for (Goal gl : goals) {
-						if (gl.name == g && gl.position.equals(new Position(row, col))) {
+						if (gl.name.equals(g) && gl.position.equals(new Position(row, col))) {
 							if (b == g) {
 								gl.isSatisfied = true;
 
@@ -611,7 +611,7 @@ public class Planner {
 	private boolean isGoalState(Node node) {
 		// TODO set isSatisfied properly
 		for (Goal g : node.goals2) {
-			if (!(g.isSatisfied == true)) {
+			if (!(g.isSatisfied)) {
 				return false;
 			}
 		}
