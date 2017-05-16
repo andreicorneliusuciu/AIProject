@@ -535,6 +535,7 @@ public class Planner {
 		}
 
 		if (box == null)
+			//SearchClient.agents.get(trappedAgent.name).isTrapped = false;
 			System.err.println("No blocking Box found for trapped agent: " + trappedAgent);
 		return box;
 	}

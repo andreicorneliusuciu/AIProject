@@ -31,7 +31,7 @@ public class Node {
 	public int agentCol;
 	public int theAgentName; // = new Agent(0,null);
 	public String theAgentColor;
-	public Set<Box> myBoxesFinal = new TreeSet<>();
+	public List<Box> myBoxesFinal = new ArrayList<Box>();
 	public boolean isMove = false;
 
 	// public List<Agent> agents;
