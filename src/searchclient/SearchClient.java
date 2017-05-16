@@ -516,19 +516,19 @@ public class SearchClient {
 		//////////////////////////////////////////
 
 		//GET THE STRATEGY
-		List<Strategy> strategies = null;
 
-		if (args.length > 0) {
-			strategies = client.getStrategies(args[0]);
-		} else {
-			strategies = new ArrayList<>(agents.size());
-			for (int i = 0; i < agents.size(); i++)
-				strategies.add(new StrategyBFS());
-			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
-		}
 
 		while (true) {
+			List<Strategy> strategies = null;
 
+			if (args.length > 0) {
+				strategies = client.getStrategies(args[0]);
+			} else {
+				strategies = new ArrayList<>(agents.size());
+				for (int i = 0; i < agents.size(); i++)
+					strategies.add(new StrategyBFS());
+				System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			}
 			Planner plan = null;
 
 			solutions = new ArrayList<List<Node>>();
@@ -582,8 +582,10 @@ public class SearchClient {
 					a.initialState.assignBlocked(blockedPositions);
 					plan = new Planner(a);//TODO: If plan fails, try to plan without blockGoalsMode
 					//if plan is not trapped
-					if(!plan.noPlan){
-					
+					if(!plan.noPlan){		
+					//Strategy s = new StrategyBestFirst(new AStar(agents.get(a.name).initialState));	
+					//
+					//
 					solution = plan.findSolution(strategies.get(agentIndex));
 					solutions.add(solution);
 					//if plan is trapped, break out of if statement

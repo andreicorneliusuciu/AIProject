@@ -21,6 +21,12 @@ public abstract class Strategy {
 	public void addToExplored(Node n) {
 		this.explored.add(n);
 	}
+	
+	public void clearExplored()
+	{
+		this.explored.clear();
+		
+	}
 
 	public boolean isExplored(Node n) {
 		return this.explored.contains(n);
@@ -176,6 +182,8 @@ public abstract class Strategy {
 			frontierSet = new HashSet<Node>();
 			clearFrontier();
 		}
+		
+		
 
 		@Override
 		public Node getAndRemoveLeaf() {
