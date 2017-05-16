@@ -1,5 +1,16 @@
 package searchclient;
 
+
+
+
+
+
+//TODO !!!!! remove agents without boxes, put them in the side or mvoe them randomly
+//-mathias level split thing
+//
+
+
+
 import java.io.BufferedReader;
 
 import java.io.IOException;
@@ -1208,7 +1219,7 @@ public class SearchClient {
 				// USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
 				if (replanCounter >= 10000) {
-					serverMessages.close();
+					//serverMessages.close();
 					return;
 				}
 			}
