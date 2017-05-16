@@ -480,7 +480,7 @@ public class Node {
 		copy.theAgentName = this.theAgentName;
 		
 		for(Goal g : this.goals2){
-			copy.goals2.add(new Goal(g));
+			copy.goals2.add(g);
 		}
 		for(Box b : this.boxes2){
 			copy.boxes2.add(new Box(b));

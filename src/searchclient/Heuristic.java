@@ -288,12 +288,12 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 		//System.err.println("A: " + chosenA.position);
-		//System.err.println(" B: " + chosenB.position);
-		//System.err.println(" G: " + chosenG.position);
+	//	System.err.println(" B: " + chosenB.position);
+//		System.err.println(" G: " + chosenG.position);
 		//System.err.println(new Position(n.agentRow,n.agentCol));
 		//System.err.println("[H] Heuristic result = " + result);
 		//System.err.println("Distance: " + DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position) + " ChosenB: " + chosenB.position + " " + chosenB.name + " chosenG: " + chosenG.name + " " + chosenG.position + " ChosenA: " + chosenA.assignedChar);
-		return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position)*8 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow,n.agentCol))*4 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow,n.agentCol))*2;
+		return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position)*4 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow,n.agentCol))*3 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow,n.agentCol))*2;
 	}
 	
 	public Set<Box> getBoxesPosition(Node n) {
