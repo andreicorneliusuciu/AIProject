@@ -201,7 +201,7 @@ public class Planner {
 		List<Box> blockingBoxes = new ArrayList<Box>();
 
 		// find blocking boxes in node
-		for (Box b : newState.boxes2) {
+		for (Box b : SearchClient.allBoxes) {
 			if (b.isBlocking) {
 				blockingBoxes.add(new Box(b));
 				//// System.err.println("blockingboxes: " + blockingBoxes);
@@ -397,7 +397,7 @@ public class Planner {
 				//System.err.println("Goal accepted :" + g.name);
 
 				Box b = null;
-				for (Box box : thisCurrentState.boxes2) {
+				for (Box box : SearchClient.allBoxes) {
 					System.err.println("feeggt" + box.isOnOwnGoal());
 					if (box.color.equals(agent.color) && !box.isOnOwnGoal()) {
 						b = new Box(box);
@@ -536,9 +536,9 @@ public class Planner {
 		// Position agentPos = trappedAgent.position;
 		float minDistance = 10000;
 
-		for (Box b : node.boxes2) {
+		for (Box b : SearchClient.allBoxes) {
 
-			if (b.color == agent.color && b.isBlocking && Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
+			if (b.color.equals(agent.color) && b.isBlocking && Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(trappedAgent.position, b.position);
 				box = new Box(b);
 
@@ -571,7 +571,7 @@ public class Planner {
 		// Position agentPos = trappedAgent.position;
 		float minDistance = 10000;
 
-		for (Box b : node.boxes2) {
+		for (Box b : SearchClient.allBoxes) {
 
 			// pick box closer to goal instead
 			if (b.color.equals(thisAgent.color) && Position.manhattanDistance(theGoal.position, b.position) < minDistance) {
