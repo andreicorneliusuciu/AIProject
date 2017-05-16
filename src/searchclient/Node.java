@@ -236,7 +236,7 @@ public class Node {
 			/*if(this.g() > 5){
 				return true;
 			}*/
-			//System.err.println(this);
+			System.err.println(this);
 			for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
 					char g = this.goals[row][col];

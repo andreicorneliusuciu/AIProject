@@ -56,45 +56,134 @@ public abstract class Heuristic implements Comparator<Node> {
 				int count = 0;
 				neighbors = getNeighbors(i, j, x, y, wallSpace);
 
-				if (isCabin(i + 1, j, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j + 1, x, y)) {
-					if (wallSpace[i + 1][j] && wallSpace[i + 1][j - 1] && wallSpace[i + 1][j + 1]) {
-						count = 4; // top
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
 					}
 				}
-				if (isCabin(i, j - 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i - 1, j - 1, x, y)) {
-					if (wallSpace[i][j - 1] && wallSpace[i + 1][j - 1] && wallSpace[i - 1][j - 1]) {
-						count = 1; // left
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && wallSpace[i + 1][j - 1] && wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
 					}
 				}
-				if (isCabin(i, j + 1, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i - 1, j + 1, x, y)) {
-					if (wallSpace[i][j + 1] && wallSpace[i + 1][j + 1] && wallSpace[i - 1][j + 1]) {
-						count = 2; // right c
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && wallSpace[i][j - 1] && !wallSpace[i][j + 1] && wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
 					}
 				}
-				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y)) {
-					if (wallSpace[i - 1][j - 1] && wallSpace[i - 1][j] && wallSpace[i - 1][j + 1]) {
-						count = 3; // bottom
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j - 1] && wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
 					}
 				}
+
+				/////////
+
+				// No walls around the position
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && wallSpace[i][j - 1] && wallSpace[i][j + 1] && wallSpace[i + 1][j]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j] && !wallSpace[i - 1][j + 1] && wallSpace[i][j - 1] && !wallSpace[i][j + 1] && wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && wallSpace[i - 1][j] && wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && wallSpace[i - 1][j] && !wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && wallSpace[i + 1][j]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
 				// } catch (IndexOutOfBoundsException e) {
-				// System.err.println(e);
+				// //system.err.println(e);
 				// }
 
-				for (Boolean b : neighbors) {
-					if (b) {
-						wallCount++;
-					}
-				}
-				if (count >= 1 && count <= 4 && wallCount <= 3) {
-					theList.add(new Position(i, j));
-				}
-
-				wallCount = 0;
 			}
 		}
 
 		return theList;
 	}
+
+	public static List<Position> findTempStorage(Node initialState) {
+		List<Position> theList = new ArrayList<Position>();
+
+		boolean[][] wallSpace = SearchClient.walls;
+
+		ArrayList<Boolean> neighbors = new ArrayList<Boolean>();
+
+		int x = wallSpace.length;
+		int y = wallSpace[0].length;
+
+		for (int i = 0; i < x; i++) {
+			for (int j = 0; j < y; j++) {
+				neighbors = getNeighbors(i, j, x, y, wallSpace);
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && !wallSpace[i][j - 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+
+				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
+
+					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i + 1][j] && !wallSpace[i + 1][j + 1]) {
+						theList.add(new Position(i, j));
+
+					}
+				}
+			}
+		}
+
+		return theList;
+	}
+
 
 	private boolean[][] invertBooleanArray(boolean[][] arr) {
 		boolean[][] walls = arr;

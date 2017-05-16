@@ -566,6 +566,14 @@ public class SearchClient {
 				System.err.println("Success!!!");
 				break;
 			}
+			ArrayList<Position> poswall = new ArrayList<Position>();
+			ArrayList<Position> temppie = new ArrayList<Position>();
+			for(Agent atemp : agents){
+				poswall.add(new Position(atemp.position.row,atemp.position.col));
+			}
+			temppie.add(new Position(0,0));
+			blockedPositions.add(poswall);
+			blockedPositions.add(temppie);
 			
 			//System.err.println("Initializing agents with initial state: /n" + agents);
 
@@ -584,7 +592,12 @@ public class SearchClient {
 					//if plan is not trapped
 					if(!plan.noPlan){
 					
+						if(agents.size() == 1){
+							strategies.clear();
+							strategies.add(new StrategyBFS());
+						}
 					solution = plan.findSolution(strategies.get(agentIndex));
+						
 					solutions.add(solution);
 					//if plan is trapped, break out of if statement
 					}
@@ -620,7 +633,7 @@ public class SearchClient {
 				}
 
 				agentIndex++;
-
+				
 				// TODO: Turn plans into arraylistarraylistposition
 				ArrayList<Position> twall = new ArrayList<Position>();
 				twall.add(new Position(agents.get(a.name).initialState.agentRow, agents.get(a.name).initialState.agentCol));
@@ -843,7 +856,7 @@ public class SearchClient {
 				System.err.println("Replanning initiated with above agents");
 				//USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
-				if (replanCounter >= 20) {
+				if (replanCounter >= 10000) {
 					serverMessages.close();
 					return;
 				}
