@@ -204,7 +204,7 @@ public class Planner {
 		List<Box> blockingBoxes = new ArrayList<Box>();
 
 		// find blocking boxes in node
-		for (Box b : newState.boxes2) {
+		for (Box b : SearchClient.allBoxes) {
 			if (b.isBlocking) {
 				blockingBoxes.add(b);
 				//// System.err.println("blockingboxes: " + blockingBoxes);
@@ -322,8 +322,11 @@ public class Planner {
 
 				Box blockingBox = findClosestBlockingBox(a, thisCurrentState);
 
+				//System.err.println("blockingboxes: " + blockingBox);
+
 				// System.err.println(blockingBox);
 				if (blockingBox != null) {
+					System.err.println(blockingBox+" blocking left, agent olor "+agent.color);
 
 					if (blockingBox.color.equals(agent.color)) {
 						// theGoalState = FreeAgent(currentState, a);
@@ -506,9 +509,10 @@ public class Planner {
 		// Position agentPos = trappedAgent.position;
 		float minDistance = 10000;
 
-		for (Box b : node.boxes2) {
+		for (Box b : SearchClient.allBoxes) {
 
-			if (b.color == agent.color && b.isBlocking && Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
+			//System.err.println("WTF: "+b);
+			if (b.color.equals(agent.color) && b.isBlocking && Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(trappedAgent.position, b.position);
 				box = b;
 
