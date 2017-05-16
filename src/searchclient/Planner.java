@@ -550,7 +550,7 @@ public class Planner {
 			}
 		}
 
-		if (box == null)
+		//if (box == null)
 			//System.err.println("No blocking Box found for trapped agent: " + trappedAgent);
 		return box;
 	}
@@ -579,7 +579,7 @@ public class Planner {
 			}
 		}
 
-		if (box == null)
+//		if (box == null)
 			//System.err.println("No Box found for agent " + agent);
 
 		//// //System.err.println("Box found at "+box);
