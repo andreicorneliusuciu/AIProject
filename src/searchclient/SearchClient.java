@@ -592,7 +592,7 @@ public class SearchClient {
 					//if plan is not trapped
 					if(!plan.noPlan){
 					
-						if(agents.size() == 1){
+						if(agents.size() == 1 && allGoals.size()>= 55){
 							strategies.clear();
 							strategies.add(new StrategyBFS());
 						}
