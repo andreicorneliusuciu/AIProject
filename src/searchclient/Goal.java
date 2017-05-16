@@ -1,5 +1,7 @@
 package searchclient;
 
+import java.util.List;
+
 public class Goal {
 	public Character name;
 	public String color;
@@ -37,6 +39,7 @@ public class Goal {
 		}
 	}
 
+	
 
 	@Override
 	public String toString() {

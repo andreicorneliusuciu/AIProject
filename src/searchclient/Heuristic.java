@@ -5,6 +5,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+
+import jdk.nashorn.internal.runtime.regexp.joni.MatcherFactory;
+
 import java.util.List;
 import java.lang.Math;
 
@@ -55,8 +58,6 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				int count = 0;
 				neighbors = getNeighbors(i, j, x, y, wallSpace);
-
-			
 
 				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
 					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
@@ -127,7 +128,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// } catch (IndexOutOfBoundsException e) {
-				// System.err.println(e);
+				// //system.err.println(e);
 				// }
 
 			}
@@ -186,7 +187,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		return theList;
 	}
 
-
 	private boolean[][] invertBooleanArray(boolean[][] arr) {
 		boolean[][] walls = arr;
 		for (int i = 0; i < walls.length; i++)
@@ -237,53 +237,50 @@ public abstract class Heuristic implements Comparator<Node> {
 	////////////////////
 
 	public int h(Node n) {
+
+		//	//system.err.println("this is the node: "+n);
+		////system.err.println("this is the boxes2 "+n.boxes2);
+
+		List<Position> boxCurrentPosition = new ArrayList<Position>();
+		for (int i = 0; i < Node.MAX_ROW; i++)
+			for (int j = 0; j < Node.MAX_COL; j++) {
+				if (n.boxes[i][j] == n.myBoxes.get(0).name) {
+					boxCurrentPosition.add(new Position(i, j));
+					////system.err.println("Box chosen: " + n.myBoxes.get(0).name + " in : " + new Position(i, j));
+				}
+
+			}
+
 		int result = 0;
-		if(n.isMove) {
-			result += DistancesComputer.
-					getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
+		if (n.isMove) {
+			result += DistancesComputer.getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
 		} else {
-		
-//		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
-//		int i = 0;
-//		Iterator<Goal> it1 = n.goals2.iterator();
-//		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-//		
-//		while (it1.hasNext() && it2.hasNext()) {
-//
-//			Box b = it2.next();
-//			Goal g = it1.next();
-//			result += DistancesComputer.
-//					getDistanceBetween2Positions(b.position, g.position);//here???
-//			//System.err.println("Dist between " + b.position + " and " + g.position + " is " + result);
-////			System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
-////			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
-//			result += DistancesComputer.
-//					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
-//		}
-//		}
-			result += DistancesComputer.
-					getDistanceBetween2Positions(n.goals2.get(0).position, new Position(n.agentRow, n.agentCol));
-			result += DistancesComputer.
-					getDistanceBetween2Positions(n.boxes2.get(0).position, new Position(n.agentRow, n.agentCol));
-//			System.err.println("[HEURISTIC] The agent " + n.theAgentName + " at postition " +new Position(n.agentRow, n.agentCol) + "has the "
-//					+ "goal at " + n.goals2.get(0) + " which is " + result + " cells away.");
+
+			for (Position p : boxCurrentPosition) {
+				////system.err.println("Position in H: " + p + " : " + n.goals2.get(0).position);
+
+				result += DistancesComputer.getDistanceBetween2Positions(p, new Position(n.agentRow, n.agentCol));
+
+				result += Math.abs(p.row - n.goals2.get(0).position.row) + Math.abs(p.col - n.goals2.get(0).position.col);//DistancesComputer.getDistanceBetween2Positions(p, n.goals2.get(0).position);
+
+				////system.err.println("result:" +result);
+			}
 		}
-		//System.err.println("[H] Heuristic result = " + result);
+		////system.err.println("[H] Heuristic result = " + result);
 		return result;
 	}
-	
+
 	public Set<Box> getBoxesPosition(Node n) {
 		Set<Box> boxesPosition = new TreeSet<>();
-		for(int i = 0; i <  DistancesComputer.levelRowSize -2 ; i++) {
-			for(int j = 0; j < DistancesComputer.levelColSize -2 ; j++) {
-				
-				if('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
-					boxesPosition.add(
-							new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
-				}			
-			}		
+		for (int i = 0; i < DistancesComputer.levelRowSize - 2; i++) {
+			for (int j = 0; j < DistancesComputer.levelColSize - 2; j++) {
+
+				if ('A' <= n.boxes[i][j] && n.boxes[i][j] <= 'Z' && n.myBoxesFinal.contains(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)))) {
+					boxesPosition.add(new Box(n.boxes[i][j], n.theAgentColor, new Position(i, j)));
+				}
+			}
 		}
-		
+
 		return boxesPosition;
 	}
 
