@@ -10,7 +10,7 @@ import searchclient.Memory;
 import searchclient.NotImplementedException;
 
 public abstract class Strategy {
-	private HashSet<Node> explored;
+	HashSet<Node> explored;
 	private final long startTime;
 
 	public Strategy() {

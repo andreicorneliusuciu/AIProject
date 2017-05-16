@@ -380,6 +380,10 @@ public class Planner {
 			thisCurrentState.nameOfGoal = chosen.name;
 			thisCurrentState.goals2 = new ArrayList<Goal>();
 			thisCurrentState.goals2.add(chosen);
+			System.err.println("CHOSEN VALUES");
+			System.err.println(chosen.position);
+			System.err.println(chosen.name);
+			System.err.println(agent.name);
 		}
 		
 		
@@ -393,7 +397,7 @@ public class Planner {
 				//System.err.println("Goal accepted :" + g.name);
 
 				Box b = null;
-				for (Box box : theAgent.initialState.boxes2) {
+				for (Box box : thisCurrentState.boxes2) {
 					System.err.println("feeggt" + box.isOnOwnGoal());
 					if (box.color.equals(agent.color) && !box.isOnOwnGoal()) {
 						b = new Box(box);
@@ -474,9 +478,13 @@ public class Planner {
 			if (iterations == 1000) {
 				// System.err.println(strategy.searchStatus());
 				iterations = 0;
+				/*LinkedList<Node> noOpList = new LinkedList<Node>();
+				initialNode.doNoOp = true;
+				noOpList.add(initialNode);
+				return noOpList;*/
 			}
 
-			if (strategy.frontierIsEmpty()) {
+			if (strategy.frontierIsEmpty() || strategy.explored.size()>5000) {
 
 				LinkedList<Node> noOpList = new LinkedList<Node>();
 				initialNode.doNoOp = true;
@@ -507,6 +515,7 @@ public class Planner {
 				}
 			}
 			iterations++;
+			
 		}
 
 	}
