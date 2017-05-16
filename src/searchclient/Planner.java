@@ -135,16 +135,15 @@ public class Planner {
 			// System.err.println("404: Goal not found. Shit");
 			return null;
 		} else {
-
 			int goalpriority = Integer.MAX_VALUE;
 			for (Goal g : newState.goals2) {
-				if (g.name.equals(goal.name) && !g.isSatisfied) {
+				if (g.name == goal.name && !g.isSatisfied) {
 					// pick highest priority goal first!!!!
 					if (goalpriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(new Position(node.agentRow,node.agentCol), g.position)) {
 						goalPos = g.position;
 						goalpriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(new Position(node.agentRow,node.agentCol), g.position);
 						goalName = g.name;
-
+						System.err.println(g.name);
 					}
 				}
 			}
@@ -204,7 +203,7 @@ public class Planner {
 		// find blocking boxes in node
 		for (Box b : newState.boxes2) {
 			if (b.isBlocking) {
-				blockingBoxes.add(b);
+				blockingBoxes.add(new Box(b));
 				//// System.err.println("blockingboxes: " + blockingBoxes);
 			}
 		}
@@ -356,30 +355,48 @@ public class Planner {
 		for(Goal g : thisCurrentState.goals2){
 			System.err.println(g.isSatisfied + " : " + g.position);
 		}
-		for (Goal g : thisCurrentState.goals2) {
-			if(chosenPriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied && g.color.equals(theAgent.color) && !g.assigned){
-				chosenPriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position);
-				chosen = g;
+		for(Goal g : thisCurrentState.goals2){
+			System.err.println("LOOK HERE");
+			System.err.println(g.position);
+			System.err.println(g.assigned);
+			System.err.println(g.isSatisfied);
+			System.err.println(g.color);
+		}
+		System.err.println("Ac: " +theAgent.color);
+		for(Goal g2 : SearchClient.allGoals){
+			for (Goal g : thisCurrentState.goals2) {
+				if(g.position.equals(g2.position)){
+					if(chosenPriority > g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied && g2.color.equals(theAgent.color) && !g2.assigned){
+						chosenPriority = g.priority*2+DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position);
+						chosen = g;
+						System.err.println("LH2");
+					}
+				}
 			}
 		}
 		if(chosen != null){
 			chosen.assigned = true;
+			theAgent.assignedChar = chosen.name;
 			thisCurrentState.nameOfGoal = chosen.name;
+			thisCurrentState.goals2 = new ArrayList<Goal>();
+			thisCurrentState.goals2.add(chosen);
 		}
+		
 		
 		//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
 		//System.err.println("Goal :" + g.name + " ," + g.color + " issatisfied: " + g.isSatisfied);
+		//System.println(thisCurrentState.goals2.size());
 		if(chosen == null){
 			System.err.println("NO CHOSEN FOR : " + theAgent.name);
 		}
-		else if (!chosen.isSatisfied && chosen.color.equals(theAgent.color)) {
+		else if (!chosen.isSatisfied /*&& chosen.color.equals(theAgent.color)*/) {
 				//System.err.println("Goal accepted :" + g.name);
 
 				Box b = null;
 				for (Box box : theAgent.initialState.boxes2) {
 					System.err.println("feeggt" + box.isOnOwnGoal());
 					if (box.color.equals(agent.color) && !box.isOnOwnGoal()) {
-						b = box;
+						b = new Box(box);
 						break;
 					}
 
@@ -402,8 +419,12 @@ public class Planner {
 //					// thisCurrentState.agentCol = pos.col;
 //
 //				} else {
-					
-					plan.add(MoveBoxToGoal(thisCurrentState, chosen));
+					theAgent.initialState.goals2 = new ArrayList<Goal>();
+					theAgent.initialState.goals2.add(chosen);
+					thisCurrentState.goals2 = new ArrayList<Goal>();
+					thisCurrentState.goals2.add(chosen);
+					System.err.println(MoveBoxToGoal(thisCurrentState,chosen));
+							plan.add(MoveBoxToGoal(thisCurrentState, chosen));
 					// plan.add(MoveToBox(thisCurrentState, new Goal('&',
 					// "none",
 					// new Position(g.position.row, 1))));
@@ -413,7 +434,6 @@ public class Planner {
 
 			
 		}
-
 		// Object plantoString;
 		System.err.println("HighestPlan: " + plantoPrint + " made by agent: " + theAgent);
 
@@ -421,6 +441,9 @@ public class Planner {
 		//			for (Node na : plan)
 		//			System.err.println("Plan selected: " + na.toString());
 		if (plan.size() > 0) {
+			//System.err.println(plan.get(0));
+			//System.err.println("DERP");
+			theAgent.initialState = plan.get(0);
 			return plan.get(0);
 		} else {
 			this.noPlan = true;
@@ -508,7 +531,7 @@ public class Planner {
 
 			if (b.color == agent.color && b.isBlocking && Position.manhattanDistance(trappedAgent.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(trappedAgent.position, b.position);
-				box = b;
+				box = new Box(b);
 
 				// //System.err.println("Box found for agent "+trappedAgent+"
 				// box
@@ -544,7 +567,7 @@ public class Planner {
 			// pick box closer to goal instead
 			if (b.color.equals(thisAgent.color) && Position.manhattanDistance(theGoal.position, b.position) < minDistance) {
 				minDistance = Position.manhattanDistance(theGoal.position, b.position);
-				box = b;
+				box = new Box(b);
 			}
 		}
 
@@ -583,8 +606,13 @@ public class Planner {
 				}
 			}
 		}
-
-		node.goals2 = goals;
+		node.goals2 = new ArrayList<Goal>();
+		for(Goal g : SearchClient.allGoals){
+			if(g.color.equals(agent.color)){
+				node.goals2.add(g);
+			}
+		}
+		//node.goals2 = goals;
 		node.boxes2 = boxes;
 
 	}

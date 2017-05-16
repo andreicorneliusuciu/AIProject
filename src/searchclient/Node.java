@@ -161,7 +161,14 @@ public class Node {
 		if (parent == null) {
 			this.g = 0;
 		} else {
-			this.g = parent.g() + 1;
+			/*if(this.action == null){
+				this.g = parent.g() + 1;
+			} else if(this.action.actionType != Command.Type.Move){
+				this.g = parent.g() + 2;
+			} else {*/
+				this.g = parent.g() + 1;
+				this.g= 0;
+			//}
 		}
 	}
 
@@ -176,12 +183,22 @@ public class Node {
 		copy.theAgentColor = this.theAgentColor;
 		// copy.boxes = this.boxes;
 
-		copy.boxes2 = this.boxes2;
+		for(Box b : this.boxes2){
+		copy.boxes2.add(new Box(b));
+		}
 		// copy.goals = this.goals;
-		copy.goals2 = this.goals2;
-		copy.myBoxes = this.myBoxes;
+		//for(Goal g : this.goals2){
+			copy.goals2 = this.goals2;
+		//}
+		for(Box b : this.myBoxes){
+			copy.boxes2.add(new Box(b));
+			}
+		
 		copy.action = this.action;
-		copy.myBoxesFinal = this.myBoxesFinal;
+		
+		for(Box b : this.myBoxesFinal){
+			copy.boxes2.add(new Box(b));
+			}
 		copy.isMove = this.isMove;
 		copy.doNoOp = this.doNoOp;
 		// copy._hash =this._hash;
@@ -193,6 +210,7 @@ public class Node {
 		}
 
 		return copy;
+
 	}
 
 	public void clearGoals() {
@@ -215,6 +233,10 @@ public class Node {
 
 	public boolean isGoalState() {
 		if (!isMove) {
+			/*if(this.g() > 5){
+				return true;
+			}*/
+			//System.err.println(this);
 			for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
 					char g = this.goals[row][col];
@@ -226,6 +248,19 @@ public class Node {
 			}
 
 			return true;
+			/*boolean done = false;
+			for(Goal g : this.goals2){
+				for(Box b : this.boxes2){
+					char temp = Character.toLowerCase(b.name);
+					if(b.position.equals(g.position) && temp == g.name){
+						done = true;
+						System.err.println("DONE!");
+						break;
+					}
+				}
+			}
+			//System.err.println(goals2.get(0).position);
+			return done;*/
 		} else {
 
 			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
@@ -264,7 +299,7 @@ public class Node {
 
 			for (Box b : boxes2) {
 				if (b.color.equals(theAgentColor)) {
-					myBoxes.add(b);
+					myBoxes.add(new Box(b));
 				}
 			}
 
@@ -439,12 +474,17 @@ public class Node {
 			}
 		}
 		copy.theAgentColor = this.theAgentColor;
-		copy.myBoxes = this.myBoxes;
+		for(Box b : this.myBoxes){
+			copy.myBoxes.add(new Box(b));
+		}
 		copy.theAgentName = this.theAgentName;
-
-		copy.goals2 = this.goals2;
-		copy.boxes2 = this.boxes2;
-
+		
+		for(Goal g : this.goals2){
+			copy.goals2.add(new Goal(g));
+		}
+		for(Box b : this.boxes2){
+			copy.boxes2.add(new Box(b));
+		}
 		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID) {
 			for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID)) {
 				copy.boxes[p.row][p.col] = '*';// TODO: Set '*' to be an
@@ -663,7 +703,12 @@ public class Node {
 
 		// TODO update boxes2 based on last nodes of all agents and moves that
 		// are stored in their initialState
-
+		this.goals2.clear();
+		for(Goal g : SearchClient.allGoals){
+			g.assigned = false;
+			this.goals2.add(new Goal(g));
+		}
+		
 		this.boxes2.clear();
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = 0; j < Node.MAX_COL; j++) {
@@ -690,7 +735,6 @@ public class Node {
 			}
 		}
 		for (Agent a : agents) {
-
 			Node newInitialState = this.Copy();
 
 			newInitialState.parent = null;
@@ -712,10 +756,10 @@ public class Node {
 
 			System.err.println("PRINTOUT OF GALZ");
 			for (Goal g : SearchClient.allGoals) {
-				//if (g.color.equals(a.color)) {
+				if (g.color.equals(a.color)) {
 					newInitialState.goals2.add(new Goal(g));
 					newInitialState.goals[g.position.row][g.position.col] = g.name;
-				//}
+				}
 				System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
 
 			}

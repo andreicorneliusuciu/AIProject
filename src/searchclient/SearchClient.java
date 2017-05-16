@@ -574,7 +574,7 @@ public class SearchClient {
 			//	Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
-				if (!a.isTrapped && !a.initialState.isGoalState()) {
+				if (!a.isTrapped /*&& !a.initialState.isGoalState()*/) {
 
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
@@ -831,6 +831,9 @@ public class SearchClient {
 					}
 					done2 = false;
 					positions2 = new ArrayList<Position>();
+				}
+				for(Goal g : SearchClient.allGoals){
+					g.assigned = false;
 				}
 				uberNode.updateUberNode(agents);
 				System.err.println("");

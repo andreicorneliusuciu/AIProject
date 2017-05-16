@@ -146,7 +146,7 @@ public abstract class Heuristic implements Comparator<Node> {
 	////////////////////
 
 	public int h(Node n) {
-		int result = 0;
+		/*int result = 0;
 		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
 		int i = 0;
 		Iterator<Goal> it1 = n.goals2.iterator();
@@ -163,10 +163,48 @@ public abstract class Heuristic implements Comparator<Node> {
 //			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
 			result += DistancesComputer.
 					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
+		}*/
+		Agent chosenA = null;
+		for(Agent a : SearchClient.agents){
+			if(n.theAgentName == a.name){
+				chosenA = a;
+				break;
+			}
 		}
 		
+		Box chosenB = null;
+		for(Box b : n.boxes2){
+			char temp = Character.toLowerCase(b.name);
+			if(chosenA.assignedChar == temp){
+				//if(!b.isOnOwnGoal()){
+					chosenB = b;
+					break;
+				//}
+			}
+		}
+		if(chosenB == null){
+			System.err.println("It happened");
+			System.err.println(n);
+			//return 0;
+		}
+		int chooseVal = Integer.MAX_VALUE;
+		Goal chosenG = null;
+		for(Goal g : SearchClient.allGoals){
+			if(g.name == chosenA.assignedChar){
+				int calc = DistancesComputer.getDistanceBetween2Positions(g.position, chosenA.position);
+				if(chooseVal > calc){
+					chooseVal = calc;
+					chosenG = new Goal(g);
+				}
+			}
+		}
+		//System.err.println("A: " + chosenA.position);
+		//System.err.println(" B: " + chosenB.position);
+		//System.err.println(" G: " + chosenG.position);
+		//System.err.println(new Position(n.agentRow,n.agentCol));
 		//System.err.println("[H] Heuristic result = " + result);
-		return result;
+		//System.err.println("Distance: " + DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position) + " ChosenB: " + chosenB.position + " " + chosenB.name + " chosenG: " + chosenG.name + " " + chosenG.position + " ChosenA: " + chosenA.assignedChar);
+		return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position)*8 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow,n.agentCol))*4 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow,n.agentCol))*2;
 	}
 	
 	public Set<Box> getBoxesPosition(Node n) {
