@@ -516,6 +516,7 @@ public class SearchClient {
 		//////////////////////////////////////////
 
 		//GET THE STRATEGY
+		
 		List<Strategy> strategies = null;
 
 		if (args.length > 0) {
