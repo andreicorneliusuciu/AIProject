@@ -1136,6 +1136,7 @@ public class SearchClient {
 					done2 = false;
 					positions2 = new ArrayList<Position>();
 				}
+				
 				uberNode.updateUberNode(agents);
 				findReachableBoxesAndGoals();
 				System.err.println("");
