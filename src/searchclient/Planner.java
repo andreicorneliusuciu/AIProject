@@ -85,10 +85,10 @@ public class Planner {
 			Node altPlan = hideAgent(this.agent);
 			plantoPrint.add(Type.HideAgent);
 			solution = implementHighPlan(altPlan, strategy);
-			
+
 			System.err.println("Alt solution ACTIVATED");
 
-			System.err.println("Plan: "+plantoPrint);
+			System.err.println("Plan: " + plantoPrint);
 		}
 		return solution;
 	}
@@ -97,10 +97,10 @@ public class Planner {
 
 		//pass reference
 		Node newState = a.initialState;
-		System.err.println("Hide initialState: "+newState);
+		System.err.println("Hide initialState: " + newState);
 
 		float length = 1000;
-		Position shortestPos = new Position(0,0);
+		Position shortestPos = new Position(0, 0);
 
 		// find shortest manhattan distance available position
 
@@ -119,7 +119,7 @@ public class Planner {
 
 		newState = MoveToBox(newState, shortestPos);
 
-		System.err.println("Hide initialState after refill: "+newState);
+		System.err.println("Hide initialState after refill: " + newState);
 
 		return newState;
 	}
@@ -163,8 +163,7 @@ public class Planner {
 				}
 			}
 		}
-	
-		
+
 		updateGoalState.goals2 = new ArrayList<>();
 		updateGoalState.isMove = true;
 		updateGoalState.goals2.add(new Goal('&', "none", pos));
@@ -175,7 +174,6 @@ public class Planner {
 		return updateGoalState;
 	}
 
-	
 	private Node MoveBoxToGoal(Node node, Goal goal) {
 		// make a goal state i n an actual goal so it can be achieved
 
@@ -414,18 +412,7 @@ public class Planner {
 		// TODO find closest box-goal distance and satisfy that first
 		int chosenPriority = Integer.MAX_VALUE;
 		Goal chosen = null;
-		System.err.println(" POSITION OF CHOSEN GOAL");
-		for (Goal g : thisCurrentState.goals2) {
-			System.err.println(g.isSatisfied + " : " + g.position);
-		}
-		for (Goal g : thisCurrentState.goals2) {
-			System.err.println("LOOK HERE");
-			System.err.println(g.position);
-			System.err.println(g.assigned);
-			System.err.println(g.isSatisfied);
-			System.err.println(g.color);
-		}
-		System.err.println("Ac: " + theAgent.color);
+
 		for (Goal g2 : SearchClient.allGoals) {
 			for (Goal g : thisCurrentState.goals2) {
 				if (g.position.equals(g2.position)) {
@@ -444,10 +431,7 @@ public class Planner {
 			thisCurrentState.nameOfGoal = chosen.name;
 			thisCurrentState.goals2 = new ArrayList<Goal>();
 			thisCurrentState.goals2.add(chosen);
-			System.err.println("CHOSEN VALUES");
-			System.err.println(chosen.position);
-			System.err.println(chosen.name);
-			System.err.println(agent.name);
+
 		}
 
 		//System.err.println("all goals in currentstate planner: "+thisCurrentState.goals2);
