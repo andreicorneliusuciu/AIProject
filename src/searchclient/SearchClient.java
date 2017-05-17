@@ -834,13 +834,21 @@ public class SearchClient {
 					if (g.color.equals(a.color)) {
 
 						usefulAgents.add(a);
-					} else {
-						uselessAgents.add(a);
-					}
+					} 
 				}
 
 			}
+			
+			for(Agent a : agents)
+			{
+				if(!usefulAgents.contains(a))
+				{
+					uselessAgents.add(a);
+				}
+			}
 
+			System.err.println("Useless agents: "+uselessAgents);
+			
 			Collections.sort(usefulAgents);
 			Collections.sort(uselessAgents);
 			
@@ -849,6 +857,8 @@ public class SearchClient {
 				a.hide = true;
 			}
 
+			System.err.println("Agents "+agents);
+			
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
 				if (!g.isSatisfied) {
