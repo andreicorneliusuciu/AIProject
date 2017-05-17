@@ -705,14 +705,12 @@ public class SearchClient {
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
 
-	
-
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
 		for (Agent a : agents) {
 			for (Box b : allBoxes) {
 
-				//	if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
+					if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
 
 				for (Goal g : a.initialState.goals2) {
 					if (g.color.equals(b.color)) {
@@ -728,8 +726,8 @@ public class SearchClient {
 				if (done)
 					break;
 
-				//				} else
-				//					continue;
+								} else
+									continue;
 			}
 
 			done = false;
@@ -884,9 +882,6 @@ public class SearchClient {
 
 				atemp.initialState.boxes2.clear();
 
-		
-								
-			
 				for (Box b : allBoxes) {
 					atemp.initialState.boxes2.add(new Box(b));
 				}
