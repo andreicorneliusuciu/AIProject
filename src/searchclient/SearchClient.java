@@ -1105,6 +1105,11 @@ public class SearchClient {
 					int j2 = 0;
 
 					boolean replan = false;
+					boolean allNoOp = false;
+					if(!jointAction.toString().contains("Push") &&  jointAction.toString().contains("Pull") && jointAction.toString().contains("Move")){
+						serverMessages.close();
+						return;
+					}
 					for (String s : commandAnalyze) {
 						if (s.contains("false")) {
 							// Don't update ubernode, replan
@@ -1231,8 +1236,8 @@ public class SearchClient {
 				// USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
 				if (replanCounter >= 2) {
-					//serverMessages.close();
-					//return;
+					serverMessages.close();
+					return;
 				}
 			}
 
@@ -1433,7 +1438,7 @@ public class SearchClient {
 			for (Position p : positions) {
 				if (matrix[p.row][p.col] != 2) {// Blockage! Oh no!
 					agent.isTrapped = true;
-					System.err.println("Agent blocking found and is: " + agent.name);
+					//System.err.println("Agent blocking found and is: " + agent.name);
 					for (int i = 0; i < levelRowSize; i++) {
 						for (int i2 = 0; i2 < levelColumnSize; i2++) {
 							if (matrix[i][i2] == 3) {
@@ -1441,7 +1446,7 @@ public class SearchClient {
 									for (Box b : allBoxes) {
 										if (b.position.equals(new Position(i, i2))) {
 											b.isBlocking = true;
-											System.err.println("Box blocking found and is: " + b);
+											//System.err.println("Box blocking found and is: " + b);
 										}
 									}
 								}
@@ -1515,8 +1520,8 @@ public class SearchClient {
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize;) {
-				System.err.println(levelRowSize);
-				System.err.println(levelColumnSize);
+				//System.err.println(levelRowSize);
+				//System.err.println(levelColumnSize);
 				if (mapOfCell[i][i2].type == 1) {
 
 					boolean connected = true;

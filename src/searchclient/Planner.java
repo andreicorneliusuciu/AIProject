@@ -420,9 +420,8 @@ public class Planner {
 					if(g.previousGoal.equals(g2.position)){
 						if(!g2.isSatisfied){
 							g.assigned = true;
-							System.err.println(" This assigns");
 						}
-						System.err.println(" This checks previous goal...");
+						System.err.println(" This checks previso");
 					}
 				}
 				System.err.println(" This has a previous goal! ");

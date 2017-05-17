@@ -287,8 +287,8 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 		if (chosenB == null) {
-			System.err.println("It happened");
-			System.err.println(n);
+			//System.err.println("It happened");
+			//System.err.println(n);
 			//return 0;
 		}
 		int chooseVal = Integer.MAX_VALUE;
