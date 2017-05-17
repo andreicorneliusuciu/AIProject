@@ -37,6 +37,8 @@ public class SearchClient {
 	// public List<Node> initialStates;
 	public static boolean[][] walls;
 
+	static boolean activator = false;
+
 	public static Node uberNode;
 	// The size of the map
 	// public static int levelColSize;
@@ -268,6 +270,18 @@ public class SearchClient {
 			row++;
 		}
 
+		findAllRooms();
+
+		allBoxes = new ArrayList<Box>();
+		for (Box b : agents.get(0).initialState.boxes2) {
+			allBoxes.add(new Box(b));
+		}
+
+		if (activator) {
+
+			findReachableBoxesAndGoals();
+		}
+
 		Collections.sort(agents);
 
 		System.err.println("\n ------------------------------------ \n");
@@ -295,7 +309,7 @@ public class SearchClient {
 
 	}
 
-	public void findAllRooms() {
+	public static void findAllRooms() {
 
 		for (Agent a : agents) {
 			flowFills[a.name] = flowFill2(a);
@@ -348,17 +362,14 @@ public class SearchClient {
 				rooms++;
 				agentsRooms[a.name] = rooms;
 				System.err.println("pizza");
+
+				activator = true;
 			}
 		}
 		System.err.println("pisse" + agentsRooms);
 	}
 
 	public static void findReachableBoxesAndGoals() {
-
-		allBoxes = new ArrayList<Box>();
-		for (Box b : agents.get(0).initialState.boxes2) {
-			allBoxes.add(new Box(b));
-		}
 
 		// boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
@@ -371,28 +382,26 @@ public class SearchClient {
 					if (g.color.equals(b.color)) {
 						// done = true;
 
-						rescueUnit(a, positions, true, g, b);
-						// break;
+						if (flowFills[a.name][g.position.row][g.position.col] != 2) {
+
+							agents.get(a.name).initialState.goals2.remove(g);
+
+							agents.get(a.name).initialState.goals[g.position.row][g.position.col] = 0;
+
+						}
+
+						if (flowFills[a.name][b.position.row][b.position.col] != 2) {
+							agents.get(a.name).initialState.myBoxesFinal.remove(b);
+							agents.get(a.name).initialState.boxes2.remove(b);
+							agents.get(a.name).initialState.boxes[b.position.row][b.position.col] = 0;
+
+						}
+
 					}
 				}
 
-				// if (done)
-				// break;
 			}
-			// done = false;
-
-			System.err.println("kusse box " + a.name);
-			for (int i = 0; i < Node.MAX_ROW; i++) {
-				for (int j = 0; j < Node.MAX_COL; j++) {
-
-					System.err.print(agents.get(a.name).initialState.goals[i][j]);
-
-				}
-				System.err.println();
-			}
-
 		}
-
 	}
 
 	public static int[][] flowFill2(Agent agent) {
@@ -823,42 +832,39 @@ public class SearchClient {
 
 			blockedPositions = new ArrayList<ArrayList<Position>>();
 
-			List<Agent> usefulAgents = new ArrayList<Agent>();
-			List<Agent> uselessAgents = new ArrayList<Agent>();
+			//			List<Agent> usefulAgents = new ArrayList<Agent>();
+			//			List<Agent> uselessAgents = new ArrayList<Agent>();
+			//
+			//			//Find agents that have no boxes/goals
+			//
+			//			for (Agent a : agents) {
+			//				for (Goal g : allGoals) {
+			//
+			//					if (g.color.equals(a.color)) {
+			//
+			//						usefulAgents.add(a);
+			//					}
+			//				}
+			//
+			//			}
+			//
+			//			for (Agent a : agents) {
+			//				if (!usefulAgents.contains(a)) {
+			//					uselessAgents.add(a);
+			//				}
+			//			}
+			//
+			//			System.err.println("Useless agents: " + uselessAgents);
+			//
+			//			Collections.sort(usefulAgents);
+			//			Collections.sort(uselessAgents);
+			//
+			//			for (Agent a : uselessAgents) {
+			//				a.hide = true;
+			//			}
+			//
+			//			System.err.println("Agents " + agents);
 
-			//Find agents that have no boxes/goals
-
-			for (Agent a : agents) {
-				for (Goal g : allGoals) {
-
-					if (g.color.equals(a.color)) {
-
-						usefulAgents.add(a);
-					} 
-				}
-
-			}
-			
-			for(Agent a : agents)
-			{
-				if(!usefulAgents.contains(a))
-				{
-					uselessAgents.add(a);
-				}
-			}
-
-			System.err.println("Useless agents: "+uselessAgents);
-			
-			Collections.sort(usefulAgents);
-			Collections.sort(uselessAgents);
-			
-			for(Agent a : uselessAgents)
-			{
-				a.hide = true;
-			}
-
-			System.err.println("Agents "+agents);
-			
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
 				if (!g.isSatisfied) {
@@ -879,6 +885,22 @@ public class SearchClient {
 			ArrayList<Position> temppie = new ArrayList<Position>();
 			for (Agent atemp : agents) {
 				poswall.add(new Position(atemp.position.row, atemp.position.col));
+				atemp.initialState.agentRow = atemp.position.row;
+				atemp.initialState.agentCol = atemp.position.col;
+
+				atemp.initialState.boxes2.clear();
+
+		
+								
+			
+				for (Box b : allBoxes) {
+					atemp.initialState.boxes2.add(new Box(b));
+				}
+
+				if (activator) {
+
+					findReachableBoxesAndGoals();
+				}
 			}
 			temppie.add(new Position(0, 0));
 			blockedPositions.add(poswall);
