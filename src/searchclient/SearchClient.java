@@ -705,13 +705,7 @@ public class SearchClient {
 		// Read level and create the initial state of the problem
 		SearchClient client = new SearchClient(serverMessages);
 
-		// TODO update allBoxes and allgoals
-
-		// for (Agent a : agents) { // positions, check if
-		allBoxes = new ArrayList<Box>();
-		for (Box b : agents.get(0).initialState.boxes2) {
-			allBoxes.add(new Box(b));
-		}
+	
 
 		boolean done = false;
 		ArrayList<Position> positions = new ArrayList<Position>();
