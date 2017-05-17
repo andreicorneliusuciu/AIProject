@@ -1220,9 +1220,11 @@ public class SearchClient {
 					done2 = false;
 					positions2 = new ArrayList<Position>();
 				}
+
 				for (Goal g : SearchClient.allGoals) {
 					g.assigned = false;
 				}
+
 				uberNode.updateUberNode(agents);
 				System.err.println("agent initialstate after: " + agents.get(0).initialState);
 
