@@ -27,7 +27,7 @@ public class Box implements Comparable<Box> {
 		this.name = b.name;
 		this.color = new String(b.color);
 		this.position = new Position(b.position.row, b.position.col);
-		this.isBlocking = isBlocking;
+		this.isBlocking = b.isBlocking;
 	}
 
 	public boolean isOnOwnGoal() {
