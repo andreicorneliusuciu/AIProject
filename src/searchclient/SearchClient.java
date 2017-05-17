@@ -583,11 +583,13 @@ public class SearchClient {
 		// Find pattern where goal is surrounded by three walls
 		int wallCount = 0;
 		int priorityAdd = 0;
+		Position prevPos = null;
 		if (!c.east) {
 			wallCount++;
 		} else if (mapOfCell[c.position.row][c.position.col + 1].prioritySet) {
 			if (mapOfCell[c.position.row][c.position.col + 1].addPriority >= priorityAdd) {
 				priorityAdd = mapOfCell[c.position.row][c.position.col + 1].addPriority + 1;
+				prevPos = new Position(c.position.row,c.position.col + 1);
 			}
 			wallCount++;
 		}
@@ -596,6 +598,7 @@ public class SearchClient {
 		} else if (mapOfCell[c.position.row][c.position.col - 1].prioritySet) {
 			if (mapOfCell[c.position.row][c.position.col - 1].addPriority >= priorityAdd) {
 				priorityAdd = mapOfCell[c.position.row][c.position.col - 1].addPriority + 1;
+				prevPos = new Position(c.position.row,c.position.col - 1);
 			}
 			wallCount++;
 		}
@@ -604,6 +607,7 @@ public class SearchClient {
 		} else if (mapOfCell[c.position.row + 1][c.position.col].prioritySet) {
 			if (mapOfCell[c.position.row + 1][c.position.col].addPriority >= priorityAdd) {
 				priorityAdd = mapOfCell[c.position.row + 1][c.position.col].addPriority + 1;
+				prevPos = new Position(c.position.row + 1,c.position.col);
 			}
 			wallCount++;
 		}
@@ -612,6 +616,7 @@ public class SearchClient {
 		} else if (mapOfCell[c.position.row - 1][c.position.col].prioritySet) {
 			if (mapOfCell[c.position.row - 1][c.position.col].addPriority >= priorityAdd) {
 				priorityAdd = mapOfCell[c.position.row - 1][c.position.col].addPriority + 1;
+				prevPos = new Position(c.position.row - 1,c.position.col + 1);
 			}
 			wallCount++;
 		}
@@ -619,7 +624,14 @@ public class SearchClient {
 			mapOfCell[c.position.row][c.position.col].prioritySet = true;
 			mapOfCell[c.position.row][c.position.col].priority += priorityAdd;
 			mapOfCell[c.position.row][c.position.col].addPriority = priorityAdd;
-			System.err.println("Found corner! " + priorityAdd);
+			if(prevPos != null){
+				for(Goal g : allGoals){
+					if(g.position.equals(new Position(c.position.row,c.position.col))){
+						g.previousGoal = prevPos;
+					}
+				}
+			}
+			//System.err.println("Found corner! " + priorityAdd);
 			return true;
 		}
 		return false;
@@ -760,8 +772,8 @@ public class SearchClient {
 
 		uberNode.agents = agents;
 
-		// storageAnalysis(uberNode);
-		// goalPriority();
+		 storageAnalysis(uberNode);
+		 goalPriority();
 
 		// for(){
 
@@ -897,7 +909,17 @@ public class SearchClient {
 
 			// System.err.println("Initializing agents with initial state: /n" +
 			// agents);
-
+			for(Goal g : SearchClient.allGoals){
+				if(g.previousGoal != null){
+					for(Goal g2 : SearchClient.allGoals){
+						if(g.previousGoal.equals(g2.position)){
+							if(!g2.isSatisfied){
+								g.assigned = true;
+							}
+						}
+					}
+				}
+			}
 			// Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			int agentIndex = 0;
 			// Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
@@ -935,6 +957,7 @@ public class SearchClient {
 					agents.get(a.name).initialState.assignBlocked(blockedPositions);
 					LinkedList<Node> tempList = new LinkedList<Node>();
 					Node tempInitialState = a.initialState.Copy();
+					
 					// System.err.println("InitialState for trapped agent " +
 					// a.name + " with initialState " + a.initialState);
 					tempInitialState.doNoOp = true; // append noop in
@@ -1180,8 +1203,18 @@ public class SearchClient {
 					done2 = false;
 					positions2 = new ArrayList<Position>();
 				}
-				for (Goal g : SearchClient.allGoals) {
-					g.assigned = false;
+				for(Goal g : SearchClient.allGoals){
+					if(g.previousGoal != null){
+						for(Goal g2 : SearchClient.allGoals){
+							if(g.previousGoal.equals(g2.position)){
+								if(!g2.isSatisfied){
+									g.assigned = true;
+								} else {
+									g.assigned = false;
+								}
+							}
+						}
+					}
 				}
 				uberNode.updateUberNode(agents);
 				System.err.println("agent initialstate after: " + agents.get(0).initialState);
@@ -1197,9 +1230,9 @@ public class SearchClient {
 
 				// USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
-				if (replanCounter >= 100) {
-					serverMessages.close();
-					return;
+				if (replanCounter >= 1) {
+					//serverMessages.close();
+					//return;
 				}
 			}
 
@@ -1482,6 +1515,8 @@ public class SearchClient {
 		ArrayList<Line> rows = new ArrayList<Line>();
 		for (int i = 0; i < levelRowSize; i++) {
 			for (int i2 = 0; i2 < levelColumnSize;) {
+				System.err.println(levelRowSize);
+				System.err.println(levelColumnSize);
 				if (mapOfCell[i][i2].type == 1) {
 
 					boolean connected = true;
@@ -1504,6 +1539,9 @@ public class SearchClient {
 					}
 					row.positions = positions;
 					rows.add(row);
+				}
+				if(i2 >= levelColumnSize){
+					break;
 				}
 				if (mapOfCell[i][i2].type == 2) {
 
@@ -1539,7 +1577,7 @@ public class SearchClient {
 					boolean connected = true;
 					Line col = new Line();
 					ArrayList<Position> positions = new ArrayList<Position>();
-					while (connected) {
+					while (connected && i2 < levelRowSize) {
 						if (mapOfCell[i2][i].type == 1) {
 							mapOfCell[i2][i].colID = cols.size();
 							positions.add(mapOfCell[i2][i].position);
@@ -1550,6 +1588,10 @@ public class SearchClient {
 					}
 					col.positions = positions;
 					cols.add(col);
+				}
+
+				if(i2 >= levelRowSize){
+					break;
 				}
 				if (mapOfCell[i2][i].type == 2) {// Goal
 					boolean connected = true;

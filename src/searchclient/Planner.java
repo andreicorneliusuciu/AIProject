@@ -414,6 +414,20 @@ public class Planner {
 		// TODO find closest box-goal distance and satisfy that first
 		int chosenPriority = Integer.MAX_VALUE;
 		Goal chosen = null;
+		for(Goal g : thisCurrentState.goals2){
+			if(g.previousGoal != null){
+				for(Goal g2 : SearchClient.allGoals){
+					if(g.previousGoal.equals(g2.position)){
+						if(!g2.isSatisfied){
+							g.assigned = true;
+							System.err.println(" This assigns");
+						}
+						System.err.println(" This checks previous goal...");
+					}
+				}
+				System.err.println(" This has a previous goal! ");
+			}
+		}
 		System.err.println(" POSITION OF CHOSEN GOAL");
 		for (Goal g : thisCurrentState.goals2) {
 			System.err.println(g.isSatisfied + " : " + g.position);
@@ -429,7 +443,7 @@ public class Planner {
 		for (Goal g2 : SearchClient.allGoals) {
 			for (Goal g : thisCurrentState.goals2) {
 				if (g.position.equals(g2.position)) {
-					if (chosenPriority > g.priority * 2 + DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied && g2.color.equals(theAgent.color) && !g2.assigned) {
+					if (chosenPriority > g.priority * 2 + DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position) && !g.isSatisfied && g2.color.equals(theAgent.color) && !g2.assigned && !g.assigned) {
 						chosenPriority = g.priority * 2 + DistancesComputer.getDistanceBetween2Positions(this.agent.position, g.position);
 						chosen = g;
 						System.err.println("LH2");
