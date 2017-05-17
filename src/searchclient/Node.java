@@ -774,7 +774,8 @@ public class Node {
 				}
 			}
 		}
-		//	}
+		
+		
 		for (Agent a : agents) {
 
 			System.err.println("sisse:  agent" + a.name + "    " + a.initialState.toString());
