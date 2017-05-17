@@ -1230,7 +1230,7 @@ public class SearchClient {
 
 				// USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
-				if (replanCounter >= 1) {
+				if (replanCounter >= 2) {
 					//serverMessages.close();
 					//return;
 				}
