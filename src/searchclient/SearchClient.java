@@ -976,6 +976,7 @@ public class SearchClient {
 							} else {
 
 								rowPosition2 = rowPosition - temp.dirToRowChange(temp.dir1);
+								colPosition2 = colPosition - Command.dirToColChange(temp.dir1);
 								twall.add(new Position(rowPosition2, colPosition2));
 							}
 						}
