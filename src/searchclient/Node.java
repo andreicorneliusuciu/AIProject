@@ -96,45 +96,39 @@ public class Node {
 			}
 		}
 
-		if (SearchClient.blockedPositions.size() > this.blockedPositionsID - 1 && this.blockedPositionsID - 1 >= 0
-				&& SearchClient.solutions != null) {
+		if (SearchClient.blockedPositions.size() > this.blockedPositionsID - 1 && this.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
 			// Fog of war
-			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-					.size() > this.blockedPositionsID - 1) {// Don't
-															// get
-															// data
-															// from
-															// prior
-															// if
-															// no
-															// prior
-															// exists
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
+																																								// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
 				for (Position p : SearchClient.blockedPositions.get(this.blockedPositionsID - 1)) {
 					// Get data from agent just prior to this one.
-					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-							.get(this.blockedPositionsID - 1).boxes[p.row][p.col];
+					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(this.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
-		} else if (SearchClient.blockedPositions.size() <= this.blockedPositionsID - 1
-				&& SearchClient.solutions != null) {// We're
-													// over
-													// the
-													// edge
+		} else if (SearchClient.blockedPositions.size() <= this.blockedPositionsID - 1 && SearchClient.solutions != null) {// We're
+																																// over
+																															// the
+																															// edge
 
-			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-					.size() > this.blockedPositionsID - 1) {// Don't
-															// get
-															// data
-															// from
-															// prior
-															// if
-															// no
-															// prior
-															// exists
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > this.blockedPositionsID - 1) {// Don't
+																																								// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
 				for (Position p : SearchClient.blockedPositions.get(SearchClient.blockedPositions.size() - 1)) {
 					// Get data from agent just prior to this one.
-					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-							.get(blockedPositionsID - 1).boxes[p.row][p.col];
+					this.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
 		}
@@ -261,7 +255,7 @@ public class Node {
 			 */
 		} else {
 
-			System.err.println("Printing goals in node special: "+goals2);
+			System.err.println("Printing goals in node special: " + goals2);
 			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
 		}
 	}
@@ -368,8 +362,7 @@ public class Node {
 								if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
 
 									for (Box childbox : n.boxes2) {
-										if (childbox.position.row == b.position.row
-												&& childbox.position.col == b.position.col) {
+										if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
 
 											childbox.position.row = newBoxRow;
 											childbox.position.col = newBoxCol;
@@ -422,8 +415,7 @@ public class Node {
 								if (b.position.row == newAgentRow && b.position.col == newAgentCol) {
 
 									for (Box childbox : n.boxes2) {
-										if (childbox.position.row == b.position.row
-												&& childbox.position.col == b.position.col) {
+										if (childbox.position.row == b.position.row && childbox.position.col == b.position.col) {
 
 											childbox.position.row = agentRow;
 											childbox.position.col = agentCol;
@@ -525,37 +517,31 @@ public class Node {
 			}
 		}
 
-		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID - 1 && copy.blockedPositionsID - 1 >= 0
-				&& SearchClient.solutions != null) {
+		if (SearchClient.blockedPositions.size() > copy.blockedPositionsID - 1 && copy.blockedPositionsID - 1 >= 0 && SearchClient.solutions != null) {
 			// Fog of war
-			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-					.size() > copy.blockedPositionsID - 1) {// Don't // exists
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't // exists
 				for (Position p : SearchClient.blockedPositions.get(copy.blockedPositionsID - 1)) {
 					// Get data from agent just prior to this one.
-					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-							.get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
+					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
-		} else if (SearchClient.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null
-				&& SearchClient.blockedPositions.size() > 0) {// We're
+		} else if (SearchClient.blockedPositions.size() <= copy.blockedPositionsID - 1 && SearchClient.solutions != null && SearchClient.blockedPositions.size() > 0) {// We're
 			// over
 			// the
 			// edge
 
-			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-					.size() > copy.blockedPositionsID - 1) {// Don't
-															// get
-															// data
-															// from
-															// prior
-															// if
-															// no
-															// prior
-															// exists
+			if (SearchClient.solutions.size() > 0 && SearchClient.solutions.get(SearchClient.solutions.size() - 1).size() > copy.blockedPositionsID - 1) {// Don't
+																																								// get
+																																							// data
+																																							// from
+																																							// prior
+																																							// if
+																																							// no
+																																							// prior
+																																							// exists
 				for (Position p : SearchClient.blockedPositions.get(SearchClient.blockedPositions.size() - 1)) {
 					// Get data from agent just prior to this one.
-					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1)
-							.get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
+					copy.boxes[p.row][p.col] = SearchClient.solutions.get(SearchClient.solutions.size() - 1).get(copy.blockedPositionsID - 1).boxes[p.row][p.col];
 				}
 			}
 		}
@@ -776,24 +762,23 @@ public class Node {
 			if (b.isOnOwnGoal()) {
 				for (Goal g : SearchClient.allGoals) {
 
-					if (SearchClient.flowFills[SearchClient.findAgentFlowfillForPos(
-							new Position(b.position.row, b.position.row))][b.position.row][b.position.row] == 2
-							&& SearchClient.flowFills[SearchClient.findAgentFlowfillForPos(new Position(g.position.row,
-									g.position.row))][g.position.row][g.position.row] == 2) {
+					//					if (SearchClient.flowFills[SearchClient.findAgentFlowfillForPos(
+					//							new Position(b.position.row, b.position.row))][b.position.row][b.position.row] == 2
+					//							&& SearchClient.flowFills[SearchClient.findAgentFlowfillForPos(new Position(g.position.row,
+					//									g.position.row))][g.position.row][g.position.row] == 2) {
 
-						if (g.position.equals(b.position)) {
-							g.isSatisfied = true;
-							g.assigned = true;
-						}
+					if (g.position.equals(b.position)) {
+						g.isSatisfied = true;
+						g.assigned = true;
 					}
 				}
 			}
 		}
+		//	}
 		for (Agent a : agents) {
-			
-			
-			System.err.println("sisse:  agent"+a.name+"    "+a.initialState.toString());
-			
+
+			System.err.println("sisse:  agent" + a.name + "    " + a.initialState.toString());
+
 			Node newInitialState = this.Copy();
 
 			newInitialState.parent = null;
@@ -835,7 +820,7 @@ public class Node {
 				}
 			}
 			a.initialState = newInitialState;
-		
+
 		}
 
 	}
