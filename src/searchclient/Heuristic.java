@@ -53,11 +53,9 @@ public abstract class Heuristic implements Comparator<Node> {
 				int count = 0;
 				neighbors = getNeighbors(i, j, x, y, wallSpace);
 
-
 				if (isCabin(i - 1, j - 1, x, y) && isCabin(i - 1, j, x, y) && isCabin(i - 1, j + 1, x, y) && isCabin(i + 1, j - 1, x, y) && isCabin(i + 1, j, x, y) && isCabin(i + 1, j + 1, x, y) && isCabin(i, j + 1, x, y) && isCabin(i, j - 1, x, y)) {
 					if (!wallSpace[i][j] && !wallSpace[i - 1][j - 1] && !wallSpace[i - 1][j] && wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && wallSpace[i][j + 1] && !wallSpace[i + 1][j - 1] && !wallSpace[i + 1][j] && wallSpace[i + 1][j + 1]) {
 						theList.add(new Position(i, j));
-
 
 					}
 				}
@@ -158,7 +156,6 @@ public abstract class Heuristic implements Comparator<Node> {
 					}
 				}
 
-
 				// } catch (IndexOutOfBoundsException e) {
 				// //system.err.println(e);
 				// }
@@ -195,7 +192,6 @@ public abstract class Heuristic implements Comparator<Node> {
 					if (!wallSpace[i][j] && !wallSpace[i - 1][j + 1] && !wallSpace[i][j - 1] && !wallSpace[i][j + 1]) {
 						theList.add(new Position(i, j));
 
-
 					}
 				}
 
@@ -219,7 +215,6 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		return theList;
 	}
-
 
 	private boolean[][] invertBooleanArray(boolean[][] arr) {
 		boolean[][] walls = arr;
@@ -271,70 +266,60 @@ public abstract class Heuristic implements Comparator<Node> {
 	////////////////////
 
 	public int h(Node n) {
-		/*int result = 0;
-		Set<Box> boxesOrderedAlphabetically = getBoxesPosition(n);
-		int i = 0;
-		Iterator<Goal> it1 = n.goals2.iterator();
-		Iterator<Box> it2 = boxesOrderedAlphabetically.iterator();
-		// System.err.println("[H] boxes size = " + boxesOrderedAlphabetically.size());
-		 //System.err.println("[H] goals2 size = " + n.goals2.size());
-		while (it1.hasNext() && it2.hasNext()) {
-
-			Box b = it2.next();
-			Goal g = it1.next();
-			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, g.position);//here???
-			//System.err.println("Dist between " + b.position + " and " + g.position + " is " + result);
-//			System.err.println("HEURISTIC} goals2 has size = " + n.goals2.size());
-//			System.err.println("HEURISTIC} boxesOrderedAlphabetically has size = " + boxesOrderedAlphabetically.size());
-			result += DistancesComputer.
-					getDistanceBetween2Positions(b.position, new Position(n.agentRow, n.agentCol));
-		}*/
+		
+		if(!n.isMove){
 		Agent chosenA = null;
-		for(Agent a : SearchClient.agents){
-			if(n.theAgentName == a.name){
+		for (Agent a : SearchClient.agents) {
+			if (n.theAgentName == a.name) {
 				chosenA = a;
 				break;
 			}
 		}
-		
+
 		Box chosenB = null;
-		for(Box b : n.boxes2){
+		for (Box b : n.boxes2) {
 			char temp = Character.toLowerCase(b.name);
-			if(chosenA.assignedChar == temp){
+			if (chosenA.assignedChar == temp) {
 				//if(!b.isOnOwnGoal()){
-					chosenB = b;
-					break;
+				chosenB = b;
+				break;
 				//}
 			}
 		}
-		if(chosenB == null){
+		if (chosenB == null) {
 			System.err.println("It happened");
 			System.err.println(n);
 			//return 0;
 		}
 		int chooseVal = Integer.MAX_VALUE;
 		Goal chosenG = null;
-		for(Goal g : SearchClient.allGoals){
-			if(g.name == chosenA.assignedChar){
+		for (Goal g : SearchClient.allGoals) {
+			if (g.name == chosenA.assignedChar) {
 				int calc = DistancesComputer.getDistanceBetween2Positions(g.position, chosenA.position);
-				if(chooseVal > calc){
+				if (chooseVal > calc) {
 					chooseVal = calc;
 					chosenG = new Goal(g);
 				}
 			}
 		}
-		//System.err.println("A: " + chosenA.position);
-		//System.err.println(" B: " + chosenB.position);
-		//System.err.println(" G: " + chosenG.position);
-		//System.err.println(new Position(n.agentRow,n.agentCol));
-		//System.err.println("[H] Heuristic result = " + result);
-		//System.err.println("Distance: " + DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position) + " ChosenB: " + chosenB.position + " " + chosenB.name + " chosenG: " + chosenG.name + " " + chosenG.position + " ChosenA: " + chosenA.assignedChar);
-		try{
-		return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position)*8 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow,n.agentCol))*4 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow,n.agentCol))*2;
-		}catch(NullPointerException e){
+		try {
+			return DistancesComputer.getDistanceBetween2Positions(chosenB.position, chosenG.position) * 8 + DistancesComputer.getDistanceBetween2Positions(chosenB.position, new Position(n.agentRow, n.agentCol)) * 4 + DistancesComputer.getDistanceBetween2Positions(chosenG.position, new Position(n.agentRow, n.agentCol)) * 2;
+		} catch (NullPointerException e) {
 			return 1000;
+
+		}
+		}else{
 			
+			
+			for(int i=0; i< Node.MAX_ROW;i++)
+				for(int j = 0; j<Node.MAX_COL;j++)
+				{
+					if(n.goals[i][j] == '&')
+					{
+						return DistancesComputer.getDistanceBetween2Positions(new Position(n.agentRow, n.agentCol), new Position(i,j));
+					}
+				}
+			return 0;
 		}
 	}
 

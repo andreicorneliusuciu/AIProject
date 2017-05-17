@@ -1,15 +1,8 @@
 package searchclient;
 
-
-
-
-
-
 //TODO !!!!! remove agents without boxes, put them in the side or mvoe them randomly
 //-mathias level split thing
 //
-
-
 
 import java.io.BufferedReader;
 
@@ -174,8 +167,7 @@ public class SearchClient {
 					int index = agents.indexOf(new Agent(Integer.parseInt("" + chr1), null));
 					if (index == -1) {
 
-						Agent agentT = new Agent(Integer.parseInt("" + chr1), "blue", new Position(rowA, col),
-								new Node(null, levelRowSize, levelColumnSize, 0));
+						Agent agentT = new Agent(Integer.parseInt("" + chr1), "blue", new Position(rowA, col), new Node(null, levelRowSize, levelColumnSize, 0));
 						agentT.initialState.theAgentColor = agentT.color;
 						agentT.initialState.theAgentName = agentT.name;
 						agentT.initialState.agentCol = agentT.position.col;
@@ -234,12 +226,10 @@ public class SearchClient {
 						// {
 						agents.get(i).initialState.boxes[row][col] = chr;
 
-						agents.get(i).initialState.boxes2
-								.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+						agents.get(i).initialState.boxes2.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 
 						if (agents.get(i).color.equals(boxesToColor.get(chr))) {
-							agents.get(i).initialState.myBoxesFinal
-									.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
+							agents.get(i).initialState.myBoxesFinal.add(new Box(chr, boxesToColor.get(chr), new Position(row, col)));
 						}
 						// uberNode.boxes2.add(new Box(chr,
 						// boxesToColor.get(chr), new Position(row, col)));
@@ -265,8 +255,7 @@ public class SearchClient {
 							agents.get(i).initialState.goals[row][col] = chr;
 							// System.err.println("goal made here: " + row + ","
 							// + col + " by agent " + agents.get(i));
-							agents.get(i).initialState.goals2
-									.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
+							agents.get(i).initialState.goals2.add(new Goal(chr, agents.get(i).color, new Position(row, col)));
 						}
 					}
 				} else if (chr == ' ' || ('0' <= chr && chr <= '9')) {
@@ -279,29 +268,9 @@ public class SearchClient {
 			row++;
 		}
 
-		///// find all rooms
-
-		//findAllRooms();
-
-		////// find reachable boxes and goals
-		//findReachableBoxesAndGoals();
-
-		///// end reachable boxes and goals
-
-		// System.err.println(" + Agents: " + agents);
 		Collections.sort(agents);
 
-		// System.err.println(" + Agents : " + agents);
-		// System.err.println(" + Boxes : " + boxesToColor);
-		// TODO Andrei: sort the allGoals list alphabetically
-		// System.err.println(" + Goals: " + allGoals);
 		System.err.println("\n ------------------------------------ \n");
-
-		// for (int i = 0 ; i < agents.size(); i++) {
-		//
-		// agents.get(i).initialState = n;
-		// System.err.println("\n $ Goals: " + n.goals2 + " Boxes: " +n.boxes2);
-		// }
 
 		int[][] mapForAllDistances = new int[levelRowSize][levelColumnSize];
 		for (int i1 = 0; i1 < levelRowSize; i1++) {
@@ -355,15 +324,12 @@ public class SearchClient {
 
 				if (a.name == 7 && a2.name == 3) {
 
-					System.err.println(
-							"a:  " + "agent   " + a.name + "   " + flowFills[a.name][a.position.row][a.position.col]);
-					System.err.println("a2:  " + "agent   " + a2.name + "   "
-							+ flowFills[a.name][a2.position.row][a2.position.col]);
+					System.err.println("a:  " + "agent   " + a.name + "   " + flowFills[a.name][a.position.row][a.position.col]);
+					System.err.println("a2:  " + "agent   " + a2.name + "   " + flowFills[a.name][a2.position.row][a2.position.col]);
 					System.err.println("hmm  " + agentsRooms[a2.name]);
 				}
 
-				if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][a2.position.row][a2.position.col]
-						&& !(a.name == a2.name)) {
+				if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][a2.position.row][a2.position.col] && !(a.name == a2.name)) {
 
 					if (agentsRooms[a2.name] != 0) {
 						flag = true;
@@ -584,8 +550,7 @@ public class SearchClient {
 		default:
 			for (int i = 0; i < agents.size(); i++)
 				strategies.add(new StrategyBFS());
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 			break;
 		}
 
@@ -654,7 +619,7 @@ public class SearchClient {
 	public static void goalPriority() {// TODO
 		for (SuperNode sn : superNodes) {
 			if (sn.goalSuperNode) {// Setup baseline priority. High is low, low
-									// is high.
+										// is high.
 				for (Line l : sn.memberLines) {
 					for (Position p : l.positions) {
 						for (Goal g : allGoals) {
@@ -721,7 +686,7 @@ public class SearchClient {
 	}
 
 	public static void main(String[] args) throws Exception { // TODO second
-																// loop,
+																	// loop,
 																// freakout
 		BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
 
@@ -744,25 +709,24 @@ public class SearchClient {
 		for (Agent a : agents) {
 			for (Box b : allBoxes) {
 
+				//	if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
 
-			//	if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
+				for (Goal g : a.initialState.goals2) {
+					if (g.color.equals(b.color)) {
+						done = true;
+						positions.add(g.position);
 
-					for (Goal g : a.initialState.goals2) {
-						if (g.color.equals(b.color)) {
-							done = true;
-							positions.add(g.position);
+						positions.add(new Position(b.position.row, b.position.col));
 
-							positions.add(new Position(b.position.row, b.position.col));
-
-							rescueUnit(a, positions, false, g, b);
-							break;
-						}
-					}
-					if (done)
+						rescueUnit(a, positions, false, g, b);
 						break;
+					}
+				}
+				if (done)
+					break;
 
-//				} else
-//					continue;
+				//				} else
+				//					continue;
 			}
 
 			done = false;
@@ -820,7 +784,6 @@ public class SearchClient {
 
 		List<Box> uselessBoxes = new ArrayList<Box>();
 
-		
 		for (Box b : allBoxes) {
 			if (!usefulBoxes.contains(b)) {
 
@@ -828,20 +791,14 @@ public class SearchClient {
 				uselessBoxes.add(b);
 			}
 		}
-		
-		System.err.println("AllBoxes before : "+allBoxes);
 
-		
-		for(Box b : uselessBoxes)
-		{
+		System.err.println("AllBoxes before : " + allBoxes);
+
+		for (Box b : uselessBoxes) {
 			allBoxes.remove(b);
 		}
-		
-		
-		System.err.println("AllBoxes after : "+allBoxes);
-		
-		
-		
+
+		System.err.println("AllBoxes after : " + allBoxes);
 
 		//GET THE STRATEGY
 
@@ -853,8 +810,7 @@ public class SearchClient {
 			strategies = new ArrayList<>(agents.size());
 			for (int i = 0; i < agents.size(); i++)
 				strategies.add(new StrategyBFS());
-			System.err.println(
-					"Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
+			System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
 		}
 
 		while (true) {
@@ -864,22 +820,34 @@ public class SearchClient {
 			solutions = new ArrayList<List<Node>>();
 
 			LinkedList<Node> solution = new LinkedList<Node>();
-			Node updatedNode = new Node(null, Node.MAX_ROW, Node.MAX_COL, 0);
 
 			blockedPositions = new ArrayList<ArrayList<Position>>();
-			ArrayList<Integer> priorAgents = new ArrayList<Integer>();
-			Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL, 0);
 
-			// check if agents are trapped
-			// for (Agent a : agents) {
-			//
-			// rescueUnit(a, positions);
-			//
-			// }
+			List<Agent> usefulAgents = new ArrayList<Agent>();
+			List<Agent> uselessAgents = new ArrayList<Agent>();
 
-			// System.err.println("The goals: " + allGoals);
+			//Find agents that have no boxes/goals
 
-			// update boxes status in all agents
+			for (Agent a : agents) {
+				for (Goal g : allGoals) {
+
+					if (g.color.equals(a.color)) {
+
+						usefulAgents.add(a);
+					} else {
+						uselessAgents.add(a);
+					}
+				}
+
+			}
+
+			Collections.sort(usefulAgents);
+			Collections.sort(uselessAgents);
+			
+			for(Agent a : uselessAgents)
+			{
+				a.hide = true;
+			}
 
 			boolean isGoalState = true;
 			for (Goal g : allGoals) {
@@ -906,8 +874,6 @@ public class SearchClient {
 			blockedPositions.add(poswall);
 			blockedPositions.add(temppie);
 
-
-
 			// System.err.println("Initializing agents with initial state: /n" +
 			// agents);
 
@@ -916,7 +882,8 @@ public class SearchClient {
 			// Node copy = new Node(null, Node.MAX_ROW, Node.MAX_COL);
 			for (Agent a : agents) {
 
-				if (!a.isTrapped /* && !a.initialState.isGoalState() */) {
+				//if the agent is not useless
+				if (!a.isTrapped) {
 
 					// System.err.println("Initializing planner for " + a.name +
 					// "with initial state: /n" + a.initialState);
@@ -938,6 +905,7 @@ public class SearchClient {
 
 					}
 				}
+
 				if (a.isTrapped && !a.initialState.isGoalState()) { //
 					// if
 					// agent
@@ -972,8 +940,7 @@ public class SearchClient {
 
 				// TODO: Turn plans into arraylistarraylistposition
 				ArrayList<Position> twall = new ArrayList<Position>();
-				twall.add(new Position(agents.get(a.name).initialState.agentRow,
-						agents.get(a.name).initialState.agentCol));
+				twall.add(new Position(agents.get(a.name).initialState.agentRow, agents.get(a.name).initialState.agentCol));
 				if (solutions.size() == 1) {
 					blockedPositions.add(twall);
 				} else {
@@ -1113,8 +1080,7 @@ public class SearchClient {
 							Command temp = n.action;
 
 							if (temp != null) {
-								System.err.println(new Position(n.agentRow - Command.dirToRowChange(temp.dir1),
-										n.agentCol - Command.dirToColChange(temp.dir1)));
+								System.err.println(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)));
 
 							}
 							if (temp == null) {
@@ -1122,8 +1088,7 @@ public class SearchClient {
 							} else if (temp.actionType.equals(Command.Type.Move)) {
 								// Update one agent
 								for (Agent a : agents) {
-									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1),
-											n.agentCol - +Command.dirToColChange(temp.dir1)))) {
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - +Command.dirToColChange(temp.dir1)))) {
 										a.position = new Position(n.agentRow, n.agentCol);
 										a.initialState = n;
 										break;
@@ -1131,14 +1096,11 @@ public class SearchClient {
 								}
 							} else if (temp.actionType.equals(Command.Type.Push)) {
 								for (Agent a : agents) {
-									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1),
-											n.agentCol - Command.dirToColChange(temp.dir1)))) {
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)))) {
 										a.position = new Position(n.agentRow, n.agentCol);
 										for (Box b : allBoxes) {
 											if (b.position.equals(new Position(a.position.row, a.position.col))) {
-												b.position = new Position(
-														b.position.row + Command.dirToRowChange(temp.dir2),
-														b.position.col + Command.dirToColChange(temp.dir2));
+												b.position = new Position(b.position.row + Command.dirToRowChange(temp.dir2), b.position.col + Command.dirToColChange(temp.dir2));
 												a.initialState = n;
 												break;
 											}
@@ -1148,14 +1110,10 @@ public class SearchClient {
 								}
 							} else if (temp.actionType.equals(Command.Type.Pull)) {
 								for (Agent a : agents) {
-									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1),
-											n.agentCol - Command.dirToColChange(temp.dir1)))) {
-										Position tempPos = new Position(n.agentRow - Command.dirToRowChange(temp.dir1),
-												n.agentCol - Command.dirToColChange(temp.dir1));
+									if (a.position.equals(new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1)))) {
+										Position tempPos = new Position(n.agentRow - Command.dirToRowChange(temp.dir1), n.agentCol - Command.dirToColChange(temp.dir1));
 										for (Box b : allBoxes) {
-											if (b.position.equals(
-													new Position(tempPos.row + Command.dirToRowChange(temp.dir2),
-															tempPos.col + Command.dirToColChange(temp.dir2)))) {
+											if (b.position.equals(new Position(tempPos.row + Command.dirToRowChange(temp.dir2), tempPos.col + Command.dirToColChange(temp.dir2)))) {
 												b.position = new Position(tempPos.row, tempPos.col);
 												a.initialState = n;
 												break;
@@ -1181,21 +1139,21 @@ public class SearchClient {
 				for (Agent a : agents) {
 					for (Box b : allBoxes) {
 
-					//	if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
+						//	if (flowFills[a.name][a.position.row][a.position.col] == flowFills[a.name][b.position.row][b.position.col]) {
 
-							for (Goal g : a.initialState.goals2) {
-								if (g.color == b.color) {
-									done2 = true;
-									positions2.add(g.position);
-									positions2.add(new Position(b.position.row, b.position.col));
-									rescueUnit(a, positions2, false, g, b);
-									break;
-								}
-							}
-							if (done2)
+						for (Goal g : a.initialState.goals2) {
+							if (g.color == b.color) {
+								done2 = true;
+								positions2.add(g.position);
+								positions2.add(new Position(b.position.row, b.position.col));
+								rescueUnit(a, positions2, false, g, b);
 								break;
-//						} else
-//							continue;
+							}
+						}
+						if (done2)
+							break;
+						//						} else
+						//							continue;
 					}
 					done2 = false;
 					positions2 = new ArrayList<Position>();
@@ -1204,22 +1162,21 @@ public class SearchClient {
 					g.assigned = false;
 				}
 				uberNode.updateUberNode(agents);
-				System.err.println("agent initialstate after: "+agents.get(0).initialState);
+				System.err.println("agent initialstate after: " + agents.get(0).initialState);
 
 				//findReachableBoxesAndGoals();
-				System.err.println("agent initialstate after2: "+agents.get(0).initialState);
+				System.err.println("agent initialstate after2: " + agents.get(0).initialState);
 
 				System.err.println("");
-				System.err.println(
-						"///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
+				System.err.println("///////////////////////////////////////////Round complete/////////////////////////////////////////////////////////////////");
 				System.err.println("FINAL agents: " + agents);
 				System.err.println("FINAL uberNode: " + uberNode);
 				System.err.println("Replanning initiated with above agents");
 
 				// USEFUL DEBUGGING TOOL! DON'T REMOVE!
 				replanCounter++;
-				if (replanCounter >= 10000) {
-					//serverMessages.close();
+				if (replanCounter >= 100) {
+					serverMessages.close();
 					return;
 				}
 			}
@@ -1265,8 +1222,7 @@ public class SearchClient {
 
 		for (int i = 0; i < allBoxes2.size(); i++) {
 			if (allBoxes2.get(i).name != '\u0000') {
-				matrix[allBoxes2.get(i).position.row][allBoxes2.get(i).position.col] = boxesToColor
-						.get(allBoxes2.get(i).name).hashCode();
+				matrix[allBoxes2.get(i).position.row][allBoxes2.get(i).position.col] = boxesToColor.get(allBoxes2.get(i).name).hashCode();
 				// System.err.println(boxesToColor.get(node.boxes[i][i2]).hashCode());
 				// System.err.println(agent.color.hashCode());
 			}
@@ -1426,8 +1382,7 @@ public class SearchClient {
 					for (int i = 0; i < levelRowSize; i++) {
 						for (int i2 = 0; i2 < levelColumnSize; i2++) {
 							if (matrix[i][i2] == 3) {
-								if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0
-										|| matrix[i][i2 + 1] == 0) {
+								if (matrix[i - 1][i2] == 0 || matrix[i + 1][i2] == 0 || matrix[i][i2 - 1] == 0 || matrix[i][i2 + 1] == 0) {
 									for (Box b : allBoxes) {
 										if (b.position.equals(new Position(i, i2))) {
 											b.isBlocking = true;
@@ -1446,7 +1401,7 @@ public class SearchClient {
 	}
 
 	public static void storageAnalysis(Node node) {// Swap out input with other
-													// types
+														// types
 													// of data?
 													// Cell[][]
 		mapOfCell = new Cell[levelRowSize][levelColumnSize];
@@ -1477,7 +1432,7 @@ public class SearchClient {
 				if (mapOfCell[i][i2].type >= 1) {
 					if (i + 1 < levelRowSize) {
 						if (mapOfCell[i + 1][i2].type >= 1) {// + is south,
-																// right?
+																	// right?
 							mapOfCell[i][i2].south = true;
 						}
 					}
@@ -1729,7 +1684,7 @@ public class SearchClient {
 						}
 						for (int id : l.south) {
 							if (rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine) {// If
-																												// they're
+																													// they're
 																												// both
 																												// goals
 																												// or
@@ -1744,7 +1699,7 @@ public class SearchClient {
 						}
 						for (int id : l.north) {
 							if (rows.get(id).goalLine && l.goalLine || !rows.get(id).goalLine && !l.goalLine) {// If
-																												// they're
+																													// they're
 																												// both
 																												// goals
 																												// or
@@ -1819,7 +1774,6 @@ public class SearchClient {
 		// Those who have absorbed false have LOWER priority than those who have
 		// absorbed true.
 	}
-
 
 	public void findNarrowCorridorsForStorage() {
 

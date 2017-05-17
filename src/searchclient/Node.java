@@ -255,6 +255,7 @@ public class Node {
 			 */
 		} else {
 
+			System.err.println("Printing goals in node special: "+goals2);
 			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
 		}
 	}

@@ -10,6 +10,8 @@ public class Agent implements Comparator<Agent>, Comparable<Agent>{
 	public Node initialState;
 	public boolean isTrapped = false;
 	public char assignedChar = 0;
+	public boolean hide = false;
+
 	
 	public Agent(int name, String color, Position position, Node initialState) {
 		this.name = name;
