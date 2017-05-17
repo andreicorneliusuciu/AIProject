@@ -100,7 +100,7 @@ public class Planner {
 		System.err.println("Hide initialState: "+newState);
 
 		float length = 1000;
-		Position shortestPos = null;
+		Position shortestPos = new Position(0,0);
 
 		// find shortest manhattan distance available position
 
