@@ -270,12 +270,15 @@ public class SearchClient {
 			row++;
 		}
 
-		findAllRooms();
-
 		allBoxes = new ArrayList<Box>();
 		for (Box b : agents.get(0).initialState.boxes2) {
 			allBoxes.add(new Box(b));
 		}
+		
+		removeUselessBoxes();
+		findAllRooms();
+
+	
 
 		////// find reachable boxes and goals
 		if (activator) {
@@ -312,18 +315,52 @@ public class SearchClient {
 
 	}
 
+	public void removeUselessBoxes(){
+		
+		
+		List<Box> usefulBoxes = new ArrayList<Box>();
+
+		// set useless boxes to walls
+		for (Agent a : agents) {
+			for (Box b : allBoxes) {
+
+				if (a.color.equals(b.color)) {
+					usefulBoxes.add(b);
+				}
+
+			}
+		}
+
+		List<Box> uselessBoxes = new ArrayList<Box>();
+
+		for (Box b : allBoxes) {
+			if (!usefulBoxes.contains(b)) {
+
+				walls[b.position.row][b.position.col] = true;
+				uselessBoxes.add(b);
+			}
+		}
+
+		System.err.println("AllBoxes before : " + allBoxes);
+
+		for (Box b : uselessBoxes) {
+			allBoxes.remove(b);
+		}
+		
+	}
+	
 	public void findAllRooms() {
 
 		for (Agent a : agents) {
 			flowFills[a.name] = flowFill2(a);
 
-			System.err.println("kusse goal " + a.name);
+//			System.err.println("kusse goal " + a.name);
 			for (int i = 0; i < Node.MAX_ROW; i++) {
 				for (int j = 0; j < Node.MAX_COL; j++) {
 
-					System.err.print(flowFills[a.name][i][j]);
+			//		System.err.print(flowFills[a.name][i][j]);
 				}
-				System.err.println();
+		//		System.err.println();
 			}
 		}
 
@@ -406,21 +443,7 @@ public class SearchClient {
 					}
 				}
 
-				// if (done)
-				// break;
 			}
-			// done = false;
-
-			//			System.err.println("kusse box " + a.name);
-			//			for (int i = 0; i < Node.MAX_ROW; i++) {
-			//				for (int j = 0; j < Node.MAX_COL; j++) {
-			//
-			//					System.err.print(agents.get(a.name).initialState.goals[i][j]);
-			//
-			//				}
-			//				System.err.println();
-			//			}
-
 		}
 
 	}
@@ -801,34 +824,7 @@ public class SearchClient {
 		//////////////////////////////////////////
 
 		// TURN ALL USELESS BOXES TO WALLS
-		List<Box> usefulBoxes = new ArrayList<Box>();
 
-		// set useless boxes to walls
-		for (Agent a : agents) {
-			for (Box b : allBoxes) {
-
-				if (a.color.equals(b.color)) {
-					usefulBoxes.add(b);
-				}
-
-			}
-		}
-
-		List<Box> uselessBoxes = new ArrayList<Box>();
-
-		for (Box b : allBoxes) {
-			if (!usefulBoxes.contains(b)) {
-
-				walls[b.position.row][b.position.col] = true;
-				uselessBoxes.add(b);
-			}
-		}
-
-		System.err.println("AllBoxes before : " + allBoxes);
-
-		for (Box b : uselessBoxes) {
-			allBoxes.remove(b);
-		}
 
 		System.err.println("AllBoxes after : " + allBoxes);
 
@@ -914,12 +910,9 @@ public class SearchClient {
 
 				atemp.initialState.boxes2.clear();
 
-				//				for(Box bo: atemp.initialState.boxes2){
-				//					
-				//					atemp.initialState.boxes2.remove(bo);
-				//					
-				//				}
-
+		
+								
+			
 				for (Box b : allBoxes) {
 					atemp.initialState.boxes2.add(new Box(b));
 				}
