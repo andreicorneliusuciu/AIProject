@@ -125,6 +125,7 @@ public abstract class Strategy {
 			//Node n = frontier.pollFirst();
 			Node n = frontier.pop();
 			frontierSet.remove(n);
+			System.gc();
 			return n;
 		}
 
