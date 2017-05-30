@@ -157,7 +157,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// } catch (IndexOutOfBoundsException e) {
-				// //system.err.println(e);
+				// ////System.err.println(e);
 				// }
 
 			}
@@ -287,8 +287,8 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 		if (chosenB == null) {
-			System.err.println("It happened");
-			System.err.println(n);
+			//System.err.println("It happened");
+			//System.err.println(n);
 			//return 0;
 		}
 		int chooseVal = Integer.MAX_VALUE;
@@ -325,7 +325,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	public Set<Box> getBoxesPosition(Node n) {
 		Set<Box> boxesPosition = new TreeSet<>();
-		//System.err.println("MY BOXES FINAL" + n.myBoxesFinal);
+		////System.err.println("MY BOXES FINAL" + n.myBoxesFinal);
 		for (int i = 0; i < DistancesComputer.levelRowSize - 2; i++) {
 			for (int j = 0; j < DistancesComputer.levelColSize - 2; j++) {
 

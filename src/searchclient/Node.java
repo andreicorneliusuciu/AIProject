@@ -83,7 +83,7 @@ public class Node {
 						}
 						tester += "\n";
 					}
-					// System.err.println(tester);
+					// //System.err.println(tester);
 				}
 			}
 		} else {
@@ -234,7 +234,7 @@ public class Node {
 			/*
 			 * if(this.g() > 5){ return true; }
 			 */
-			System.err.println(this);
+			//System.err.println(this);
 			for (int row = 1; row < MAX_ROW - 1; row++) {
 				for (int col = 1; col < MAX_COL - 1; col++) {
 					char g = this.goals[row][col];
@@ -250,12 +250,12 @@ public class Node {
 			 * boolean done = false; for(Goal g : this.goals2){ for(Box b :
 			 * this.boxes2){ char temp = Character.toLowerCase(b.name);
 			 * if(b.position.equals(g.position) && temp == g.name){ done = true;
-			 * System.err.println("DONE!"); break; } } }
-			 * //System.err.println(goals2.get(0).position); return done;
+			 * //System.err.println("DONE!"); break; } } }
+			 * ////System.err.println(goals2.get(0).position); return done;
 			 */
 		} else {
 
-			System.err.println("Printing goals in node special: "+goals2);
+			//System.err.println("Printing goals in node special: "+goals2);
 			return this.agentRow == goals2.get(0).position.row && this.agentCol == goals2.get(0).position.col;
 		}
 	}
@@ -275,7 +275,7 @@ public class Node {
 					// is moving
 					if (this.cellIsFree(newAgentRow, newAgentCol)) {
 						Node n = this.ChildNode();
-						////// //System.err.println("Move!!! by: "+theAgentName);
+						////// ////System.err.println("Move!!! by: "+theAgentName);
 
 						n.action = c;
 						n.agentRow = newAgentRow;
@@ -308,30 +308,30 @@ public class Node {
 					// is moving
 					if (this.cellIsFree(newAgentRow, newAgentCol)) {
 						Node n = this.ChildNode();
-						////// //System.err.println("Move!!! by: "+theAgentName);
+						////// ////System.err.println("Move!!! by: "+theAgentName);
 
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						expandedNodes.add(n);
-						// ////////System.err.println("Move \n" + n);
-						// ////////System.err.println("ITIASS HAPPENING move");
+						// //////////System.err.println("Move \n" + n);
+						// //////////System.err.println("ITIASS HAPPENING move");
 
 					}
 				} else if (c.actionType == Type.Push) {
 
-					//////// //System.err.println("MyBoxes: "+myBoxes);
+					//////// ////System.err.println("MyBoxes: "+myBoxes);
 					for (Box b : myBoxes) {
 
 						if (b.name.equals(this.boxes[newAgentRow][newAgentCol])) {
 							boxColor = b.color;
-							// ////////System.err.println("ITIASS HAPPENING pull");
+							// //////////System.err.println("ITIASS HAPPENING pull");
 						}
 					}
 
-					////System.err.println("ZEBUG: "+theAgentColor);
+					//////System.err.println("ZEBUG: "+theAgentColor);
 					if (this.boxAt(newAgentRow, newAgentCol) && theAgentColor.equals(boxColor)) {
-						// ////////System.err.println("yes it is");
+						// //////////System.err.println("yes it is");
 
 						int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
 						int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
@@ -341,7 +341,7 @@ public class Node {
 
 							Node n = this.ChildNode();
 
-							// //System.err.println("Push!!!" +
+							// ////System.err.println("Push!!!" +
 							// boxes[newAgentRow][newAgentCol]+": "+boxColor+" by:
 							// "+theAgentName+": "+theAgentColor);
 							n.action = c;
@@ -381,7 +381,7 @@ public class Node {
 						// .. and there's a box in "dir2" of the agent
 
 						for (Box b : myBoxes) {
-							// ////////System.err.println("Box: "+b+" nameOfCharBox:
+							// //////////System.err.println("Box: "+b+" nameOfCharBox:
 							// "+this.boxes[boxRow][boxCol]);
 							if (b.name.equals(this.boxes[boxRow][boxCol])) {
 								boxColor = b.color;
@@ -393,7 +393,7 @@ public class Node {
 
 							Node n = this.ChildNode();
 
-							// //System.err.println("Pull!!!" +
+							// ////System.err.println("Pull!!!" +
 							// boxes[boxRow][boxCol]+": "+boxColor+" by:
 							// "+theAgentName+": "+theAgentColor);
 
@@ -428,7 +428,7 @@ public class Node {
 		}
 		// Collections.shuffle(expandedNodes, RND);
 
-		// ////////System.err.println("size: "+expandedNodes);
+		// //////////System.err.println("size: "+expandedNodes);
 		return expandedNodes;
 	}
 
@@ -443,7 +443,7 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this, MAX_ROW, MAX_COL, blockedPositionsID + 1);
 		copy.blockGoalsMode = this.blockGoalsMode;
-		// System.err.println("This is the thing maaaan| "
+		// //System.err.println("This is the thing maaaan| "
 		// +copy.blockedPositionsID);
 		// aici
 
@@ -499,7 +499,7 @@ public class Node {
 						}
 						tester += "\n";
 					}
-					// System.err.println(tester);
+					// //System.err.println(tester);
 				}
 			}
 		} else {
@@ -545,7 +545,7 @@ public class Node {
 				}
 			}
 		}
-		// //////System.err.println("copy:::::"+copy.myBoxes);
+		// ////////System.err.println("copy:::::"+copy.myBoxes);
 
 		return copy;
 	}
@@ -553,16 +553,16 @@ public class Node {
 	public LinkedList<Node> extractPlan() {
 		LinkedList<Node> plan = new LinkedList<Node>();
 		Node n = this;
-		//////// //System.err.println("initialNodeisinitialstate: " + n.parent +
+		//////// ////System.err.println("initialNodeisinitialstate: " + n.parent +
 		//////// n.isGoalState());
 		while (!n.isInitialState()) {
-			//// //System.err.println("plan: " + n);
+			//// ////System.err.println("plan: " + n);
 			plan.addFirst(n);
 
 			n = n.parent;
-			//////// //System.err.println("parent: " + n);
+			//////// ////System.err.println("parent: " + n);
 		}
-		//////// //System.err.println("the plan" + plan);
+		//////// ////System.err.println("the plan" + plan);
 		return plan;
 	}
 
@@ -582,15 +582,15 @@ public class Node {
 	}
 
 	public void printGoals() {
-		System.err.println("__________________________________________________\n");
+		//System.err.println("__________________________________________________\n");
 		for (int i = 0; i < Node.MAX_ROW; i++) {
-			System.err.print("\n");
+			//System.err.print("\n");
 			for (int j = 0; j < Node.MAX_COL; j++) {
 
-				System.err.print(this.goals[i][j]);
+				//System.err.print(this.goals[i][j]);
 			}
 		}
-		System.err.println("\n__________________________________________________");
+		//System.err.println("\n__________________________________________________");
 
 	}
 
@@ -672,7 +672,7 @@ public class Node {
 	public boolean isConflict(Node node2) {
 
 		if (this.agentRow == node2.agentRow && this.agentCol == node2.agentCol) {
-			//System.err.println("Agent conflict! woo");
+			////System.err.println("Agent conflict! woo");
 			return true;
 		}
 
@@ -708,7 +708,7 @@ public class Node {
 			}
 		}
 
-		//System.err.println("No conflicts in this move");
+		////System.err.println("No conflicts in this move");
 		return false;
 	}
 
@@ -717,9 +717,9 @@ public class Node {
 	// same color as the
 	// smallNode in uberNode
 	{
-		//System.err.println("Updating UberNode and agents initiated");
+		////System.err.println("Updating UberNode and agents initiated");
 		// List<Agent> tempAgents = agents;
-		//System.err.println("Agents before initialized: " + agents);
+		////System.err.println("Agents before initialized: " + agents);
 
 		// we have to update the boxes2 locations!!! check if they a re updated
 		// cannot update those, use boxes[][] instead
@@ -765,15 +765,15 @@ public class Node {
 			newInitialState.agentCol = a.initialState.agentCol;
 			newInitialState.theAgentColor = a.initialState.theAgentColor;
 
-			//System.err.println("fuck1"+this.myBoxesFinal);
+			////System.err.println("fuck1"+this.myBoxesFinal);
 
 			//TODO why does this nto update in .copy() ????????
 			newInitialState.myBoxesFinal = a.initialState.myBoxesFinal;
-			//System.err.println("fuck2"+a.initialState.myBoxesFinal);
+			////System.err.println("fuck2"+a.initialState.myBoxesFinal);
 			// erase goals2
 			newInitialState.goals2.clear();
 
-			//System.err.println("after goals2 clear, referece:"+this.goals2);
+			////System.err.println("after goals2 clear, referece:"+this.goals2);
 			newInitialState.theAgentName = a.name;
 			newInitialState.doNoOp = false;
 
@@ -784,7 +784,7 @@ public class Node {
 				}
 			}
 
-			//System.err.println("PRINTOUT OF GALZ");
+			////System.err.println("PRINTOUT OF GALZ");
 			for (Goal g : SearchClient.allGoals) {
 
 				//if (SearchClient.flowFills[a.name][a.position.row][a.position.col] == SearchClient.flowFills[a.name][g.position.row][g.position.col]) {
@@ -794,7 +794,7 @@ public class Node {
 						newInitialState.goals[g.position.row][g.position.col] = g.name;
 					}
 
-					//System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
+					////System.err.println("Solved: " + g.isSatisfied + ". Position: " + g.position);
 				//}
 			}
 			a.initialState = newInitialState;
